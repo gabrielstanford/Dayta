@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "897083396063",
+    "project_id": "absorb-34b0e",
+    "storage_bucket": "absorb-34b0e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:897083396063:android:b2b2f2e7a1a89739fc3e6a",
+        "android_client_info": {
+          "package_name": "com.gabrielcode.absorb"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD2AlKBbNrp8x3hHIVaLjQHMf7Z1bgnxxk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
