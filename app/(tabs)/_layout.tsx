@@ -1,9 +1,19 @@
-import { Tabs } from 'expo-router';
 import React from 'react';
-
-import { TabBarIcon } from '@/components/navigation/TabBarIcon';
+import { Tabs } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons'; // Correct import for Ionicons with Expo
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+
+type IoniconName = keyof typeof Ionicons.glyphMap;
+
+type TabBarIconProps = {
+  name: IoniconName;
+  color: string;
+};
+
+const TabBarIcon: React.FC<TabBarIconProps> = ({ name, color }) => (
+  <Ionicons name={name} size={35} color={color} />
+);
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -13,50 +23,42 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-      }}>
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: 'Journal',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
+            <TabBarIcon name={focused ? 'book' : 'book-outline'} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="journal"
-        options={{
-          title: 'Journal',
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'code-slash' : 'code-slash-outline'} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen 
         name="recommendations"
         options={{
           title: 'Recs',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'code-slash' : 'code-slash-outline'} color={color} />
-          )
+            <TabBarIcon name={focused ? 'star' : 'star-outline'} color={color} /> // Updated icon for recommendations
+          ),
         }}
       />
-      <Tabs.Screen 
+      <Tabs.Screen
         name="stats"
         options={{
           title: 'Stats',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'code-slash' : 'code-slash-outline'} color={color} />
-          )
+            <TabBarIcon name={focused ? 'stats-chart' : 'stats-chart-outline'} color={color} /> // Updated icon for stats
+          ),
         }}
       />
-      <Tabs.Screen 
+      <Tabs.Screen
         name="settings/index"
         options={{
           title: 'Settings',
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'code-slash' : 'code-slash-outline'} color={color} />
-          )
+            <TabBarIcon name={focused ? 'settings' : 'settings-outline'} color={color} /> // Updated icon for settings
+          ),
         }}
       />
     </Tabs>
