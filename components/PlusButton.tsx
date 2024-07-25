@@ -1,14 +1,17 @@
 import {Link} from 'expo-router'
-import {Pressable, Text} from 'react-native'
+import {Pressable, Text, Dimensions} from 'react-native'
+import {ThemedText} from './ThemedText'
+import AntDesign from '@expo/vector-icons/AntDesign';
+
 
 export default function PlusButton() {
+const {width} = Dimensions.get('window');
 
 return(
 <Link href="/journal"
-style={{position: 'absolute', bottom: 20, right: 20}}
 asChild>
  <Pressable>
-   <Text>Add</Text>
+    <AntDesign name="pluscircle" size={width/6.25} color="black" />
  </Pressable>
 </Link>
 );
