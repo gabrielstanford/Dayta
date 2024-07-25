@@ -14,6 +14,7 @@ const { width, height } = Dimensions.get('window');
 const buttonWidth = width/6.25
 
 function Journal() {
+  console.log('rendering journal')
   //toggle the state of the modal
     const [modalVisible, setModalVisible] = useState(false);
     const toggleModal = () => setModalVisible(!modalVisible)
@@ -28,7 +29,7 @@ function Journal() {
           <ThemedText type="titleText">My Journal</ThemedText>
         </View>
         {activities.map((activity, index) => (
-          <View key={index} style={styles.stepContainer}>
+          <View key={activity.text} style={styles.stepContainer}>
           <ThemedText type="journalText">{activity.text}</ThemedText>
           </View>
         ))}

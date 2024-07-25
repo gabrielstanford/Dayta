@@ -5,6 +5,7 @@ import {Button} from '@rneui/themed'
 import {useAppContext} from '@/contexts/AppContext'
 const {width, height} = Dimensions.get("window");
 const buttonWidth = width/5;
+import {AntDesign, FontAwesome5} from '@expo/vector-icons';
 
 interface MyModalProps extends ModalProps {
   visible: boolean;
@@ -32,8 +33,9 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
       const newStates = [...prevStates];
       newStates[index].pressed = true; // Set the pressed button's state to true
       // Add the pressed activity to context
-      console.log('New button states:', newStates);
-      addActivity(newStates[index]);
+      setTimeout(() => {
+        addActivity(newStates[index]);
+      }, 0);
       return newStates;
     });
    
