@@ -8,6 +8,7 @@ interface ButtonState {
 interface AppContextProps {
   activities: ButtonState[];
   addActivity: (activity: ButtonState) => void;
+  removeActivity: (activity: ButtonState) => void;
 }
 
 interface AppProviderProps {
@@ -29,8 +30,17 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }, 0); // Delay the state update
   };
 
+  const removeActivity = (activity: ButtonState) => {
+    setTimeout(() => {
+    setActivities(prevActivities => 
+      prevActivities.filter(act => act.text !== activity.text)
+    );
+  }, 0);
+  };
+
+
   return (
-    <AppContext.Provider value={{ activities, addActivity }}>
+    <AppContext.Provider value={{ activities, addActivity, removeActivity }}>
       {children}
     </AppContext.Provider>
   );

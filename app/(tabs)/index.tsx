@@ -20,8 +20,9 @@ function Journal() {
     const toggleModal = () => setModalVisible(!modalVisible)
 
     const { activities } = useAppContext();
-
+    console.log(activities)
   return (
+    
       <View style={styles.layoutContainer}>
         <MyModal visible={modalVisible} onClose={toggleModal} />
         <View style={styles.contentContainer}>
@@ -29,7 +30,7 @@ function Journal() {
           <ThemedText type="titleText">My Journal</ThemedText>
         </View>
         {activities.map((activity, index) => (
-          <View key={activity.text} style={styles.stepContainer}>
+          <View key={index} style={styles.stepContainer}>
           <ThemedText type="journalText">{activity.text}</ThemedText>
           </View>
         ))}

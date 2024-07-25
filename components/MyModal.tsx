@@ -70,9 +70,11 @@ interface MyModalProps extends ModalProps {
 
 const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) => {
 
-  const { addActivity } = useAppContext();
+  const { addActivity, removeActivity } = useAppContext();
   console.log('MyModal component rendered');
   const [buttonStates, setButtonStates] = useState<ButtonState[]>([
+    //this is where you add buttons. it's all configured so you just need to add it here and all will work
+    //this base of work will make it very easy in the future to add a search component.
     { text: 'Walk', iconLibrary: "fontAwesome5", icon: "walking", pressed: false }, //fontawesome
     { text: 'Breakfast', iconLibrary: "materialCommunityIcons", icon: "food-variant", pressed: false }, //community
     { text: 'Coffee', iconLibrary: "materialCommunityIcons", icon: "coffee", pressed: false }, //community
@@ -87,11 +89,19 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
   const handlePress = (index: number) => {
     setButtonStates(prevStates => {
       const newStates = [...prevStates];
-      newStates[index].pressed = true; // Set the pressed button's state to true
+      const isPressed = newStates[index].pressed;
+      newStates[index].pressed = !isPressed;
+      if(newStates[index].pressed) {
+        setTimeout(() => {
+          addActivity(newStates[index]);
+        }, 0);
+      }
+      else {
       // Add the pressed activity to context
-      setTimeout(() => {
-        addActivity(newStates[index]);
-      }, 0);
+        setTimeout(() => {
+        removeActivity(newStates[index]);
+        }, 0);
+      }
       return newStates;
     });
    
