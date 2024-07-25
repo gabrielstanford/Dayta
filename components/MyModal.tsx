@@ -13,7 +13,7 @@ interface MyModalProps extends ModalProps {
 
 const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) => {
 
-  const {setText} = useAppContext();
+  const { addActivity } = useAppContext();
   console.log('MyModal component rendered');
   const [buttonStates, setButtonStates] = useState([
     { text: 'Walk', pressed: false },
@@ -31,10 +31,12 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
     setButtonStates(prevStates => {
       const newStates = [...prevStates];
       newStates[index].pressed = true; // Set the pressed button's state to true
+      // Add the pressed activity to context
+      console.log('New button states:', newStates);
+      addActivity(newStates[index]);
       return newStates;
     });
-    console.log('Adding activity:', buttonStates[index].text);
-    setText(buttonStates[index].text);
+   
   };
     // Define rows for grid layout
     const rows = [

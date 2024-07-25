@@ -1,8 +1,13 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-interface AppContextProps {
+interface ButtonState {
   text: string;
-  setText: (text: string) => void;
+  pressed: boolean;
+}
+
+interface AppContextProps {
+  activities: ButtonState[];
+  addActivity: (activity: ButtonState) => void;
 }
 
 interface AppProviderProps {
@@ -12,12 +17,15 @@ interface AppProviderProps {
 const AppContext = createContext<AppContextProps | undefined>(undefined);
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
-  const [text, setText] = useState('');
+  const [activities, setActivities] = useState<ButtonState[]>([]);
 
-  console.log('AppProvider rendered');
+  const addActivity = (activity: ButtonState) => {
+    console.log('Adding activity:', activity);
+    setActivities(prevActivities => [...prevActivities, activity]);
+  };
 
   return (
-    <AppContext.Provider value={{ text, setText }}>
+    <AppContext.Provider value={{ activities, addActivity }}>
       {children}
     </AppContext.Provider>
   );
@@ -26,9 +34,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 export const useAppContext = (): AppContextProps => {
   const context = useContext(AppContext);
   if (!context) {
-    console.error('useAppContext must be used within an AppProvider');
     throw new Error('useAppContext must be used within an AppProvider');
   }
-  console.log('useAppContext accessed');
   return context;
 };

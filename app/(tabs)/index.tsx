@@ -13,30 +13,25 @@ import { AppProvider, useAppContext } from '@/contexts/AppContext';
 const { width, height } = Dimensions.get('window');
 const buttonWidth = width/6.25
 
-export default function Journal() {
+function Journal() {
   //toggle the state of the modal
     const [modalVisible, setModalVisible] = useState(false);
     const toggleModal = () => setModalVisible(!modalVisible)
 
-    const { text } = useAppContext();
-    console.log('Index component rendered with text:', text);
+    const { activities } = useAppContext();
+
   return (
-    <AppProvider>
       <View style={styles.layoutContainer}>
         <MyModal visible={modalVisible} onClose={toggleModal} />
         <View style={styles.contentContainer}>
         <View style={styles.titleContainer}>
           <ThemedText type="titleText">My Journal</ThemedText>
         </View>
-        <View style={styles.stepContainer}>
-          <ThemedText type="journalText">Activity 1: {text}</ThemedText>
-        </View>
-        <View style={styles.stepContainer}>
-          <ThemedText type="journalText">Activity 2: 90 Minute Pomodoro</ThemedText>
-        </View>
-        <View style={styles.stepContainer}>
-          <ThemedText type="journalText">Activity 3: Coffee</ThemedText>
-        </View>
+        {activities.map((activity, index) => (
+          <View key={index} style={styles.stepContainer}>
+          <ThemedText type="journalText">{activity.text}</ThemedText>
+          </View>
+        ))}
         </View>
         <View style={styles.plusButtonContainer}>
           <Pressable onPress={toggleModal}>
@@ -44,7 +39,6 @@ export default function Journal() {
           </Pressable>
         </View>
       </View>
-    </AppProvider>
   );
 }
 
@@ -77,3 +71,13 @@ plusButtonContainer: {
     width: buttonWidth
 },
 });
+
+const Index: React.FC = () => {
+  return (
+    <AppProvider>
+      <Journal />
+    </AppProvider>
+  );
+};
+
+export default Index;
