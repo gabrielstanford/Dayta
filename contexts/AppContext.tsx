@@ -4,10 +4,15 @@ interface ButtonState {
   text: string;
   pressed: boolean;
 }
-
+interface TimeBlock {
+  startTime: number,   // Unix timestamp for the start time
+  duration: number,    // Duration in seconds
+  endTime: number      // Unix timestamp for the end time (startTime + duration)
+}
 interface Activity {
   id: string;
   button: ButtonState;
+  timeBlock: TimeBlock;
 }
 
 interface AppContextProps {

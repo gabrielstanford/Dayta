@@ -70,9 +70,15 @@ interface MyModalProps extends ModalProps {
   visible: boolean;
   onClose: () => void;
 }
+interface TimeBlock {
+  startTime: number; // Unix timestamp
+  duration: number;  // Duration in seconds
+  endTime: number;   // Unix timestamp
+}
 interface activity {
   id : string;
   button: ButtonState;
+  timeBlock: TimeBlock;
 }
 const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) => {
 
@@ -98,7 +104,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
       const currentButton = newStates[index]
       if(currentButton.pressed) {
         setTimeout(() => {
-          const activity = {id: uuid.v4() as string, button: newStates[index]};
+          const activity = {id: uuid.v4() as string, button: newStates[index], timeBlock: {startTime: 5, duration: 6, endTime: 11}};
           //now send that id to the current button so it knows which activity it's linked to
           currentButton.id = activity.id;
           addActivity(activity);
@@ -117,8 +123,6 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
   const [durationModalVisible, setDurationModalVisible] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<ButtonState | null>(null);
   const [selectedActivityIndex, setSelectedActivityIndex] = useState<number | null>(null);
-
-  const toggleModalVis = () => setDurationModalVisible(!durationModalVisible)
 
   const handlePress = (index: number) => {
 
@@ -139,14 +143,15 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
         //if the activity was already pressed, change logic to unclick it (no button popup)
       }
   };
-    const handleDurationSubmit = (duration: number) => {
+    const handleDurationSubmit = (block: TimeBlock) => {
       if (selectedActivity && selectedActivityIndex !== null) {
       setButtonStates(prevStates => {
         const newStates = [...prevStates];
         newStates[selectedActivityIndex].pressed = !newStates[selectedActivityIndex].pressed;
         const currentButton = newStates[selectedActivityIndex]
           setTimeout(() => {
-            const activity = {id: uuid.v4() as string, button: newStates[selectedActivityIndex]};
+            const activity = {id: uuid.v4() as string, button: newStates[selectedActivityIndex], timeBlock: block};
+            console.log(activity)
             //now send that id to the current button so it knows which activity it's linked to
             currentButton.id = activity.id;
             addActivity(activity);
@@ -229,7 +234,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
           {/* {durationModalVisible ? <><DurationModal durationModalVisible={durationModalVisible} onClose={() => handleDurationSubmit(30)} /></> : <></>} */}
       </View>
       <View>
-        <DurationModal durationModalVisible={durationModalVisible} onClose={() => handleDurationSubmit(30)}/>
+        <DurationModal durationModalVisible={durationModalVisible} onClose={handleDurationSubmit}/>
       </View>
     </Modal>
   );
