@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import { Modal, View, Text, StyleSheet, ModalProps, Dimensions, Pressable } from 'react-native';
 import {ThemedText} from './ThemedText'
 import {Button} from '@rneui/themed'
@@ -6,6 +6,8 @@ import {useAppContext} from '@/contexts/AppContext'
 const {width, height} = Dimensions.get("window");
 const buttonWidth = width/5;
 import {AntDesign, FontAwesome5, MaterialCommunityIcons, Ionicons, MaterialIcons} from '@expo/vector-icons';
+import uuid from 'react-native-uuid';
+import DurationModal from './DurationModal'
 
 // Define specific types for each icon component
 type AntDesignIcon = typeof AntDesign;
@@ -61,17 +63,20 @@ type ButtonState = {
   iconLibrary: string;
   icon: string;
   pressed: boolean;
+  id?: string;
 };
 
 interface MyModalProps extends ModalProps {
   visible: boolean;
   onClose: () => void;
 }
-
+interface activity {
+  id : string;
+  button: ButtonState;
+}
 const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) => {
 
-  const { addActivity, removeActivity } = useAppContext();
-  console.log('MyModal component rendered');
+  const { activities, addActivity, removeActivity } = useAppContext();
   const [buttonStates, setButtonStates] = useState<ButtonState[]>([
     //this is where you add buttons. it's all configured so you just need to add it here and all will work
     //this base of work will make it very easy in the future to add a search component.
@@ -82,30 +87,76 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
     { text: 'Scrolling', iconLibrary: "fontAwesome5", icon: "tiktok", pressed: false }, //fontawesome5
     { text: 'Driving', iconLibrary: "antDesign", icon: "car", pressed: false }, //antdesign
     { text: 'School', iconLibrary: "ionicons", icon: "school", pressed: false }, //ionicons
-    { text: 'Relaxation', iconLibrary: "fontAwesome5", icon: "umbrella-beach", pressed: false }, //fontawesome
+    { text: 'Relaxation', iconLibrary: "fontAwesome5", icon: "umbrella-beach", pressed: false}, //fontawesome
     { text: 'Work', iconLibrary: "materialIcons", icon: "work", pressed: false }, //materialicons
   ]);
 
-  const handlePress = (index: number) => {
+  const setActivities = (index: number) => {
     setButtonStates(prevStates => {
       const newStates = [...prevStates];
-      const isPressed = newStates[index].pressed;
-      newStates[index].pressed = !isPressed;
-      if(newStates[index].pressed) {
+      newStates[index].pressed = !newStates[index].pressed;
+      const currentButton = newStates[index]
+      if(currentButton.pressed) {
         setTimeout(() => {
-          addActivity(newStates[index]);
+          const activity = {id: uuid.v4() as string, button: newStates[index]};
+          //now send that id to the current button so it knows which activity it's linked to
+          currentButton.id = activity.id;
+          addActivity(activity);
         }, 0);
       }
       else {
       // Add the pressed activity to context
         setTimeout(() => {
-        removeActivity(newStates[index]);
+          if(currentButton.id) {removeActivity(currentButton.id)}
         }, 0);
       }
+      
       return newStates;
     });
-   
+  }
+  const [durationModalVisible, setDurationModalVisible] = useState(false);
+  const [selectedActivity, setSelectedActivity] = useState<ButtonState | null>(null);
+  const [selectedActivityIndex, setSelectedActivityIndex] = useState<number | null>(null);
+
+  const toggleModalVis = () => setDurationModalVisible(!durationModalVisible)
+
+  const handlePress = (index: number) => {
+
+    //add a pop-up modal requesting duration
+      const activity = { ...buttonStates[index] };
+
+      if(activity.pressed) {
+        buttonStates[index].pressed=false
+        setTimeout(() => {
+          if(activity.id) {removeActivity(activity.id as string)}
+        }, 0);
+      }
+      else {
+        setSelectedActivity(activity);
+        //note index is the index of the buttons, which indicates the activity it points it
+        setSelectedActivityIndex(index);
+        setDurationModalVisible(true);
+        //if the activity was already pressed, change logic to unclick it (no button popup)
+      }
   };
+    const handleDurationSubmit = (duration: number) => {
+      if (selectedActivity && selectedActivityIndex !== null) {
+      setButtonStates(prevStates => {
+        const newStates = [...prevStates];
+        newStates[selectedActivityIndex].pressed = !newStates[selectedActivityIndex].pressed;
+        const currentButton = newStates[selectedActivityIndex]
+          setTimeout(() => {
+            const activity = {id: uuid.v4() as string, button: newStates[selectedActivityIndex]};
+            //now send that id to the current button so it knows which activity it's linked to
+            currentButton.id = activity.id;
+            addActivity(activity);
+          }, 0);
+        
+        return newStates;
+      });
+      setDurationModalVisible(!durationModalVisible);
+      }
+    }
     // Define rows for grid layout
     const rows = [
       buttonStates.slice(0, 3), // First row
@@ -138,8 +189,26 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
         </View>
       ));
     };
+    const resetButtonStates = () => {
+      setButtonStates(prevStates =>
+        prevStates.map(button => ({
+          ...button,
+          pressed: false
+        }))
+      );
+    };
+    const closeModal = () => {
+      resetButtonStates();
+      onClose();
+    }
 
+    useEffect(() => {
+      if (!visible) {
+        setButtonStates(prevStates => prevStates.map(state => ({ ...state, pressed: false, id: undefined })));
+      }
+    }, [visible]);
   return (
+    
     <Modal
       transparent={false}
       animationType="slide"
@@ -155,8 +224,12 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
           {renderButtons()}
         </View>
         <View style={styles.buttonContainer}>
-          <Button buttonStyle={styles.closeButton} color="secondary" title="Close" onPress={onClose} />
+          <Button buttonStyle={styles.closeButton} color="secondary" title="Close" onPress={() => closeModal()} />
         </View>
+          {/* {durationModalVisible ? <><DurationModal durationModalVisible={durationModalVisible} onClose={() => handleDurationSubmit(30)} /></> : <></>} */}
+      </View>
+      <View>
+        <DurationModal durationModalVisible={durationModalVisible} onClose={() => handleDurationSubmit(30)}/>
       </View>
     </Modal>
   );

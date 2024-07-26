@@ -5,7 +5,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { Button, ButtonGroup, withTheme, Text } from '@rneui/themed';
 import { useState } from 'react';
 import {Link} from 'expo-router'
-import AntDesign from '@expo/vector-icons/AntDesign';
+import {AntDesign, MaterialIcons} from '@expo/vector-icons';
 import MyModal from '@/components/MyModal'
 import { AppProvider, useAppContext } from '@/contexts/AppContext';
 
@@ -14,13 +14,15 @@ const { width, height } = Dimensions.get('window');
 const buttonWidth = width/6.25
 
 function Journal() {
-  console.log('rendering journal')
   //toggle the state of the modal
     const [modalVisible, setModalVisible] = useState(false);
     const toggleModal = () => setModalVisible(!modalVisible)
 
-    const { activities } = useAppContext();
-    console.log(activities)
+    const { activities, removeActivity } = useAppContext();
+
+    const removeActiv = (index: number) => {
+        removeActivity(activities[index].id);
+    }
   return (
     
       <View style={styles.layoutContainer}>
@@ -29,15 +31,24 @@ function Journal() {
         <View style={styles.titleContainer}>
           <ThemedText type="titleText">My Journal</ThemedText>
         </View>
-        {activities.map((activity, index) => (
-          <View key={index} style={styles.stepContainer}>
-          <ThemedText type="journalText">{activity.text}</ThemedText>
-          </View>
-        ))}
+        {activities.length>0 ? 
+          activities.map((activity, index) => (
+            <View key={index} style={styles.stepContainer}>
+              <ThemedText type="journalText">{activity.button.text}</ThemedText>
+              <Pressable onPress={() => removeActiv(index)}>
+                <MaterialIcons name="delete" size={width/15} color="black" />
+              </Pressable>
+            </View>
+          )) : 
+          <Pressable onPress={toggleModal}>
+            <View style={styles.stepContainer}>  
+              <ThemedText type="journalText">Add Your First Activity For The Day!</ThemedText>
+            </View>
+          </Pressable>}
         </View>
         <View style={styles.plusButtonContainer}>
           <Pressable onPress={toggleModal}>
-          <AntDesign name="pluscircle" size={width/6.25} color="black" />
+            <AntDesign name="pluscircle" size={width/6.25} color="black" />
           </Pressable>
         </View>
       </View>
@@ -61,6 +72,8 @@ titleContainer: {
   padding: 10,
 },
 stepContainer: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
   padding: 8,
   marginBottom: 10,
   borderColor: 'bisque',

@@ -5,35 +5,41 @@ interface ButtonState {
   pressed: boolean;
 }
 
+interface Activity {
+  id: string;
+  button: ButtonState;
+}
+
 interface AppContextProps {
-  activities: ButtonState[];
-  addActivity: (activity: ButtonState) => void;
-  removeActivity: (activity: ButtonState) => void;
+  activities: Activity[];
+  addActivity: (activity: Activity) => void;
+  removeActivity: (id: string) => void;
 }
 
 interface AppProviderProps {
   children: ReactNode;
 }
 
+
 const AppContext = createContext<AppContextProps | undefined>(undefined);
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
-  const [activities, setActivities] = useState<ButtonState[]>([]);
+  const [activities, setActivities] = useState<Activity[]>([]);
 
-  //I had to create useeffect and be a little clever here. The idea is:
-  //it only updates the state AFTER mymodal is done rendering, not at the same time.
-  const pendingActivityRef = useState<ButtonState | null>(null);
-
-  const addActivity = (activity: ButtonState) => {
+  const addActivity = (activity: Activity) => {
     setTimeout(() => {
-      setActivities(prevActivities => [...prevActivities, activity]);
-    }, 0); // Delay the state update
+      setActivities(prevActivities =>
+        prevActivities.some(act => act.id === activity.id)
+          ? prevActivities // Avoid adding duplicates
+          : [...prevActivities, activity] // Add new activity
+      );
+    }, 0); // Delay the state update to avoid updating while page is rendering
   };
 
-  const removeActivity = (activity: ButtonState) => {
+  const removeActivity = (id: string) => {
     setTimeout(() => {
     setActivities(prevActivities => 
-      prevActivities.filter(act => act.text !== activity.text)
+      prevActivities.filter(act => act.id !== id)
     );
   }, 0);
   };
