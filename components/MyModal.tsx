@@ -151,7 +151,6 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
         const currentButton = newStates[selectedActivityIndex]
           setTimeout(() => {
             const activity = {id: uuid.v4() as string, button: newStates[selectedActivityIndex], timeBlock: block};
-            console.log(activity)
             //now send that id to the current button so it knows which activity it's linked to
             currentButton.id = activity.id;
             addActivity(activity);
@@ -231,10 +230,9 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
         <View style={styles.buttonContainer}>
           <Button buttonStyle={styles.closeButton} color="secondary" title="Close" onPress={() => closeModal()} />
         </View>
-          {/* {durationModalVisible ? <><DurationModal durationModalVisible={durationModalVisible} onClose={() => handleDurationSubmit(30)} /></> : <></>} */}
       </View>
       <View>
-        <DurationModal durationModalVisible={durationModalVisible} onClose={handleDurationSubmit}/>
+        <DurationModal style={styles.durationModal} durationModalVisible={durationModalVisible} onClose={handleDurationSubmit} activity={selectedActivity as ButtonState}/>
       </View>
     </Modal>
   );
@@ -271,7 +269,9 @@ const styles = StyleSheet.create({
     width: buttonWidth,
     backgroundColor: 'black',
   },
-  
+  durationModal: {
+    flex: 1
+  },
   //close button
   buttonContainer: {
     position: 'absolute', // Absolute positioning to overlay everything

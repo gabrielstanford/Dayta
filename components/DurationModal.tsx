@@ -1,44 +1,77 @@
-import {ModalProps, Modal, View, StyleSheet} from 'react-native'
+import {ModalProps, Modal, View, StyleSheet, Dimensions} from 'react-native'
 import {ThemedText} from './ThemedText'
 import {Button} from '@rneui/themed'
+import TimeDropdown from './TimeDropdown'
+import {useState} from 'react'
 
+const {width, height} = Dimensions.get("window");
 interface TimeBlock {
   startTime: number; // Unix timestamp
   duration: number;  // Duration in seconds
   endTime: number;   // Unix timestamp
   }
-
-interface DurationModalProps extends ModalProps {
+  type ButtonState = {
+    text: string;
+    iconLibrary: string;
+    icon: string;
+    pressed: boolean;
+    id?: string;
+  };
+  
+  interface DurationModalProps extends ModalProps {
     durationModalVisible: boolean;
     onClose: (timeBlock: TimeBlock) => void;
+    activity: ButtonState;
   }
 
-const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onClose, ...modalProps }) => {
+const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onClose, activity, ...modalProps }) => {
+    
+  const [selectedHour, setSelectedHour] = useState("08");
+  const [selectedMinute, setSelectedMinute] = useState("00");
+  const [selectedPeriod, setSelectedPeriod] = useState("AM");
 
+  const handleHourChange = (hour: string) => {
+    setSelectedHour(hour);
+  };
+
+  const handleMinuteChange = (minute: string) => {
+    setSelectedMinute(minute);
+  };
+
+  const handlePeriodChange = (period: string) => {
+    setSelectedPeriod(period);
+  };
+
+  const generateTimeString = () => {
+    const timeString = selectedHour + ":" + selectedMinute + " " + selectedPeriod
+    console.log(timeString)
+    return timeString
+  }
+  
     // Function to convert duration input to seconds
     function convertDurationToSeconds(minutes: number): number {
       return (minutes * 60);
     }
-    function convertTimeToUnix(timeString: string): number {
-      // Split the time string into its components
-      const [time, modifier] = timeString.split(' ');
-      let [hours, minutes] = time.split(':').map(Number);
+    const convertTimeToUnix = (timeString: string, date: Date = new Date()): number => {
+      // Parse the time string
+      const [time, period] = timeString.split(' ');
+      const [hours, minutes] = time.split(':').map(Number);
     
-      // Adjust hours based on the AM/PM modifier
-      if (modifier === 'PM' && hours < 12) {
-        hours += 12;
-      } else if (modifier === 'AM' && hours === 12) {
-        hours = 0;
+      // Convert 12-hour format to 24-hour format
+      let hours24 = hours;
+      if (period === 'PM' && hours !== 12) {
+        hours24 += 12;
+      } else if (period === 'AM' && hours === 12) {
+        hours24 = 0;
       }
     
-      // Get the current date
-      const now = new Date();
-      now.setHours(hours, minutes, 0, 0);
+      // Set the UTC time based on the input
+      const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), hours24, minutes));
     
       // Convert to Unix timestamp and return
-      return Math.floor(now.getTime() / 1000);
-    }
-
+      return Math.floor(utcDate.getTime() / 1000);
+    };
+    
     // Function to create a TimeBlock based on user input
     function createTimeBlock(startTime: string, durationMinutes: number): TimeBlock {
       const startTimeUnix = convertTimeToUnix(startTime); // Convert start time to Unix timestamp
@@ -60,8 +93,27 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onC
         {...modalProps}>
             <View style={styles.durationModalOverlay}>
                 <View style={styles.durationModalContent}>
-                    <ThemedText style={styles.durationModalTitle}>Enter Duration for Activity</ThemedText>
-                <Button title="Submit" onPress={() => onClose(createTimeBlock("10:00 AM", 5))} />
+                  <View style={styles.titleContainer}>
+                    <ThemedText type="title" style={styles.durationModalTitle}> {activity ? activity.text : ""}: Enter Time</ThemedText>
+                  </View>
+                  <View style={styles.timeDropdown}>
+                    <View style={styles.subtitleContainer}>
+                      <ThemedText type="subtitle">Start Time:</ThemedText>
+                    </View>
+                    <View style={styles.dropdownContainer}>
+                      <TimeDropdown
+                      selectedHour={selectedHour}
+                      selectedMinute={selectedMinute}
+                      selectedPeriod={selectedPeriod}
+                      onHourChange={handleHourChange}
+                      onMinuteChange={handleMinuteChange}
+                      onPeriodChange={handlePeriodChange}
+                      />
+                    </View>
+                  </View>
+                <View style={styles.submitContainer}>
+                  <Button title="Submit" style={styles.submitButton} onPress={() => onClose(createTimeBlock(generateTimeString(), 5))} />
+                </View>
             </View>
         </View>
       </Modal>
@@ -77,17 +129,42 @@ const styles = StyleSheet.create({
         alignItems: 'center',
       },
       durationModalContent: {
-        width: 300,
-        padding: 20,
+        flex: 0.5,
+        width: width/1.1,
+        height: height/2,
+        padding: 10,
         backgroundColor: 'white',
         borderRadius: 10,
-        alignItems: 'center',
-        justifyContent: 'center',
+      },
+      titleContainer: {
+        alignItems: 'center'
       },
       durationModalTitle: {
         fontSize: 20,
-        marginBottom: 20,
       },
+      timeDropdown: {
+
+      },
+      subtitleContainer: {
+
+      },
+      dropdownContainer: {
+        height: 200, // Adjust this value as needed
+        width: '100%', // Or a fixed width if required
+        overflow: 'hidden', // Ensures dropdown content does not spill outside
+        borderWidth: 1,
+        borderColor: 'gray',
+        borderRadius: 5,
+        padding: 10, // Optional padding
+      },
+      submitContainer: {
+        alignContent: 'flex-start',
+
+      },
+      submitButton: {
+        paddingTop: 10,
+        width: '30%'
+      }
 })
 
 export default DurationModal;

@@ -23,6 +23,27 @@ function Journal() {
     const removeActiv = (index: number) => {
         removeActivity(activities[index].id);
     }
+    const convertUnixToTimeString = (unixTimestamp: number): string => {
+      // Create a Date object from the Unix timestamp
+      const date = new Date(unixTimestamp * 1000); // Convert seconds to milliseconds
+    
+      // Get hours and minutes in UTC
+      let hours = date.getUTCHours(); // Use UTC hours to avoid time zone issues
+      const minutes = date.getUTCMinutes();
+    
+      // Determine AM or PM
+      const period = hours < 12 ? 'AM' : 'PM';
+    
+      // Convert hours from 24-hour to 12-hour format
+      hours = hours % 12;
+      hours = hours ? hours : 12; // Hour '0' should be '12'
+    
+      // Format minutes to always have two digits
+      const formattedMinutes = minutes < 10 ? `0${minutes}` : `${minutes}`;
+    
+      // Construct the formatted time string
+      return `${hours}:${formattedMinutes} ${period}`;
+    };
   return (
     
       <View style={styles.layoutContainer}>
@@ -34,6 +55,7 @@ function Journal() {
         {activities.length>0 ? 
           activities.map((activity, index) => (
             <View key={index} style={styles.stepContainer}>
+              <ThemedText type="journalText">{convertUnixToTimeString(activity.timeBlock.startTime)}</ThemedText>
               <ThemedText type="journalText">{activity.button.text}</ThemedText>
               <Pressable onPress={() => removeActiv(index)}>
                 <MaterialIcons name="delete" size={width/15} color="black" />
