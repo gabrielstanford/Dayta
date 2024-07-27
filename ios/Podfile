@@ -8,6 +8,10 @@ ENV['RCT_NEW_ARCH_ENABLED'] = podfile_properties['newArchEnabled'] == 'true' ? '
 ENV['EX_DEV_CLIENT_NETWORK_INSPECTOR'] = podfile_properties['EX_DEV_CLIENT_NETWORK_INSPECTOR']
 
 platform :ios, podfile_properties['ios.deploymentTarget'] || '13.4'
+
+source 'https://github.com/expo/expo.git'
+source 'https://github.com/CocoaPods/Specs.git'
+
 install! 'cocoapods',
   :deterministic_uuids => false
 
@@ -18,9 +22,17 @@ use_modular_headers!
 target 'absorb' do
   use_expo_modules!
   config = use_native_modules!
-
   use_frameworks! :linkage => podfile_properties['ios.useFrameworks'].to_sym if podfile_properties['ios.useFrameworks']
   use_frameworks! :linkage => ENV['USE_FRAMEWORKS'].to_sym if ENV['USE_FRAMEWORKS']
+  # Pods for YourApp
+  pod 'Expo', :path => '../node_modules/expo'
+  pod 'ExpoModulesCore', :path => '../node_modules/expo-modules-core'
+  pod 'Firebase/Core'
+  pod 'Firebase/Auth'
+  pod 'GoogleSignIn'
+  pod 'Firebase/Firestore'
+  pod 'gRPC-C++', '~> 1.62.2' # Specify the version if needed
+  # Add other Firebase SDKs you need
 
   use_react_native!(
     :path => config[:reactNativePath],

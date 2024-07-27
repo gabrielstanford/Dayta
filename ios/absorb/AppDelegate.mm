@@ -2,13 +2,17 @@
 
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTLinkingManager.h>
+#import <Firebase.h>
+#import <GoogleSignIn/GoogleSignIn.h>
 
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
   self.moduleName = @"main";
-
+  if ([FIRApp defaultApp] == nil) {
+    [FIRApp configure];
+  }
   // You can add your custom initial props in the dictionary below.
   // They will be passed down to the ViewController used by React Native.
   self.initialProps = @{};
@@ -32,7 +36,9 @@
 
 // Linking API
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options {
-  return [super application:application openURL:url options:options] || [RCTLinkingManager application:application openURL:url options:options];
+    BOOL handledByGoogleSignIn = [[GIDSignIn sharedInstance] handleURL:url];
+    BOOL handledByReactNative = [RCTLinkingManager application:application openURL:url options:options];
+    return handledByGoogleSignIn || handledByReactNative;
 }
 
 // Universal Links

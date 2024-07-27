@@ -29,6 +29,9 @@
         <array>
           <string>myapp</string>
           <string>com.gabrielcode.absorb</string>
+
+          <!-- Google Sign-In URL scheme -->
+          <string>com.googleusercontent.apps.897083396063-iloe73jfel7gj5kjath7l75f8v8s01d6</string>
         </array>
       </dict>
     </array>
