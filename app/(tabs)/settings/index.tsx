@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, Switch, StyleSheet, Button, Alert } from 'react-native';
+import { View, Text, Switch, StyleSheet, Button, Alert, Pressable} from 'react-native';
+import {useLogout} from '@/components/useLogout'
 
 const Settings = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -18,6 +19,8 @@ const Settings = () => {
     Alert.alert('Settings saved!');
   };
 
+  const logout = useLogout();
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Settings</Text>
@@ -34,6 +37,9 @@ const Settings = () => {
           value={notificationsEnabled}
           onValueChange={handleNotificationsToggle}
         />
+      </View>
+      <View style={styles.settingItem}>
+        <Pressable style={styles.settingLabel} onPress={logout}><Text>Log Out</Text></Pressable>
       </View>
       <Button title="Save" onPress={handleSave} />
     </View>

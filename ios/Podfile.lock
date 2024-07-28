@@ -2405,6 +2405,8 @@ PODS:
     - React-perflogger (= 0.74.3)
     - React-utils (= 0.74.3)
   - RecaptchaInterop (100.0.0)
+  - RNCAsyncStorage (1.24.0):
+    - React-Core
   - RNCPicker (2.7.7):
     - React-Core
   - RNFBApp (20.3.0):
@@ -2585,6 +2587,7 @@ DEPENDENCIES:
   - React-runtimescheduler (from `../node_modules/react-native/ReactCommon/react/renderer/runtimescheduler`)
   - React-utils (from `../node_modules/react-native/ReactCommon/react/utils`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
+  - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - "RNCPicker (from `../node_modules/@react-native-picker/picker`)"
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
   - "RNFBAuth (from `../node_modules/@react-native-firebase/auth`)"
@@ -2759,6 +2762,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/react/utils"
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
+  RNCAsyncStorage:
+    :path: "../node_modules/@react-native-async-storage/async-storage"
   RNCPicker:
     :path: "../node_modules/@react-native-picker/picker"
   RNFBApp:
@@ -2872,6 +2877,7 @@ SPEC CHECKSUMS:
   React-utils: 6f7ac39d9a0de447d4334bb25d144a28c0c5d8c9
   ReactCommon: 4a09c7d8a06e93c1e2e988a3b9f3db3d2449f2fc
   RecaptchaInterop: 7d1a4a01a6b2cb1610a47ef3f85f0c411434cb21
+  RNCAsyncStorage: ec53e44dc3e75b44aa2a9f37618a49c3bc080a7a
   RNCPicker: b7873ba797dc586bfaf3307d737cbdc620a9ff3e
   RNFBApp: a7aff07a7f212149539fce51a1326c6d208b03ad
   RNFBAuth: 3ed676e60d0ca3b2c71023240658e1f02bc752d7
