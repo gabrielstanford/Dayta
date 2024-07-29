@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Switch, StyleSheet, Button, Alert, Pressable} from 'react-native';
-import {useLogout} from '@/components/useLogout'
+import {useLogout} from '@/utils/useLogout'
 
 const Settings = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);

@@ -3,17 +3,40 @@ import PlusButton from '@/components/PlusButton'
 import { ThemedText } from '@/components/ThemedText';
 //import firestore from '@react-native-firebase/firestore'
 import { Button, ButtonGroup, withTheme, Text } from '@rneui/themed';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {Link} from 'expo-router'
 import {AntDesign, MaterialIcons} from '@expo/vector-icons';
 import MyModal from '@/components/MyModal'
 import { AppProvider, useAppContext } from '@/contexts/AppContext';
+import { saveUserData, getUserData } from '@/utils/firestore';
+import {useAuth} from '@/contexts/AuthContext'
 
 // Get screen width. This is for more responsive layouts
 const { width, height } = Dimensions.get('window');
 const buttonWidth = width/6.25
 
 function Journal() {
+
+  const { user } = useAuth();
+  const [userData, setUserData] = useState<any>(null);
+
+  useEffect(() => {
+    if (user) {
+      // Fetch user data when the component mounts
+      getUserData(user.uid).then((data) => {
+        if (data) {
+          setUserData(data);
+        }
+      });
+    }
+  }, [user]);
+
+  const handleSave = () => {
+    if (user) {
+      saveUserData(user.uid, { name: 'John Doe', age: 30 });
+    }
+  };
+
   //toggle the state of the modal
     const [modalVisible, setModalVisible] = useState(false);
     const toggleModal = () => setModalVisible(!modalVisible)
@@ -67,6 +90,11 @@ function Journal() {
               <ThemedText type="journalText">Add Your First Activity For The Day!</ThemedText>
             </View>
           </Pressable>}
+          <Pressable onPress={handleSave}>
+          <View style={styles.stepContainer}>  
+            {userData ? <ThemedText type="journalText">Age: {userData.age}, Name: {userData.name}</ThemedText> : <ThemedText type="journalText">Add "Data" To Firestore</ThemedText>}
+          </View>
+        </Pressable>
         </View>
         <View style={styles.plusButtonContainer}>
           <Pressable onPress={toggleModal}>

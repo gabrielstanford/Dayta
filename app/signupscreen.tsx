@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { useRouter } from 'expo-router';
 
 const SignUpScreen: React.FC = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-
+  const router = useRouter();
+  
   const handleSignUp = async () => {
     const auth = getAuth();
 
     try {
       // Create user with email and password
       await createUserWithEmailAndPassword(auth, email, password);
-      Alert.alert('Success', 'Account created successfully!');
+      router.push('/');
     } catch (error) {
       console.error(error);
       Alert.alert('Error', 'Failed to create account. Please try again.');

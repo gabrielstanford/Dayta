@@ -1,4 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect, useRef } from 'react';
+import { setDoc, doc, deleteDoc } from 'firebase/firestore';
+import { firestore } from '@/firebase/firebase';
+import { useAuth } from './AuthContext'; // Assume you have a context for auth
 
 interface ButtonState {
   text: string;
@@ -30,23 +33,40 @@ const AppContext = createContext<AppContextProps | undefined>(undefined);
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [activities, setActivities] = useState<Activity[]>([]);
+  const { user } = useAuth(); // Get the authenticated user from your auth context
 
-  const addActivity = (activity: Activity) => {
-    setTimeout(() => {
-      setActivities(prevActivities =>
-        prevActivities.some(act => act.id === activity.id)
-          ? prevActivities // Avoid adding duplicates
-          : [...prevActivities, activity] // Add new activity
-      );
-    }, 0); // Delay the state update to avoid updating while page is rendering
-  };
+  const addActivity = async (activity: Activity) => {
+    try {
+      if (user) {
+        // Save the activity to Firestore
+        await setDoc(doc(firestore, 'users', user.uid, 'activities', activity.id), activity);
+      }
+  
+      setTimeout(() => {
+        setActivities(prevActivities =>
+          prevActivities.some(act => act.id === activity.id)
+            ? prevActivities // Avoid adding duplicates
+            : [...prevActivities, activity] // Add new activity
+        );
+      }, 0); // Delay the state update to avoid updating during rendering
+    } catch (error) {
+      console.error('Error adding activity to Firestore:', error);
+    }
+  };  
 
-  const removeActivity = (id: string) => {
+  const removeActivity = async (id: string) => {
+    try {
+      if(user) {
+        await deleteDoc(doc(firestore, 'users', user.uid, 'activities', id));
+      }
     setTimeout(() => {
     setActivities(prevActivities => 
       prevActivities.filter(act => act.id !== id)
     );
-  }, 0);
+    }, 0); // Delay the state update to avoid updating during rendering
+    } catch (error) {
+    console.error('Error adding activity to Firestore:', error);
+    }
   };
 
 
