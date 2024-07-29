@@ -1,50 +1,54 @@
 import { StyleSheet, Pressable, View, Dimensions} from 'react-native';
-import PlusButton from '@/components/PlusButton'
 import { ThemedText } from '@/components/ThemedText';
-//import firestore from '@react-native-firebase/firestore'
-import { Button, ButtonGroup, withTheme, Text } from '@rneui/themed';
 import { useState, useEffect } from 'react';
-import {Link} from 'expo-router'
 import {AntDesign, MaterialIcons} from '@expo/vector-icons';
 import MyModal from '@/components/MyModal'
 import { AppProvider, useAppContext } from '@/contexts/AppContext';
-import { saveUserData, getUserData } from '@/utils/firestore';
+import { collection, onSnapshot, getDocs } from 'firebase/firestore';
+import {firestore} from '@/firebase/firebase'
 import {useAuth} from '@/contexts/AuthContext'
 
 // Get screen width. This is for more responsive layouts
 const { width, height } = Dimensions.get('window');
 const buttonWidth = width/6.25
 
+
 function Journal() {
 
   const { user } = useAuth();
-  const [userData, setUserData] = useState<any>(null);
+  const [dbActivities, setDbActivities] = useState<any>(null);
 
   useEffect(() => {
     if (user) {
-      // Fetch user data when the component mounts
-      getUserData(user.uid).then((data) => {
-        if (data) {
-          setUserData(data);
-        }
+      console.log('user logged in')
+      // Reference to the activities subcollection for the given userId
+      const activitiesRef = collection(firestore, 'users', user.uid, 'activities');
+      // Set up a real-time listener
+      const unsubscribe = onSnapshot(activitiesRef, (snapshot) => {
+        const userActivities: any[] = [];
+        snapshot.forEach((doc) => {
+          userActivities.push({ id: doc.id, ...doc.data() });
+        });
+        userActivities.sort((a, b) => a.timeBlock.startTime - b.timeBlock.startTime);
+        setDbActivities(userActivities);
+      }, (error) => {
+        console.error('Error fetching activities:', error);
       });
+
+      // Clean up the listener on component unmount
+      return () => unsubscribe();
     }
   }, [user]);
-
-  const handleSave = () => {
-    if (user) {
-      saveUserData(user.uid, { name: 'John Doe', age: 30 });
-    }
-  };
-
+  console.log('dbActivities: ' + dbActivities)
+  
   //toggle the state of the modal
     const [modalVisible, setModalVisible] = useState(false);
     const toggleModal = () => setModalVisible(!modalVisible)
 
     const { activities, removeActivity } = useAppContext();
 
-    const removeActiv = (index: number) => {
-        removeActivity(activities[index].id);
+    const removeActiv = (id: string) => {
+        removeActivity(id);
     }
     const convertUnixToTimeString = (unixTimestamp: number): string => {
       // Create a Date object from the Unix timestamp
@@ -75,12 +79,12 @@ function Journal() {
         <View style={styles.titleContainer}>
           <ThemedText type="titleText">My Journal</ThemedText>
         </View>
-        {activities.length>0 ? 
-          activities.map((activity, index) => (
-            <View key={index} style={styles.stepContainer}>
+        {dbActivities ? 
+          dbActivities.map((activity: any) => (
+            <View key={activity.id} style={styles.stepContainer}>
               <ThemedText type="journalText">{convertUnixToTimeString(activity.timeBlock.startTime)}</ThemedText>
               <ThemedText type="journalText">{activity.button.text}</ThemedText>
-              <Pressable onPress={() => removeActiv(index)}>
+              <Pressable onPress={() => removeActiv(activity.id)}>
                 <MaterialIcons name="delete" size={width/15} color="black" />
               </Pressable>
             </View>
@@ -90,11 +94,6 @@ function Journal() {
               <ThemedText type="journalText">Add Your First Activity For The Day!</ThemedText>
             </View>
           </Pressable>}
-          <Pressable onPress={handleSave}>
-          <View style={styles.stepContainer}>  
-            {userData ? <ThemedText type="journalText">Age: {userData.age}, Name: {userData.name}</ThemedText> : <ThemedText type="journalText">Add "Data" To Firestore</ThemedText>}
-          </View>
-        </Pressable>
         </View>
         <View style={styles.plusButtonContainer}>
           <Pressable onPress={toggleModal}>

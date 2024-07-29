@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, Switch, StyleSheet, Button, Alert, Pressable} from 'react-native';
 import {useLogout} from '@/utils/useLogout'
+import {useRouter} from 'expo-router'
 
 const Settings = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -20,7 +21,7 @@ const Settings = () => {
   };
 
   const logout = useLogout();
-
+  const router = useRouter();
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Settings</Text>
@@ -40,6 +41,9 @@ const Settings = () => {
       </View>
       <View style={styles.settingItem}>
         <Pressable style={styles.settingLabel} onPress={logout}><Text>Log Out</Text></Pressable>
+      </View>
+      <View style={styles.settingItem}>
+        <Pressable style={styles.settingLabel} onPress={() => router.push("/info")}><Text>User Info</Text></Pressable>
       </View>
       <Button title="Save" onPress={handleSave} />
     </View>
