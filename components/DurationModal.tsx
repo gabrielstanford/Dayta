@@ -1,8 +1,9 @@
-import {ModalProps, Modal, View, StyleSheet, Dimensions} from 'react-native'
+import {ModalProps, Modal, View, StyleSheet, Dimensions, Text, TouchableWithoutFeedback} from 'react-native'
 import {ThemedText} from './ThemedText'
 import {Button} from '@rneui/themed'
 import TimeDropdown from './TimeDropdown'
 import {useState} from 'react'
+import Slider from '@react-native-community/slider';
 
 const {width, height} = Dimensions.get("window");
 interface TimeBlock {
@@ -20,15 +21,17 @@ interface TimeBlock {
   
   interface DurationModalProps extends ModalProps {
     durationModalVisible: boolean;
-    onClose: (timeBlock: TimeBlock) => void;
+    onSubmit: (timeBlock: TimeBlock) => void;
+    onTapOut: () => void;
     activity: ButtonState;
   }
 
-const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onClose, activity, ...modalProps }) => {
+const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onSubmit, onTapOut, activity, ...modalProps }) => {
     
   const [selectedHour, setSelectedHour] = useState("08");
   const [selectedMinute, setSelectedMinute] = useState("00");
   const [selectedPeriod, setSelectedPeriod] = useState("AM");
+  const [duration, setDuration] = useState(0);
 
   const handleHourChange = (hour: string) => {
     setSelectedHour(hour);
@@ -84,6 +87,14 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onC
         endTime: endTimeUnix
       };
     }
+    function formatTime(minutes: number) {
+      const hours = Math.floor(minutes / 60);
+      const remainingMinutes = minutes % 60;
+    
+      return `${hours}h ${remainingMinutes}m`;   
+    
+    }
+
     return(
         <Modal 
         transparent={true}
@@ -91,15 +102,14 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onC
         visible={durationModalVisible}
 
         {...modalProps}>
+          <TouchableWithoutFeedback onPress={onTapOut}>
             <View style={styles.durationModalOverlay}>
+            <TouchableWithoutFeedback>
                 <View style={styles.durationModalContent}>
                   <View style={styles.titleContainer}>
-                    <ThemedText type="title" style={styles.durationModalTitle}> {activity ? activity.text : ""}: Enter Time</ThemedText>
+                    <ThemedText type="title"> Start Time</ThemedText>
                   </View>
                   <View style={styles.timeDropdown}>
-                    <View style={styles.subtitleContainer}>
-                      <ThemedText type="subtitle">Start Time:</ThemedText>
-                    </View>
                     <View style={styles.dropdownContainer}>
                       <TimeDropdown
                       selectedHour={selectedHour}
@@ -111,11 +121,31 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onC
                       />
                     </View>
                   </View>
+                <View style={styles.titleContainer}>
+                  <ThemedText type="title"> Duration: {formatTime(duration)} </ThemedText>
+                </View>
+                <View style={styles.slider}>
+                  <Text>0</Text>
+                  <Slider
+                  style={styles.slider}
+                  minimumValue={0}
+                  maximumValue={120}
+                  step={1}
+                  value={duration}
+                  onValueChange={(value) => setDuration(value)}
+                  minimumTrackTintColor="#1FB28A"
+                  maximumTrackTintColor="#d3d3d3"
+                  thumbTintColor="#1FB28A"
+                  />
+                  <Text>2 hrs</Text>
+                </View>
                 <View style={styles.submitContainer}>
-                  <Button title="Submit" style={styles.submitButton} onPress={() => onClose(createTimeBlock(generateTimeString(), 5))} />
+                  <Button title="Submit" style={styles.submitButton} onPress={() => onSubmit(createTimeBlock(generateTimeString(), duration))} />
                 </View>
             </View>
-        </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
       </Modal>
     );
     
@@ -137,10 +167,9 @@ const styles = StyleSheet.create({
         borderRadius: 10,
       },
       titleContainer: {
+        marginTop: 10,
+        marginBottom: 5,
         alignItems: 'center'
-      },
-      durationModalTitle: {
-        fontSize: 20,
       },
       timeDropdown: {
 
@@ -152,14 +181,17 @@ const styles = StyleSheet.create({
         height: 200, // Adjust this value as needed
         width: '100%', // Or a fixed width if required
         overflow: 'hidden', // Ensures dropdown content does not spill outside
-        borderWidth: 1,
-        borderColor: 'gray',
-        borderRadius: 5,
         padding: 10, // Optional padding
       },
       submitContainer: {
         alignContent: 'flex-start',
 
+      },
+      slider: {
+          flex: 1,
+          flexDirection: 'row',
+          width: '100%',
+          height: 40,
       },
       submitButton: {
         paddingTop: 10,

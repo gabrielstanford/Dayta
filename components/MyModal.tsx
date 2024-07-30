@@ -203,7 +203,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
     >
       <View style={styles.modalOverlay}>
         <View style={styles.titleContainer}>
-          <ThemedText type="title">Quick Add</ThemedText>
+          <ThemedText type="titleText">Quick Add</ThemedText>
         </View>
         <View style={styles.quickAddContainer}>
           {renderButtons()}
@@ -213,7 +213,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
         </View>
       </View>
       <View>
-        <DurationModal style={styles.durationModal} durationModalVisible={durationModalVisible} onClose={handleDurationSubmit} activity={selectedActivity as ButtonState}/>
+        <DurationModal style={styles.durationModal} durationModalVisible={durationModalVisible} onSubmit={handleDurationSubmit} onTapOut={() => setDurationModalVisible(false)} activity={selectedActivity as ButtonState}/>
       </View>
     </Modal>
   );
