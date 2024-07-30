@@ -34,11 +34,11 @@ const AppContext = createContext<AppContextProps | undefined>(undefined);
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [activities, setActivities] = useState<Activity[]>([]);
   const { user } = useAuth(); // Get the authenticated user from your auth context
-
+  const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+  
   const addActivity = async (activity: Activity) => {
     try {
       if (user) {
-        const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
         const dateRef = doc(firestore, 'users', user.uid, 'dates', today);
         const activityRef = doc(dateRef, 'activities', activity.id);
   
@@ -67,7 +67,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const removeActivity = async (id: string) => {
     try {
       if(user) {
-        await deleteDoc(doc(firestore, 'users', user.uid, 'activities', id));
+        await deleteDoc(doc(firestore, 'users', user.uid, 'dates', today, 'activities', id));
       }
     setTimeout(() => {
     setActivities(prevActivities => 
