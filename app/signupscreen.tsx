@@ -2,18 +2,41 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'expo-router';
+import {firestore} from '@/firebase/firebase'
+import { setDoc, doc } from 'firebase/firestore';
 
-const SignUpScreen: React.FC = () => {
+const setUserTimezone = async (userId: string, timezone: string) => {
+  const userRef = doc(firestore, 'users', userId);
+  await setDoc(userRef, { timezone }, { merge: true });
+};
+
+  const SignUpScreen: React.FC = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const router = useRouter();
   
+    // Function to get the user's timezone
+    const getUserTimezone = () => {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+    };
+
+  // Function to handle user signup
   const handleSignUp = async () => {
     const auth = getAuth();
+    const timezone = getUserTimezone(); // Get the user's timezone
 
     try {
       // Create user with email and password
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Get the user ID
+      const userId = user.uid;
+
+      // Set the user's timezone in Firestore
+      await setUserTimezone(userId, timezone);
+
+      // Navigate to the home page
       router.push('/');
     } catch (error) {
       console.error(error);

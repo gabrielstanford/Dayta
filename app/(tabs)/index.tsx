@@ -12,7 +12,6 @@ import {useAuth} from '@/contexts/AuthContext'
 const { width, height } = Dimensions.get('window');
 const buttonWidth = width/6.25
 
-
 function Journal() {
 
   const { user } = useAuth();
@@ -20,9 +19,9 @@ function Journal() {
 
   useEffect(() => {
     if (user) {
-      console.log('user logged in')
       // Reference to the activities subcollection for the given userId
-      const activitiesRef = collection(firestore, 'users', user.uid, 'activities');
+      const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+      const activitiesRef = collection(firestore, 'users', user.uid, 'dates', today, 'activities');
       // Set up a real-time listener
       const unsubscribe = onSnapshot(activitiesRef, (snapshot) => {
         const userActivities: any[] = [];
@@ -39,13 +38,12 @@ function Journal() {
       return () => unsubscribe();
     }
   }, [user]);
-  console.log('dbActivities: ' + dbActivities)
   
   //toggle the state of the modal
     const [modalVisible, setModalVisible] = useState(false);
     const toggleModal = () => setModalVisible(!modalVisible)
 
-    const { activities, removeActivity } = useAppContext();
+    const { removeActivity } = useAppContext();
 
     const removeActiv = (id: string) => {
         removeActivity(id);

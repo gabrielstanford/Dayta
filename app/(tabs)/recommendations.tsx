@@ -2,11 +2,21 @@ import { StyleSheet, View, Dimensions } from 'react-native';
 import { HelloWave } from '@/components/HelloWave';
 import { ThemedText } from '@/components/ThemedText';
 //import firestore from '@react-native-firebase/firestore'
+import { format } from 'date-fns-tz';
 
 const { width, height } = Dimensions.get('window');
 const buttonWidth = width/6.25
 
+// Function to convert Unix timestamp to local time based on the user's timezone
+const convertToLocalTime = (timestamp: number, timezone: string) => {
+  const date = new Date(timestamp * 1000); // Convert Unix timestamp to JavaScript Date object
+  return format(date, 'yyyy-MM-dd HH:mm:ssXXX', { timeZone: timezone });
+};
+
+//pass in activities, times
+//convert to local time
 export default function Recommendations() {
+
   return (
     <View style={styles.layoutContainer}>
       <View style={styles.titleContainer}>

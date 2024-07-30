@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect, useRef } from 'react';
-import { setDoc, doc, deleteDoc } from 'firebase/firestore';
+import { setDoc, doc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { firestore } from '@/firebase/firebase';
 import { useAuth } from './AuthContext'; // Assume you have a context for auth
 
@@ -38,8 +38,18 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const addActivity = async (activity: Activity) => {
     try {
       if (user) {
-        // Save the activity to Firestore
-        await setDoc(doc(firestore, 'users', user.uid, 'activities', activity.id), activity);
+        const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+        const dateRef = doc(firestore, 'users', user.uid, 'dates', today);
+        const activityRef = doc(dateRef, 'activities', activity.id);
+  
+        // Update or create the date document with a timestamp
+        await setDoc(dateRef, { createdAt: serverTimestamp() }, { merge: true });
+  
+        // Save the activity to the activities subcollection
+        await setDoc(activityRef, {
+          ...activity,
+          createdAt: serverTimestamp(), // Optional: add timestamp to the activity
+        });
       }
   
       setTimeout(() => {
