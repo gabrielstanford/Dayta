@@ -11,7 +11,6 @@ export default function Recommendations() {
     <View style={styles.layoutContainer}>
       <View style={styles.titleContainer}>
         <ThemedText type="titleText">Statistics</ThemedText>
-        <ThemedText type="subtitle">Tailored statistics to give you deep insights into your life!</ThemedText>
       </View>
       <View style={styles.chartContainer}>
           <DashboardChart />

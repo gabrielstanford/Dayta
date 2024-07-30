@@ -21,7 +21,6 @@ export default function Recommendations() {
     <View style={styles.layoutContainer}>
       <View style={styles.titleContainer}>
         <ThemedText type="titleText">Recommendations</ThemedText>
-        <ThemedText type="subtitle">Our personalized collection of ideas for you to make the best of your day!</ThemedText>
       </View>
       <View style={styles.stepContainer}>
         <ThemedText type="journalText">Rec 1: Wake Up 1 Hour Later</ThemedText>

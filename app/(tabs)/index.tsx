@@ -1,4 +1,4 @@
-import { StyleSheet, Pressable, View, Dimensions} from 'react-native';
+import { StyleSheet, Pressable, View, Dimensions, FlatList, Text, TouchableOpacity} from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { useState, useEffect } from 'react';
 import {AntDesign, MaterialIcons} from '@expo/vector-icons';
@@ -11,6 +11,57 @@ import {useAuth} from '@/contexts/AuthContext'
 // Get screen width. This is for more responsive layouts
 const { width, height } = Dimensions.get('window');
 const buttonWidth = width/6.25
+
+const convertUnixToTimeString = (startTime: number, endTime: number): string => {
+  // Create a Date object from the Unix timestamp
+  const date = new Date(startTime * 1000); // Convert seconds to milliseconds
+  const endDate = new Date(endTime * 1000)
+  //this function is a bit confusing, but startTime is always what will be returned; end time is only for
+  //deciding whether to show the AM/PM at the end (takes extra space if both are am/pm)
+  // Get hours and minutes in UTC
+  let hours = date.getUTCHours(); // Use UTC hours to avoid time zone issues
+  let endHours = endDate.getUTCHours();
+  const minutes = date.getUTCMinutes();
+
+  // Determine AM or PM
+  const periodStart = hours < 12 ? 'AM' : 'PM';
+  const periodEnd = endHours < 12 ? 'AM' : 'PM';
+
+  // Convert hours from 24-hour to 12-hour format
+  hours = hours % 12;
+  hours = hours ? hours : 12; // Hour '0' should be '12'
+
+  // Format minutes to always have two digits
+  const formattedMinutes = minutes < 10 ? `0${minutes}` : `${minutes}`;
+  // Construct the formatted time string
+  if(endTime>0 && periodEnd==periodStart)
+  return `${hours}:${formattedMinutes}`;
+  else
+  return `${hours}:${formattedMinutes} ${periodStart}`;
+};
+
+const ActivityItem = ({ activity }: { activity: any }) => {
+  
+  const { removeActivity } = useAppContext();
+
+  const removeActiv = (id: string) => {
+      removeActivity(id);
+  }
+
+  return (
+  
+  <View style={styles.activityContainer}>
+    <View style={styles.timeContainer}>
+      <Text style={styles.timeText}>{convertUnixToTimeString(activity.timeBlock.startTime, activity.timeBlock.endTime)}</Text>
+      <Text style={styles.timeText}> - </Text>
+      <Text style={styles.timeText}>{convertUnixToTimeString(activity.timeBlock.endTime, 0)}</Text>
+    </View>
+    <Text style={styles.activityName}>{activity.button.text}</Text>
+      <Pressable onPress={() => removeActiv(activity.id)}>
+     <MaterialIcons name="delete" size={width/15} color="black" />
+     </Pressable>
+  </View>
+);}
 
 function Journal() {
 
@@ -43,32 +94,6 @@ function Journal() {
     const [modalVisible, setModalVisible] = useState(false);
     const toggleModal = () => setModalVisible(!modalVisible)
 
-    const { removeActivity } = useAppContext();
-
-    const removeActiv = (id: string) => {
-        removeActivity(id);
-    }
-    const convertUnixToTimeString = (unixTimestamp: number): string => {
-      // Create a Date object from the Unix timestamp
-      const date = new Date(unixTimestamp * 1000); // Convert seconds to milliseconds
-    
-      // Get hours and minutes in UTC
-      let hours = date.getUTCHours(); // Use UTC hours to avoid time zone issues
-      const minutes = date.getUTCMinutes();
-    
-      // Determine AM or PM
-      const period = hours < 12 ? 'AM' : 'PM';
-    
-      // Convert hours from 24-hour to 12-hour format
-      hours = hours % 12;
-      hours = hours ? hours : 12; // Hour '0' should be '12'
-    
-      // Format minutes to always have two digits
-      const formattedMinutes = minutes < 10 ? `0${minutes}` : `${minutes}`;
-    
-      // Construct the formatted time string
-      return `${hours}:${formattedMinutes} ${period}`;
-    };
   return (
     
       <View style={styles.layoutContainer}>
@@ -78,20 +103,23 @@ function Journal() {
           <ThemedText type="titleText">My Journal</ThemedText>
         </View>
         {dbActivities ? 
-          dbActivities.map((activity: any) => (
-            <View key={activity.id} style={styles.stepContainer}>
-              <ThemedText type="journalText">{convertUnixToTimeString(activity.timeBlock.startTime)}</ThemedText>
-              <ThemedText type="journalText">{activity.button.text}</ThemedText>
-              <Pressable onPress={() => removeActiv(activity.id)}>
-                <MaterialIcons name="delete" size={width/15} color="black" />
-              </Pressable>
-            </View>
-          )) : 
-          <Pressable onPress={toggleModal}>
-            <View style={styles.stepContainer}>  
-              <ThemedText type="journalText">Add Your First Activity For The Day!</ThemedText>
-            </View>
-          </Pressable>}
+        <FlatList 
+        data={dbActivities}
+        renderItem={({ item }) => <ActivityItem activity={item} />}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.listContent}
+        />
+          // dbActivities.map((activity: any) => (
+          //   <View key={activity.id} style={styles.stepContainer}>
+          //     <ThemedText type="journalText">{convertUnixToTimeString(activity.timeBlock.startTime)}</ThemedText>
+          //     <ThemedText type="journalText">{activity.button.text}</ThemedText>
+          //     <Pressable onPress={() => removeActiv(activity.id)}>
+          //       <MaterialIcons name="delete" size={width/15} color="black" />
+          //     </Pressable>
+          //   </View>
+          // )) 
+          : 
+          <></>}
         </View>
         <View style={styles.plusButtonContainer}>
           <Pressable onPress={toggleModal}>
@@ -118,13 +146,40 @@ titleContainer: {
   alignItems: 'center',
   padding: 10,
 },
-stepContainer: {
+container: {
+  flex: 1,
+  backgroundColor: '#f0f0f0',
+  paddingTop: 20,
+},
+listContent: {
+  paddingHorizontal: 20,
+},
+activityContainer: {
+  backgroundColor: '#fff',
+  borderRadius: 10,
+  padding: 15,
+  marginVertical: 10,
+  shadowColor: '#000',
+  shadowOpacity: 0.1,
+  shadowRadius: 10,
+  shadowOffset: { width: 0, height: 4 },
   flexDirection: 'row',
-  justifyContent: 'space-between',
-  padding: 8,
-  marginBottom: 10,
-  borderColor: 'bisque',
-  borderWidth: 2
+  alignItems: 'center',
+},
+timeContainer: {
+  flex: 3,
+  flexDirection: 'row',
+  flexWrap: 'nowrap',
+},
+timeText: {
+  fontSize: 13,
+  flexWrap: 'nowrap',
+  color: '#333',
+},
+activityName: {
+  flex: 3,
+  fontSize: 16,
+  fontWeight: 'bold',
 },
 plusButtonContainer: {
     position: 'absolute', // Absolute positioning to overlay everything
@@ -133,6 +188,10 @@ plusButtonContainer: {
     width: buttonWidth
 },
 });
+
+const styles2 = StyleSheet.create({
+
+})
 
 const Index: React.FC = () => {
   return (

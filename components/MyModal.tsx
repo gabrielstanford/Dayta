@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import { Modal, View, Text, StyleSheet, ModalProps, Dimensions, Pressable } from 'react-native';
+import { Modal, View, Text, StyleSheet, ModalProps, Dimensions, Pressable} from 'react-native';
 import {ThemedText} from './ThemedText'
 import {Button} from '@rneui/themed'
 import {useAppContext} from '@/contexts/AppContext'
@@ -78,14 +78,10 @@ interface TimeBlock {
   duration: number;  // Duration in seconds
   endTime: number;   // Unix timestamp
 }
-interface activity {
-  id : string;
-  button: ButtonState;
-  timeBlock: TimeBlock;
-}
+
 const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) => {
 
-  const { activities, addActivity, removeActivity } = useAppContext();
+  const { addActivity, removeActivity } = useAppContext();
   //setting button states dynamically based on past user activities. 
   const [buttonStates, setButtonStates] = useState<ButtonState[]>([
     //this is where you add buttons. it's all configured so you just need to add it here and all will work
