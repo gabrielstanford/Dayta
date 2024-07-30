@@ -9,6 +9,9 @@ import {AntDesign, FontAwesome5, MaterialCommunityIcons, Ionicons, MaterialIcons
 import uuid from 'react-native-uuid';
 import DurationModal from './DurationModal'
 
+//next: add search
+//after: add functionality to change what shows up on quick add based on an array of 9 quick add options that we can pass in
+
 // Define specific types for each icon component
 type AntDesignIcon = typeof AntDesign;
 type FontAwesome5Icon = typeof FontAwesome5;
@@ -83,6 +86,7 @@ interface activity {
 const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) => {
 
   const { activities, addActivity, removeActivity } = useAppContext();
+  //setting button states dynamically based on past user activities. 
   const [buttonStates, setButtonStates] = useState<ButtonState[]>([
     //this is where you add buttons. it's all configured so you just need to add it here and all will work
     //this base of work will make it very easy in the future to add a search component.
@@ -97,29 +101,6 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
     { text: 'Work', iconLibrary: "materialIcons", icon: "work", pressed: false }, //materialicons
   ]);
 
-  const setActivities = (index: number) => {
-    setButtonStates(prevStates => {
-      const newStates = [...prevStates];
-      newStates[index].pressed = !newStates[index].pressed;
-      const currentButton = newStates[index]
-      if(currentButton.pressed) {
-        setTimeout(() => {
-          const activity = {id: uuid.v4() as string, button: newStates[index], timeBlock: {startTime: 5, duration: 6, endTime: 11}};
-          //now send that id to the current button so it knows which activity it's linked to
-          currentButton.id = activity.id;
-          addActivity(activity);
-        }, 0);
-      }
-      else {
-      // Add the pressed activity to context
-        setTimeout(() => {
-          if(currentButton.id) {removeActivity(currentButton.id)}
-        }, 0);
-      }
-      
-      return newStates;
-    });
-  }
   const [durationModalVisible, setDurationModalVisible] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<ButtonState | null>(null);
   const [selectedActivityIndex, setSelectedActivityIndex] = useState<number | null>(null);

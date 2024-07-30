@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, Switch, StyleSheet, Button, Alert, Pressable} from 'react-native';
+import { View, Text, Switch, StyleSheet, Button, Alert, Pressable, Dimensions} from 'react-native';
 import {useLogout} from '@/utils/useLogout'
 import {useRouter} from 'expo-router'
+import {ThemedText} from '@/components/ThemedText'
+
+const { width, height } = Dimensions.get('window');
 
 const Settings = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -24,26 +27,28 @@ const Settings = () => {
   const router = useRouter();
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Settings</Text>
+      <View style={styles.titleContainer}>
+        <ThemedText type="titleText">Settings</ThemedText>
+      </View>
       <View style={styles.settingItem}>
-        <Text style={styles.settingLabel}>Dark Mode</Text>
+        <ThemedText type="journalText" style={styles.settingLabel}>Dark Mode</ThemedText>
         <Switch
           value={isDarkMode}
           onValueChange={handleDarkModeToggle}
         />
       </View>
       <View style={styles.settingItem}>
-        <Text style={styles.settingLabel}>Notifications</Text>
+        <ThemedText type="journalText" style={styles.settingLabel}>Notifications</ThemedText>
         <Switch
           value={notificationsEnabled}
           onValueChange={handleNotificationsToggle}
         />
       </View>
       <View style={styles.settingItem}>
-        <Pressable style={styles.settingLabel} onPress={logout}><Text>Log Out</Text></Pressable>
+        <Pressable style={styles.settingLabel} onPress={logout}><ThemedText type="journalText">Log Out</ThemedText></Pressable>
       </View>
       <View style={styles.settingItem}>
-        <Pressable style={styles.settingLabel} onPress={() => router.push("/info")}><Text>User Info</Text></Pressable>
+        <Pressable style={styles.settingLabel} onPress={() => router.push("/info")}><ThemedText type="journalText">User Info</ThemedText></Pressable>
       </View>
       <Button title="Save" onPress={handleSave} />
     </View>
@@ -53,13 +58,17 @@ const Settings = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#fff', // Change based on dark mode state
+    paddingTop: height/18,
+    backgroundColor: 'darkcyan',
+    position: 'relative', // Container must be relative for absolute positioning of child
+  },
+  titleContainer: {
+    alignItems: 'center',
+    padding: 10
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
   },
   settingItem: {
     flexDirection: 'row',

@@ -14,11 +14,11 @@ export default function DashboardChart() {
     ]
   };
   const chartConfig = {
-    backgroundGradientFrom: "#1E2923",
-    backgroundGradientFromOpacity: 0,
-    backgroundGradientTo: "#08130D",
-    backgroundGradientToOpacity: 0.5,
-    color: (opacity = 1) => `rgba(26, 255, 146, ${opacity})`,
+    backgroundGradientFrom: "#093D3B", // Darker shade of dark cyan
+    backgroundGradientFromOpacity: 0.5,
+    backgroundGradientTo: "#0B4A48", // Slightly lighter shade of dark cyan
+    backgroundGradientToOpacity: 0.8,
+    color: (opacity = 1) => `rgba(245, 222, 179, ${opacity})`, // Bisque color for chart elements
     strokeWidth: 2, // optional, default 3
     barPercentage: 0.5,
     useShadowColorFromDataset: false // optional
@@ -28,11 +28,11 @@ export default function DashboardChart() {
     return(
         <BarChart
         data={data}
-        width={screenWidth - 20} // Adjust padding as needed
+        width={screenWidth} // Adjust padding as needed
         height={220}
         yAxisLabel="$"
         chartConfig={chartConfig}
-        verticalLabelRotation={30}
+        verticalLabelRotation={10}
         yAxisSuffix=""
       />
     );

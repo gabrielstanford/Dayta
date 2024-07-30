@@ -10,8 +10,8 @@ export default function Recommendations() {
   return (
     <View style={styles.layoutContainer}>
       <View style={styles.titleContainer}>
-        <ThemedText type="title">Recommendations</ThemedText>
-        <ThemedText type="subtitle">Our personalized collection of ideas for you to make the best of your day!</ThemedText>
+        <ThemedText type="titleText">Statistics</ThemedText>
+        <ThemedText type="subtitle">Tailored statistics to give you deep insights into your life!</ThemedText>
       </View>
       <View style={styles.chartContainer}>
           <DashboardChart />
@@ -36,6 +36,6 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   chartContainer: {
-
+    width: width
   },
 });
