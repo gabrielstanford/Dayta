@@ -10,6 +10,7 @@ import {AntDesign, FontAwesome5, MaterialCommunityIcons, Ionicons, MaterialIcons
 import uuid from 'react-native-uuid';
 import DurationModal from './DurationModal'
 import ActivitySearch from './SearchBar'
+import {ShuffledActivityButtons} from '../Data/ActivityButtons'
 
 //next: add search
 //after: add functionality to change what shows up on quick add based on an array of 9 quick add options that we can pass in
@@ -67,6 +68,7 @@ type ButtonState = {
   text: string;
   iconLibrary: string;
   icon: string;
+  keywords: string[];
   pressed: boolean;
   id?: string;
 };
@@ -85,31 +87,20 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
 
   const { addActivity, removeActivity } = useAppContext();
   //setting button states dynamically based on past user activities. 
-  const [buttonStates, setButtonStates] = useState<ButtonState[]>([
-    //this is where you add buttons. it's all configured so you just need to add it here and all will work
-    //this base of work will make it very easy in the future to add a search component.
-    { text: 'Walk', iconLibrary: "fontAwesome5", icon: "walking", pressed: false }, //fontawesome
-    { text: 'Breakfast', iconLibrary: "materialCommunityIcons", icon: "food-variant", pressed: false }, //community
-    { text: 'Coffee', iconLibrary: "materialCommunityIcons", icon: "coffee", pressed: false }, //community
-    { text: 'Gym', iconLibrary: "materialCommunityIcons", icon: "weight-lifter", pressed: false }, //community
-    { text: 'Scrolling', iconLibrary: "fontAwesome5", icon: "tiktok", pressed: false }, //fontawesome5
-    { text: 'Driving', iconLibrary: "antDesign", icon: "car", pressed: false }, //antdesign
-    { text: 'School', iconLibrary: "ionicons", icon: "school", pressed: false }, //ionicons
-    { text: 'Relaxation', iconLibrary: "fontAwesome5", icon: "umbrella-beach", pressed: false}, //fontawesome
-    { text: 'Work', iconLibrary: "materialIcons", icon: "work", pressed: false }, //materialicons
-  ]);
+  const [buttonStates, setButtonStates] = useState<ButtonState[]>(ShuffledActivityButtons.slice(0, 9));
 
   const [durationModalVisible, setDurationModalVisible] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<ButtonState | null>(null);
   const [selectedActivityIndex, setSelectedActivityIndex] = useState<number | null>(null);
-
-  const handlePress = (index: number) => {
-
+  const [isButton, setIsButton] = useState<boolean>(true)
+  const handlePress = (text: string) => {
+    console.log("pressed button, text: " + text)
+    const foundIndex = buttonStates.findIndex(item => item.text === text);
     //add a pop-up modal requesting duration
-      const activity = { ...buttonStates[index] };
-
+    if(foundIndex!==-1) {
+      const activity = { ...buttonStates[foundIndex] };
       if(activity.pressed) {
-        buttonStates[index].pressed=false
+        buttonStates[foundIndex].pressed=false
         setTimeout(() => {
           if(activity.id) {removeActivity(activity.id as string)}
         }, 0);
@@ -117,12 +108,22 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
       else {
         setSelectedActivity(activity);
         //note index is the index of the buttons, which indicates the activity it points it
-        setSelectedActivityIndex(index);
+        setSelectedActivityIndex(foundIndex);
         setDurationModalVisible(true);
         //if the activity was already pressed, change logic to unclick it (no button popup)
       }
+    }
+    else {
+      setIsButton(false)
+      const activity = ShuffledActivityButtons.find(item => item.text===text)
+      if(activity)
+      setSelectedActivity(activity);
+      setDurationModalVisible(true);
+      
+    }
   };
     const handleDurationSubmit = (block: TimeBlock) => {
+      if(isButton) {
       if (selectedActivity && selectedActivityIndex !== null) {
       setButtonStates(prevStates => {
         const newStates = [...prevStates];
@@ -137,8 +138,22 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
         
         return newStates;
       });
+    }
+    }
+    else {
+      setTimeout(() => {
+        if(selectedActivity) {
+        selectedActivity.id="notimportant"
+        const activity = {id: uuid.v4() as string, button: selectedActivity as ButtonState, timeBlock: block};
+        addActivity(activity);
+        }
+        else {
+          console.log("no selected activity")
+        }
+      }, 0);
+    }
       setDurationModalVisible(!durationModalVisible);
-      }
+
     }
     // Define rows for grid layout
     const rows = [
@@ -157,7 +172,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
               <View key={buttonIndex} style={styles.addButtonContainer}>
                 <Pressable
                   style={styles.quickAddButton}
-                  onPress={() => handlePress(rowIndex * 3 + buttonIndex)}
+                  onPress={() => handlePress(button.text)}
                 >
                   <IconComponent
                     name={button.icon}
@@ -212,7 +227,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
           {renderButtons()}
         </View>
         <View style={styles.searchContainer}>
-            <ActivitySearch />
+            <ActivitySearch onclick={handlePress}/>
         </View>
       </View>
       <View>

@@ -109,15 +109,6 @@ function Journal() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
         />
-          // dbActivities.map((activity: any) => (
-          //   <View key={activity.id} style={styles.stepContainer}>
-          //     <ThemedText type="journalText">{convertUnixToTimeString(activity.timeBlock.startTime)}</ThemedText>
-          //     <ThemedText type="journalText">{activity.button.text}</ThemedText>
-          //     <Pressable onPress={() => removeActiv(activity.id)}>
-          //       <MaterialIcons name="delete" size={width/15} color="black" />
-          //     </Pressable>
-          //   </View>
-          // )) 
           : 
           <></>}
         </View>

@@ -1,31 +1,30 @@
 // ActivitySearch.tsx
 import React, { useState } from 'react';
-import { View, FlatList, Text, StyleSheet } from 'react-native';
+import { View, FlatList, Text, StyleSheet, Pressable } from 'react-native';
 import { SearchBar } from '@rneui/themed';
+import {FlippedActivityButtons} from '@/Data/ActivityButtons'
 
-interface Activity {
-  id: number;
-  name: string;
-  keywords: string[];
+type ButtonState = {
+  text: string;
+  iconLibrary: string;
+  icon: string;
+  pressed: boolean;
+  id?: string;
+};
+interface SearchProps  {
+  onclick: (text: string) => void
 }
-
-const activities: Activity[] = [
-  { id: 1, name: 'Run', keywords: ['jog', 'sprint', 'dash'] },
-  { id: 2, name: 'Walk', keywords: ['stroll', 'amble', 'saunter'] },
-  // more activities...
-];
-
-const ActivitySearch: React.FC = () => {
+const ActivitySearch: React.FC<SearchProps> = ({onclick}) => {
   const [query, setQuery] = useState<string>('');
-  const [results, setResults] = useState<Activity[]>(activities);
+  const [results, setResults] = useState<ButtonState[]>(FlippedActivityButtons);
 
   const handleSearch = (text: string) => {
     setQuery(text);
     if (text.trim() === '') {
-      setResults(activities);
+      setResults(FlippedActivityButtons);
     } else {
-      const filteredResults = activities.filter(activity =>
-        activity.name.toLowerCase().includes(text.toLowerCase()) ||
+      const filteredResults = FlippedActivityButtons.filter(activity =>
+        activity.text.toLowerCase().includes(text.toLowerCase()) ||
         activity.keywords.some(keyword => keyword.toLowerCase().includes(text.toLowerCase()))
       );
       setResults(filteredResults);
@@ -34,7 +33,7 @@ const ActivitySearch: React.FC = () => {
 
   const clearSearch = () => {
     setQuery('');
-    setResults(activities);
+    setResults(FlippedActivityButtons);
   };
 
   return (
@@ -52,8 +51,8 @@ const ActivitySearch: React.FC = () => {
       />
       <FlatList
         data={results}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <Text style={styles.resultText}>{item.name}</Text>}
+        keyExtractor={(item) => item.text}
+        renderItem={({ item }) => <Pressable onPress={() => onclick(item.text)}><Text style={styles.resultText}>{item.text}</Text></Pressable>}
       />
     </View>
   );
@@ -62,10 +61,7 @@ const ActivitySearch: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 40,
     backgroundColor: '#f5f5f5',
-    borderWidth: 3,
-    borderColor: 'yellow'
   },
   searchBarContainer: {
     backgroundColor: '#f5f5f5',
@@ -79,6 +75,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   resultText: {
+    backgroundColor: '#f5f5f5',
     padding: 15,
     fontSize: 16,
     borderBottomWidth: 1,

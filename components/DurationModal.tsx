@@ -1,9 +1,13 @@
-import {ModalProps, Modal, View, StyleSheet, Dimensions, Text, TouchableWithoutFeedback} from 'react-native'
+import {ModalProps, Modal, View, StyleSheet, Dimensions, Text, TouchableWithoutFeedback, Platform} from 'react-native'
 import {ThemedText} from './ThemedText'
 import {Button} from '@rneui/themed'
 import TimeDropdown from './TimeDropdown'
-import {useState} from 'react'
+import {useState, useEffect} from 'react'
 import Slider from '@react-native-community/slider';
+import {useAuth} from '@/contexts/AuthContext'
+import { getDoc, doc } from 'firebase/firestore';
+import {firestore} from '@/firebase/firebase'
+import { format, fromZonedTime, toZonedTime } from 'date-fns-tz';
 
 const {width, height} = Dimensions.get("window");
 interface TimeBlock {
@@ -32,6 +36,7 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
   const [selectedMinute, setSelectedMinute] = useState("00");
   const [selectedPeriod, setSelectedPeriod] = useState("AM");
   const [duration, setDuration] = useState(0);
+  const {user} = useAuth();
 
   const handleHourChange = (hour: string) => {
     setSelectedHour(hour);
@@ -44,8 +49,71 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
   const handlePeriodChange = (period: string) => {
     setSelectedPeriod(period);
   };
+  const getUserTimezone = async (userId: string): Promise<string> => {
+    const userRef = doc(firestore, 'users', userId);
+    const docSnap = await getDoc(userRef);
+    if (docSnap.exists()) {
+      return docSnap.data()?.timezone || 'UTC'; // Default to 'UTC' if timezone is not set
+    }
+    throw new Error('User not found');
+  };
+
+  async function processUserTimezone(unixTime: Promise<number>): Promise<number> {
+    try {
+      // Fetch the user's time zone
+      if(user) {
+      const userTimeZone: string = await getUserTimezone(user.uid);
+  
+      // Unix timestamp representing the local time chosen by the user
+      const userSelectedTime: number = 1690785600; // Example timestamp
+  
+      // Convert Unix timestamp to a Date object in UTC
+      const utcDate: Date = new Date(userSelectedTime * 1000);
+  
+      // Convert the UTC date to the time in the user's time zone
+      const zonedDate: Date = toZonedTime(utcDate, userTimeZone);
+      // Convert the UTC Date object to Unix timestamp (seconds since epoch)
+      const unixTimestamp: number = Math.floor(zonedDate.getTime() / 1000);
+      console.log(`Local Time in User's Time Zone: ${zonedDate.toISOString()}`);
+      return unixTimestamp
+      }
+      else {
+        return unixTime
+      }
+    } catch (error) {
+      console.error('Error fetching user time zone:', error);
+      throw error;
+    }
+  }
+  async function calculateEndTime(startTimeUnix: Promise<number>, durationSeconds: number): Promise<number> {
+    try {
+      // Await the result from processUserTimezone
+      const zonedUnix = await processUserTimezone(startTimeUnix);
+      
+      // Calculate end time
+      const endTimeUnix = zonedUnix + durationSeconds;
+      return endTimeUnix;
+    } catch (error) {
+      console.error('Error processing user time zone:', error);
+      throw error; // Rethrow or handle as needed
+    }
+  }
+  
+  
+  const convertToLocalTime = (timestamp: number, timezone: string) => {
+    const date = new Date(timestamp * 1000); // Convert Unix timestamp to JavaScript Date object
+    return format(date, 'yyyy-MM-dd HH:mm:ssXXX', { timeZone: timezone });
+  };
+  
 
   const generateTimeString = () => {
+    //const localTime = 
+    if (user) {
+      const timeZone=getUserTimezone(user.uid)
+      console.log(timeZone)
+      console.log()
+    }
+    
     const timeString = selectedHour + ":" + selectedMinute + " " + selectedPeriod
     console.log(timeString)
     return timeString
@@ -79,7 +147,11 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
     function createTimeBlock(startTime: string, durationMinutes: number): TimeBlock {
       const startTimeUnix = convertTimeToUnix(startTime); // Convert start time to Unix timestamp
       const durationSeconds = convertDurationToSeconds(durationMinutes); // Convert duration to seconds
-      const endTimeUnix = startTimeUnix + durationSeconds; // Calculate end time
+      const utcDate = new Date(startTimeUnix * 1000);
+    // Convert the UTC date to the time in the user's time zone
+      const zonedUnix = processUserTimezone(startTimeUnix)
+      //change start time to locally converted unix
+      const endTimeUnix = calculateEndTime(zonedUnix, durationSeconds); // Calculate end time
     
       return {
         startTime: startTimeUnix,
@@ -91,7 +163,7 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
       const hours = Math.floor(minutes / 60);
       const remainingMinutes = minutes % 60;
     
-      return `${hours}h ${remainingMinutes}m`;   
+      return `${hours}h ${remainingMinutes}m`; 
     
     }
 
@@ -110,7 +182,7 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
                     <ThemedText type="title"> Start Time</ThemedText>
                   </View>
                   <View style={styles.timeDropdown}>
-                    <View style={styles.dropdownContainer}>
+                    <View style={Platform.OS === 'ios' ? styles.dropdownContainer : androidCustom.dropdownContainer}>
                       <TimeDropdown
                       selectedHour={selectedHour}
                       selectedMinute={selectedMinute}
@@ -174,11 +246,9 @@ const styles = StyleSheet.create({
       timeDropdown: {
 
       },
-      subtitleContainer: {
 
-      },
       dropdownContainer: {
-        height: 200, // Adjust this value as needed
+        height: height/4, // Adjust this value as needed
         width: '100%', // Or a fixed width if required
         overflow: 'hidden', // Ensures dropdown content does not spill outside
         padding: 10, // Optional padding
@@ -199,4 +269,12 @@ const styles = StyleSheet.create({
       }
 })
 
+const androidCustom = StyleSheet.create({
+  dropdownContainer: {
+    height: height/6, // Adjust this value as needed
+    width: '100%', // Or a fixed width if required
+    overflow: 'hidden', // Ensures dropdown content does not spill outside
+    padding: 10, // Optional padding
+  },
+})
 export default DurationModal;
