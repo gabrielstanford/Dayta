@@ -155,10 +155,11 @@ listContent: {
   paddingHorizontal: 20,
 },
 activityContainer: {
+  flex: 1,
   backgroundColor: '#fff',
   borderRadius: 10,
   padding: 15,
-  marginVertical: 10,
+  marginTop: 10,
   shadowColor: '#000',
   shadowOpacity: 0.1,
   shadowRadius: 10,

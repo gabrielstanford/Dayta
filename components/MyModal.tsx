@@ -5,9 +5,11 @@ import {Button} from '@rneui/themed'
 import {useAppContext} from '@/contexts/AppContext'
 const {width, height} = Dimensions.get("window");
 const buttonWidth = width/5;
+const titleWidth = width/2;
 import {AntDesign, FontAwesome5, MaterialCommunityIcons, Ionicons, MaterialIcons} from '@expo/vector-icons';
 import uuid from 'react-native-uuid';
 import DurationModal from './DurationModal'
+import ActivitySearch from './SearchBar'
 
 //next: add search
 //after: add functionality to change what shows up on quick add based on an array of 9 quick add options that we can pass in
@@ -198,14 +200,19 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
       {...modalProps}
     >
       <View style={styles.modalOverlay}>
-        <View style={styles.titleContainer}>
-          <ThemedText type="titleText">Quick Add</ThemedText>
+        <View style={styles.headerSection}>
+          <View style={styles.buttonContainer}>
+            <Button buttonStyle={styles.closeButton} color="secondary" title="Close" onPress={() => closeModal()} />
+          </View>
+          <View style={styles.titleContainer}>
+            <ThemedText type="titleText">Quick Add</ThemedText>
+          </View>
         </View>
         <View style={styles.quickAddContainer}>
           {renderButtons()}
         </View>
-        <View style={styles.buttonContainer}>
-          <Button buttonStyle={styles.closeButton} color="secondary" title="Close" onPress={() => closeModal()} />
+        <View style={styles.searchContainer}>
+            <ActivitySearch />
         </View>
       </View>
       <View>
@@ -220,19 +227,37 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'darkcyan',
     paddingTop: height/18,
-    position: 'relative',
+    position: 'relative'
+  },
+    headerSection: {
+      flex: 1,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      position: 'relative'
+    },
+      //close button
+  buttonContainer: {
+    flex: 1,
+  },
+  closeButton: {
+    width: buttonWidth,
   },
    titleContainer: {
+    flex: 1,
+    width: titleWidth,
+    position: 'absolute',
     alignItems: 'center',
-    padding: 10,
+    left: (width / 2) - (titleWidth / 2), // Center horizontally more precisely
   },
-  quickAddContainer: {
-    paddingTop: 15,
 
+  quickAddContainer: {
+    flex: 7,
+    alignItems: 'center',
   },
   quickAddRow: {
+    flex: 1,
+    width: width,
     flexDirection: 'row',
-    margin: 15,
     justifyContent: 'space-around',
   },
 
@@ -242,22 +267,11 @@ const styles = StyleSheet.create({
   quickAddButton: {
     width: buttonWidth,
   },
-  buttonPressed: {
-    width: buttonWidth,
-    backgroundColor: 'black',
-  },
   durationModal: {
     flex: 1
   },
-  //close button
-  buttonContainer: {
-    position: 'absolute', // Absolute positioning to overlay everything
-    bottom: height/7, // Space from the bottom of the container
-    left: (width / 2) - (buttonWidth / 2), // Center horizontally more precisely
-    width: buttonWidth
-  },
-  closeButton: {
-    width: buttonWidth,
+  searchContainer: {
+    flex: 5
   },
 });
 
