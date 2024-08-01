@@ -7,7 +7,6 @@ import Slider from '@react-native-community/slider';
 import {useAuth} from '@/contexts/AuthContext'
 import { getDoc, doc } from 'firebase/firestore';
 import {firestore} from '@/firebase/firebase'
-import { format, fromZonedTime, toZonedTime } from 'date-fns-tz';
 
 const {width, height} = Dimensions.get("window");
 interface TimeBlock {
@@ -58,54 +57,6 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
     throw new Error('User not found');
   };
 
-  async function processUserTimezone(unixTime: Promise<number>): Promise<number> {
-    try {
-      // Fetch the user's time zone
-      if(user) {
-      const userTimeZone: string = await getUserTimezone(user.uid);
-  
-      // Unix timestamp representing the local time chosen by the user
-      const userSelectedTime: number = 1690785600; // Example timestamp
-  
-      // Convert Unix timestamp to a Date object in UTC
-      const utcDate: Date = new Date(userSelectedTime * 1000);
-  
-      // Convert the UTC date to the time in the user's time zone
-      const zonedDate: Date = toZonedTime(utcDate, userTimeZone);
-      // Convert the UTC Date object to Unix timestamp (seconds since epoch)
-      const unixTimestamp: number = Math.floor(zonedDate.getTime() / 1000);
-      console.log(`Local Time in User's Time Zone: ${zonedDate.toISOString()}`);
-      return unixTimestamp
-      }
-      else {
-        return unixTime
-      }
-    } catch (error) {
-      console.error('Error fetching user time zone:', error);
-      throw error;
-    }
-  }
-  async function calculateEndTime(startTimeUnix: Promise<number>, durationSeconds: number): Promise<number> {
-    try {
-      // Await the result from processUserTimezone
-      const zonedUnix = await processUserTimezone(startTimeUnix);
-      
-      // Calculate end time
-      const endTimeUnix = zonedUnix + durationSeconds;
-      return endTimeUnix;
-    } catch (error) {
-      console.error('Error processing user time zone:', error);
-      throw error; // Rethrow or handle as needed
-    }
-  }
-  
-  
-  const convertToLocalTime = (timestamp: number, timezone: string) => {
-    const date = new Date(timestamp * 1000); // Convert Unix timestamp to JavaScript Date object
-    return format(date, 'yyyy-MM-dd HH:mm:ssXXX', { timeZone: timezone });
-  };
-  
-
   const generateTimeString = () => {
     //const localTime = 
     if (user) {
@@ -148,13 +99,13 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
       const startTimeUnix = convertTimeToUnix(startTime); // Convert start time to Unix timestamp
       const durationSeconds = convertDurationToSeconds(durationMinutes); // Convert duration to seconds
       const utcDate = new Date(startTimeUnix * 1000);
-    // Convert the UTC date to the time in the user's time zone
-      const zonedUnix = processUserTimezone(startTimeUnix)
-      //change start time to locally converted unix
-      const endTimeUnix = calculateEndTime(zonedUnix, durationSeconds); // Calculate end time
-    
+      const offset = utcDate.getTimezoneOffset(); // Time zone offset in minutes
+      const utcZonedTime = new Date(utcDate.getTime() + offset * 60000);
+      const unixTimestamp = Math.floor(utcZonedTime.getTime() / 1000);
+      const endTimeUnix = unixTimestamp + durationSeconds; // Calculate end time
+      console.log(unixTimestamp)
       return {
-        startTime: startTimeUnix,
+        startTime: unixTimestamp,
         duration: durationSeconds,
         endTime: endTimeUnix
       };

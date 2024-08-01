@@ -21,7 +21,7 @@ interface Activity {
 interface AppContextProps {
   activities: Activity[];
   addActivity: (activity: Activity) => void;
-  removeActivity: (id: string) => void;
+  removeActivity: (id: string | null, activ: Activity | null) => void;
 }
 
 interface AppProviderProps {
@@ -34,12 +34,12 @@ const AppContext = createContext<AppContextProps | undefined>(undefined);
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [activities, setActivities] = useState<Activity[]>([]);
   const { user } = useAuth(); // Get the authenticated user from your auth context
-  const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
-  
+
   const addActivity = async (activity: Activity) => {
     try {
       if (user) {
-        const dateRef = doc(firestore, 'users', user.uid, 'dates', today);
+        const startDate = new Date(activity.timeBlock.startTime * 1000).toISOString().split('T')[0];
+        const dateRef = doc(firestore, 'users', user.uid, 'dates', startDate);
         const activityRef = doc(dateRef, 'activities', activity.id);
   
         // Update or create the date document with a timestamp
@@ -64,16 +64,40 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
   };  
 
-  const removeActivity = async (id: string) => {
+  const removeActivity = async (id: string | null, activ: Activity | null) => {
     try {
       if(user) {
-        await deleteDoc(doc(firestore, 'users', user.uid, 'dates', today, 'activities', id));
+        if(id) {
+        const activity = activities.find(act => act.id===id)
+        if(activity) {
+        const startDate = new Date(activity.timeBlock.startTime * 1000).toISOString().split('T')[0];
+        await deleteDoc(doc(firestore, 'users', user.uid, 'dates', startDate, 'activities', id));
+        }
+        setTimeout(() => {
+          setActivities(prevActivities => 
+            prevActivities.filter(act => act.id !== id)
+            
+          );
+          }, 0); // Delay the state update to avoid updating during rendering
       }
-    setTimeout(() => {
-    setActivities(prevActivities => 
-      prevActivities.filter(act => act.id !== id)
-    );
-    }, 0); // Delay the state update to avoid updating during rendering
+      else if(activ ){
+        console.log('Trying to delete ', activ)
+        const startDate = new Date(activ.timeBlock.startTime * 1000).toISOString().split('T')[0];
+        console.log(startDate)
+        await deleteDoc(doc(firestore, 'users', user.uid, 'dates', startDate, 'activities', activ.id));
+
+        setTimeout(() => {
+        // Update state with a filler
+        setActivities(prevActivities => {
+          const filteredActivities = prevActivities.filter(act => act.id !== activ.id);
+          // Add a filler entry to force a re-render
+          return [...filteredActivities, { button: {icon: "car", iconLibrary: "antDesign", id: 'filler-', keywords: ["stroll"], pressed: false, text: "Driving"}, id: "filler2", timeBlock: {duration: 0, endTime: 2, startTime: 3} }];
+        });
+
+          }, 0); // Delay the state update to avoid updating during rendering
+      }
+
+    }
     } catch (error) {
     console.error('Error adding activity to Firestore:', error);
     }

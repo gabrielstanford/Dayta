@@ -7,21 +7,41 @@ import { AppProvider, useAppContext } from '@/contexts/AppContext';
 import { collection, onSnapshot, getDocs } from 'firebase/firestore';
 import {firestore} from '@/firebase/firebase'
 import {useAuth} from '@/contexts/AuthContext'
+import getFilteredActivityRefs from '@/Data/HandleTime'
 
 // Get screen width. This is for more responsive layouts
 const { width, height } = Dimensions.get('window');
 const buttonWidth = width/6.25
 
+interface ButtonState {
+  text: string;
+  pressed: boolean;
+}
+interface TimeBlock {
+  startTime: number,   // Unix timestamp for the start time
+  duration: number,    // Duration in seconds
+  endTime: number      // Unix timestamp for the end time (startTime + duration)
+}
+interface Activity {
+  id: string;
+  button: ButtonState;
+  timeBlock: TimeBlock;
+}
+
 const convertUnixToTimeString = (startTime: number, endTime: number): string => {
   // Create a Date object from the Unix timestamp
   const date = new Date(startTime * 1000); // Convert seconds to milliseconds
   const endDate = new Date(endTime * 1000)
+  //change timezones to convert to local
+  const offset = date.getTimezoneOffset();
+  const zonedUTCStartTime = new Date(date.getTime() - offset * 60000);
+  const zonedUTCEndTime = new Date(endDate.getTime() - offset * 60000);
   //this function is a bit confusing, but startTime is always what will be returned; end time is only for
   //deciding whether to show the AM/PM at the end (takes extra space if both are am/pm)
   // Get hours and minutes in UTC
-  let hours = date.getUTCHours(); // Use UTC hours to avoid time zone issues
-  let endHours = endDate.getUTCHours();
-  const minutes = date.getUTCMinutes();
+  let hours = zonedUTCStartTime.getUTCHours(); // Use UTC hours to avoid time zone issues
+  let endHours = zonedUTCEndTime.getUTCHours();
+  const minutes = zonedUTCStartTime.getUTCMinutes();
 
   // Determine AM or PM
   const periodStart = hours < 12 ? 'AM' : 'PM';
@@ -40,13 +60,12 @@ const convertUnixToTimeString = (startTime: number, endTime: number): string => 
   return `${hours}:${formattedMinutes} ${periodStart}`;
 };
 
-const ActivityItem = ({ activity }: { activity: any }) => {
-  
-  const { removeActivity } = useAppContext();
+interface ActivityItemProps {
+  activity: Activity;
+  onpress: (activity: Activity) => void 
+}
 
-  const removeActiv = (id: string) => {
-      removeActivity(id);
-  }
+const ActivityItem = ({ activity, onpress }: ActivityItemProps) => {
 
   return (
   
@@ -57,7 +76,7 @@ const ActivityItem = ({ activity }: { activity: any }) => {
       <Text style={styles.timeText}>{convertUnixToTimeString(activity.timeBlock.endTime, 0)}</Text>
     </View>
     <Text style={styles.activityName}>{activity.button.text}</Text>
-      <Pressable onPress={() => removeActiv(activity.id)}>
+      <Pressable onPress={() => onpress(activity)}>
      <MaterialIcons name="delete" size={width/15} color="black" />
      </Pressable>
   </View>
@@ -67,28 +86,71 @@ function Journal() {
 
   const { user } = useAuth();
   const [dbActivities, setDbActivities] = useState<any>(null);
+  const [version, setVersion] = useState(0)
+  const { removeActivity } = useAppContext();
+  const remove = (act: Activity) => {
+    removeActivity(null, act);
+    setVersion(prevVersion => prevVersion + 1)
+  }
 
   useEffect(() => {
+    console.log('running journal effect', version);
+    
     if (user) {
-      // Reference to the activities subcollection for the given userId
-      const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
-      const activitiesRef = collection(firestore, 'users', user.uid, 'dates', today, 'activities');
-      // Set up a real-time listener
-      const unsubscribe = onSnapshot(activitiesRef, (snapshot) => {
-        const userActivities: any[] = [];
-        snapshot.forEach((doc) => {
-          userActivities.push({ id: doc.id, ...doc.data() });
+      // Function to get filtered activity references
+      const filtActivities = getFilteredActivityRefs();
+      const activitiesRef1 = collection(firestore, 'users', user.uid, 'dates', filtActivities[0], 'activities');
+      const activitiesRef2 = collection(firestore, 'users', user.uid, 'dates', filtActivities[1], 'activities');
+      
+      // Arrays to hold fetched activities
+      const userActivities1: any[] = [];
+      const userActivities2: any[] = [];
+  
+      // Set up snapshot listeners
+      const unsubscribeFromRef1 = onSnapshot(activitiesRef1, (snapshot1) => {
+        userActivities1.length = 0; // Clear the array
+        snapshot1.forEach((doc) => {
+          userActivities1.push({ id: doc.id, ...doc.data() });
         });
-        userActivities.sort((a, b) => a.timeBlock.startTime - b.timeBlock.startTime);
-        setDbActivities(userActivities);
+        userActivities1.filter(act => act.timeBlock.startTime>filtActivities[3])
+        updateActivities(); // Call updateActivities when data is fetched
       }, (error) => {
-        console.error('Error fetching activities:', error);
+        console.error('Error fetching activities from ref1:', error);
       });
-
-      // Clean up the listener on component unmount
-      return () => unsubscribe();
+  
+      const unsubscribeFromRef2 = onSnapshot(activitiesRef2, (snapshot2) => {
+        userActivities2.length = 0; // Clear the array
+        snapshot2.forEach((doc) => {
+          userActivities2.push({ id: doc.id, ...doc.data() });
+        });
+        userActivities1.filter(act => act.timeBlock.startTime<filtActivities[4])
+        updateActivities(); // Call updateActivities when data is fetched
+      }, (error) => {
+        console.error('Error fetching activities from ref2:', error);
+      });
+  
+      // Function to handle merging and updating state
+      const updateActivities = () => {
+        // Merge arrays
+        const allActivities = [
+          ...userActivities1,
+          ...userActivities2
+        ];
+  
+        // Sort by startTime
+        allActivities.sort((a, b) => a.timeBlock.startTime - b.timeBlock.startTime);
+  
+        // Update state with the sorted activities
+        setDbActivities(allActivities);
+      };
+  
+      // Clean up the listeners when the component unmounts or dependencies change
+      return () => {
+        unsubscribeFromRef1();
+        unsubscribeFromRef2();
+      };
     }
-  }, [user]);
+  }, [user, version]);
   
   //toggle the state of the modal
     const [modalVisible, setModalVisible] = useState(false);
@@ -105,7 +167,7 @@ function Journal() {
         {dbActivities ? 
         <FlatList 
         data={dbActivities}
-        renderItem={({ item }) => <ActivityItem activity={item} />}
+        renderItem={({ item }) => <ActivityItem activity={item} onpress={remove}/>}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
         />

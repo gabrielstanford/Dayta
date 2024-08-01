@@ -102,7 +102,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
       if(activity.pressed) {
         buttonStates[foundIndex].pressed=false
         setTimeout(() => {
-          if(activity.id) {removeActivity(activity.id as string)}
+          if(activity.id) {removeActivity(activity.id as string, null)}
         }, 0);
       }
       else {
