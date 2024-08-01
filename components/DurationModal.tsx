@@ -4,9 +4,7 @@ import {Button} from '@rneui/themed'
 import TimeDropdown from './TimeDropdown'
 import {useState, useEffect} from 'react'
 import Slider from '@react-native-community/slider';
-import {useAuth} from '@/contexts/AuthContext'
-import { getDoc, doc } from 'firebase/firestore';
-import {firestore} from '@/firebase/firebase'
+import {useAppContext} from '@/contexts/AppContext'
 
 const {width, height} = Dimensions.get("window");
 interface TimeBlock {
@@ -30,12 +28,49 @@ interface TimeBlock {
   }
 
 const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onSubmit, onTapOut, activity, ...modalProps }) => {
-    
-  const [selectedHour, setSelectedHour] = useState("08");
-  const [selectedMinute, setSelectedMinute] = useState("00");
+  const unixEndTimeToHMS = (endTime: number) => {
+    const date = new Date(endTime * 1000); // Convert Unix timestamp to utc date
+    const offset = date.getTimezoneOffset(); // Time zone offset in minutes
+    const utcZonedDate = new Date(date.getTime() - offset * 60000);
+    //zone the date
+    let hour = utcZonedDate.getUTCHours();
+    const minute = utcZonedDate.getUTCMinutes();
+    const period = hour >= 12 ? "PM" : "AM";
+  
+    // Convert to 12-hour format and pad with leading zeros if necessary
+    hour = hour % 12;
+    hour = hour ? hour : 12; // Handle the case where hour is 0
+    const hourString = hour < 10 ? `0${hour}` : `${hour}`;
+    const minuteString = minute < 10 ? `0${minute}` : `${minute}`;
+    return [ hourString, minuteString, period ];
+  }
+  const {activities} = useAppContext();
+
+  const [selectedHour, setSelectedHour] = useState("10");
+  const [selectedMinute, setSelectedMinute] = useState("30");
   const [selectedPeriod, setSelectedPeriod] = useState("AM");
-  const [duration, setDuration] = useState(0);
-  const {user} = useAuth();
+  const [hasInitialized, setHasInitialized] = useState(false);
+  if(activities) {
+  const sortedActivities = activities.sort((a, b) => a.timeBlock.startTime - b.timeBlock.startTime);
+  useEffect(() => {
+    if (durationModalVisible) {
+      if (!hasInitialized && sortedActivities.length > 0) {
+        const mostRecentEndTime = unixEndTimeToHMS(
+          sortedActivities[sortedActivities.length-1].timeBlock.endTime
+        );
+        setSelectedHour(mostRecentEndTime[0]);
+        setSelectedMinute(mostRecentEndTime[1]);
+        setSelectedPeriod(mostRecentEndTime[2]);
+        setHasInitialized(true);
+      }
+    } else {
+      // Reset the initialization state when the modal is closed
+      setHasInitialized(false);
+    }
+  }, [durationModalVisible, hasInitialized, sortedActivities]);
+  }
+  //could implement logic here for making this most likely based on the activity
+  const [duration, setDuration] = useState(15);
 
   const handleHourChange = (hour: string) => {
     setSelectedHour(hour);
@@ -47,14 +82,6 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
 
   const handlePeriodChange = (period: string) => {
     setSelectedPeriod(period);
-  };
-  const getUserTimezone = async (userId: string): Promise<string> => {
-    const userRef = doc(firestore, 'users', userId);
-    const docSnap = await getDoc(userRef);
-    if (docSnap.exists()) {
-      return docSnap.data()?.timezone || 'UTC'; // Default to 'UTC' if timezone is not set
-    }
-    throw new Error('User not found');
   };
 
   const generateTimeString = () => {
@@ -92,7 +119,7 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
     function createTimeBlock(startTime: string, durationMinutes: number): TimeBlock {
       const startTimeUnix = convertTimeToUnix(startTime); // Convert start time to Unix timestamp
       const durationSeconds = convertDurationToSeconds(durationMinutes); // Convert duration to seconds
-      const utcDate = new Date(startTimeUnix * 1000);
+      const utcDate = new Date(startTimeUnix * 1000); 
       const offset = utcDate.getTimezoneOffset(); // Time zone offset in minutes
       const utcZonedTime = new Date(utcDate.getTime() + offset * 60000);
       const unixTimestamp = Math.floor(utcZonedTime.getTime() / 1000);
@@ -110,7 +137,6 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
       return `${hours}h ${remainingMinutes}m`; 
     
     }
-
     return(
         <Modal 
         transparent={true}

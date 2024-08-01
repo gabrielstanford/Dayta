@@ -76,14 +76,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         setTimeout(() => {
           setActivities(prevActivities => 
             prevActivities.filter(act => act.id !== id)
-            
           );
           }, 0); // Delay the state update to avoid updating during rendering
       }
       else if(activ ){
-        console.log('Trying to delete ', activ)
         const startDate = new Date(activ.timeBlock.startTime * 1000).toISOString().split('T')[0];
-        console.log(startDate)
         await deleteDoc(doc(firestore, 'users', user.uid, 'dates', startDate, 'activities', activ.id));
 
         setTimeout(() => {

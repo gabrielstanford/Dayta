@@ -49,13 +49,21 @@ function Page() {
   }, [user, activities]); // Dependency array, re-run effect if `user` changes
 
   const activityCounts = countValues(activityText)
+  const entries = Object.entries(activityCounts)
+  entries.sort(([, valueA], [, valueB]) => valueB - valueA);
+  const topEntries = entries.slice(0,4)
+  const sortedDictTop = Object.fromEntries(topEntries);
+  let enoughDataForCommonChart = false;
+  if(topEntries && topEntries[0] && topEntries[0][1]>3) {
+    enoughDataForCommonChart = true;
+  }
   return (
     <View style={styles.layoutContainer}>
       <View style={styles.titleContainer}>
         <ThemedText type="titleText">Statistics</ThemedText>
       </View>
       <View style={styles.chartContainer}>
-          <DashboardChart x={Object.keys(activityCounts)} y={Object.values(activityCounts)}/>
+          {enoughDataForCommonChart ? <DashboardChart x={Object.keys(sortedDictTop)} y={Object.values(sortedDictTop)} /> : <ThemedText type="titleText">We Need More Data! Come Back Later :)</ThemedText>}
       </View>
     </View>
   );
@@ -126,7 +134,7 @@ const getAllActivitiesForUser = async (user: any): Promise<Activity[]> => {
   }
 }
 
-const Recommendations: React.FC = () => {
+const Stats: React.FC = () => {
   return (
     <AppProvider>
       <Page />
@@ -134,4 +142,4 @@ const Recommendations: React.FC = () => {
   );
 };
 
-export default Recommendations;
+export default Stats;

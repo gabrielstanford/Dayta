@@ -112,7 +112,6 @@ function Journal() {
           userActivities1.push({ id: doc.id, ...doc.data() });
         });
         userActivities1 = userActivities1.filter(act => act.timeBlock.startTime>=filtActivities[2])
-        console.log(userActivities1)
         updateActivities(); // Call updateActivities when data is fetched
       }, (error) => {
         console.error('Error fetching activities from ref1:', error);
@@ -123,7 +122,6 @@ function Journal() {
         snapshot2.forEach((doc) => {
           userActivities2.push({ id: doc.id, ...doc.data() });
         });
-        console.log(filtActivities[3])
         userActivities2 = userActivities2.filter(act => act.timeBlock.startTime<=filtActivities[3])
         updateActivities(); // Call updateActivities when data is fetched
       }, (error) => {
