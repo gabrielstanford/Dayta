@@ -11,6 +11,7 @@ import uuid from 'react-native-uuid';
 import DurationModal from './DurationModal'
 import ActivitySearch from './SearchBar'
 import {ShuffledActivityButtons} from '../Data/ActivityButtons'
+import Toast from 'react-native-toast-message'
 
 //next: add search
 //after: add functionality to change what shows up on quick add based on an array of 9 quick add options that we can pass in
@@ -133,6 +134,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
             //now send that id to the current button so it knows which activity it's linked to
             currentButton.id = activity.id;
             addActivity(activity);
+            Toast.show({ type: 'success', text1: 'Added Activity To Journal!' })
           }, 0);
         
         return newStates;
@@ -145,6 +147,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
         selectedActivity.id="notimportant"
         const activity = {id: uuid.v4() as string, button: selectedActivity as ButtonState, timeBlock: block};
         addActivity(activity);
+        Toast.show({ type: 'success', text1: 'Added Activity To Journal!'})
         }
         else {
           console.log("no selected activity")
@@ -232,6 +235,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
       <View>
         <DurationModal style={styles.durationModal} durationModalVisible={durationModalVisible} onSubmit={handleDurationSubmit} onTapOut={() => setDurationModalVisible(false)} activity={selectedActivity as ButtonState}/>
       </View>
+      <Toast />
     </Modal>
   );
 };
