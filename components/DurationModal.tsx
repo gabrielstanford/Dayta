@@ -59,14 +59,8 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
 
   const generateTimeString = () => {
     //const localTime = 
-    if (user) {
-      const timeZone=getUserTimezone(user.uid)
-      console.log(timeZone)
-      console.log()
-    }
     
     const timeString = selectedHour + ":" + selectedMinute + " " + selectedPeriod
-    console.log(timeString)
     return timeString
   }
   
@@ -103,7 +97,6 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
       const utcZonedTime = new Date(utcDate.getTime() + offset * 60000);
       const unixTimestamp = Math.floor(utcZonedTime.getTime() / 1000);
       const endTimeUnix = unixTimestamp + durationSeconds; // Calculate end time
-      console.log(unixTimestamp)
       return {
         startTime: unixTimestamp,
         duration: durationSeconds,

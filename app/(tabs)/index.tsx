@@ -94,7 +94,6 @@ function Journal() {
   }
 
   useEffect(() => {
-    console.log('running journal effect', version);
     
     if (user) {
       // Function to get filtered activity references
@@ -103,8 +102,8 @@ function Journal() {
       const activitiesRef2 = collection(firestore, 'users', user.uid, 'dates', filtActivities[1], 'activities');
       
       // Arrays to hold fetched activities
-      const userActivities1: any[] = [];
-      const userActivities2: any[] = [];
+      let userActivities1: any[] = [];
+      let userActivities2: any[] = [];
   
       // Set up snapshot listeners
       const unsubscribeFromRef1 = onSnapshot(activitiesRef1, (snapshot1) => {
@@ -112,7 +111,8 @@ function Journal() {
         snapshot1.forEach((doc) => {
           userActivities1.push({ id: doc.id, ...doc.data() });
         });
-        userActivities1.filter(act => act.timeBlock.startTime>filtActivities[3])
+        userActivities1 = userActivities1.filter(act => act.timeBlock.startTime>=filtActivities[2])
+        console.log(userActivities1)
         updateActivities(); // Call updateActivities when data is fetched
       }, (error) => {
         console.error('Error fetching activities from ref1:', error);
@@ -123,7 +123,8 @@ function Journal() {
         snapshot2.forEach((doc) => {
           userActivities2.push({ id: doc.id, ...doc.data() });
         });
-        userActivities1.filter(act => act.timeBlock.startTime<filtActivities[4])
+        console.log(filtActivities[3])
+        userActivities2 = userActivities2.filter(act => act.timeBlock.startTime<=filtActivities[3])
         updateActivities(); // Call updateActivities when data is fetched
       }, (error) => {
         console.error('Error fetching activities from ref2:', error);

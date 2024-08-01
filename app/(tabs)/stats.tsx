@@ -8,7 +8,7 @@ const buttonWidth = width/6.25
 import { collection, onSnapshot, getDocs } from 'firebase/firestore';
 import {firestore} from '@/firebase/firebase'
 import {useAuth} from '@/contexts/AuthContext'
-import getFilteredActivityRefs from '@/Data/HandleTime'
+import {useAppContext, AppProvider} from '@/contexts/AppContext'
 
 // Define a type for the counts object
 interface ValueCounts {
@@ -22,70 +22,10 @@ const countValues = (array: string[]): ValueCounts => {
     return acc;
   }, {});
 };
-function Recommendations() {
+function Page() {
   
   const { user } = useAuth();
-  const [dbActivities, setDbActivities] = useState<any>(null);
-  const activities = ['walk', 'coffee', 'chores']
-  const frequency = [1, 1, 5]
-  const [version, setVersion] = useState(0)
- 
-  // useEffect(() => {
-    
-  //   if (user) {
-  //     const filtActivities = getFilteredActivityRefs();
-  //     const activitiesRef1 = collection(firestore, 'users', user.uid, 'dates', filtActivities[0], 'activities');
-  //     const activitiesRef2 = collection(firestore, 'users', user.uid, 'dates', filtActivities[1], 'activities');
-      
-  //     // Arrays to hold fetched activities
-  //     const userActivities1: any[] = [];
-  //     const userActivities2: any[] = [];
-  
-  //     // Set up snapshot listeners
-  //     const unsubscribeFromRef1 = onSnapshot(activitiesRef1, (snapshot1) => {
-  //       userActivities1.length = 0; // Clear the array
-  //       snapshot1.forEach((doc) => {
-  //         userActivities1.push({ id: doc.id, ...doc.data() });
-  //       });
-  //       userActivities1.filter(act => act.timeBlock.startTime>filtActivities[3])
-  //       updateActivities(); // Call updateActivities when data is fetched
-  //     }, (error) => {
-  //       console.error('Error fetching activities from ref1:', error);
-  //     });
-  
-  //     const unsubscribeFromRef2 = onSnapshot(activitiesRef2, (snapshot2) => {
-  //       userActivities2.length = 0; // Clear the array
-  //       snapshot2.forEach((doc) => {
-  //         userActivities2.push({ id: doc.id, ...doc.data() });
-  //       });
-  //       userActivities1.filter(act => act.timeBlock.startTime<filtActivities[4])
-  //       updateActivities(); // Call updateActivities when data is fetched
-  //     }, (error) => {
-  //       console.error('Error fetching activities from ref2:', error);
-  //     });
-  
-  //     // Function to handle merging and updating state
-  //     const updateActivities = () => {
-  //       // Merge arrays
-  //       const allActivities = [
-  //         ...userActivities1,
-  //         ...userActivities2
-  //       ];
-  
-  //       // Sort by startTime
-  //       allActivities.sort((a, b) => a.timeBlock.startTime - b.timeBlock.startTime);
-  
-  //       // Update state with the sorted activities
-  //       setDbActivities(allActivities);
-  //     };
-  
-  //     // Clean up the listeners when the component unmounts or dependencies change
-  //     return () => {
-  //       unsubscribeFromRef1();
-  //       unsubscribeFromRef2();
-  //     };
-  //   }
-  // }, [user, version]);
+  const {activities} = useAppContext()
   
   const [activityText, setActivityText] = useState<string[]>([]);
 
@@ -106,7 +46,7 @@ function Recommendations() {
     };
 
     fetchActivities();
-  }, [user]); // Dependency array, re-run effect if `user` changes
+  }, [user, activities]); // Dependency array, re-run effect if `user` changes
 
   const activityCounts = countValues(activityText)
   return (
@@ -185,5 +125,13 @@ const getAllActivitiesForUser = async (user: any): Promise<Activity[]> => {
     throw error;
   }
 }
+
+const Recommendations: React.FC = () => {
+  return (
+    <AppProvider>
+      <Page />
+    </AppProvider>
+  );
+};
 
 export default Recommendations;

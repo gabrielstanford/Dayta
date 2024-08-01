@@ -94,7 +94,6 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
   const [selectedActivityIndex, setSelectedActivityIndex] = useState<number | null>(null);
   const [isButton, setIsButton] = useState<boolean>(true)
   const handlePress = (text: string) => {
-    console.log("pressed button, text: " + text)
     const foundIndex = buttonStates.findIndex(item => item.text === text);
     //add a pop-up modal requesting duration
     if(foundIndex!==-1) {
