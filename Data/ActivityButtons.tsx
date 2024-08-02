@@ -23,7 +23,7 @@ const ActivityButtons: ButtonState[] = [
     { text: 'Lunch', iconLibrary: "materialCommunityIcons", icon: "food-variant", keywords: ['Eating', 'Meal'], pressed: false },
     { text: 'Dinner', iconLibrary: "materialCommunityIcons", icon: "food-variant", keywords: ['Eating', 'Meal'], pressed: false },
     { text: 'Meal', iconLibrary: "materialCommunityIcons", icon: "food-variant", keywords: ['Eating', 'Breakfast', 'Lunch', 'Dinner', 'Snack'], pressed: false },
-
+    { text: 'Watching Educational Video', iconLibrary: "fontAwesome5", icon: "video", keywords: ['Educational Video', 'Video', 'Watching Video'] , pressed: false },
     //physical
     { text: 'Walk', iconLibrary: "fontAwesome5", icon: "walking", keywords: ['Stroll'], pressed: false },
     { text: 'Gym', iconLibrary: "materialCommunityIcons", icon: "weight-lifter", keywords: ['Exercise', 'Workout'], pressed: false },
@@ -35,6 +35,7 @@ const ActivityButtons: ButtonState[] = [
     { text: 'Showering', iconLibrary: "fontAwesome5", icon: "shower", keywords: ['Shower', 'Water', 'Cleaning'], pressed: false }, 
     { text: 'Taking a Break', iconLibrary: "fontAwesome5", icon: "pause", keywords: ['Break', 'Quick Break', 'Rest', 'Resting', 'Pause', 'Pausing'], pressed: false }, 
     { text: 'Wound Care', iconLibrary: "ionicons", icon: "bandage", keywords: ['Bandade', 'Injury'], pressed: false }, 
+    { text: 'Hygiene/Skin Care', iconLibrary: "fontAwesome5", icon: "smile-beam", keywords: ['Brushing Teeth', 'Tooth Brush', 'Brush', 'Washing Face', 'Face Mask'], pressed: false }, 
 
     //Music
     { text: 'Composing', iconLibrary: "ionicons", icon: "musical-note-sharp", keywords: ['Music'], pressed: false }, 
@@ -64,6 +65,8 @@ const ActivityButtons: ButtonState[] = [
     { text: 'Chores', iconLibrary: "materialIcons", icon: "local-laundry-service", keywords: ['Stroll'], pressed: false }, 
     { text: 'Laying In Bed', iconLibrary: "fontAwesome5", icon: "bed", keywords: ['Scrolling', 'Waking Up'], pressed: false }, 
     { text: 'Preparing a Meal', iconLibrary: "materialCommunityIcons", icon: "chef-hat", keywords: ['Cooking'], pressed: false }, 
+    { text: 'Family Time', iconLibrary: "materialCommunityIcons", icon: "mother-heart", keywords: ['Spending Time With Family', 'Socializing with family', 'Family Social', 'Game Night', 'Talking With parents'], pressed: false }, 
+
 
     { text: 'Journaling', iconLibrary: "ionicons", icon: "journal-sharp", keywords: ['Writing'], pressed: false }
 ]

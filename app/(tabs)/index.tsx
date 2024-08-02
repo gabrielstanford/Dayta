@@ -1,7 +1,7 @@
 import { StyleSheet, Pressable, View, Dimensions, FlatList, Text, TouchableOpacity} from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { useState, useEffect } from 'react';
-import {AntDesign, MaterialIcons} from '@expo/vector-icons';
+import {AntDesign, MaterialIcons, Ionicons} from '@expo/vector-icons';
 import MyModal from '@/components/MyModal'
 import { AppProvider, useAppContext } from '@/contexts/AppContext';
 import { collection, onSnapshot, getDocs } from 'firebase/firestore';
@@ -87,6 +87,7 @@ function Journal() {
   const { user } = useAuth();
   const [dbActivities, setDbActivities] = useState<any>(null);
   const [version, setVersion] = useState(0)
+  const [dateIncrement, setDateIncrement] = useState(0)
   const { removeActivity } = useAppContext();
   const remove = (act: Activity) => {
     removeActivity(null, act);
@@ -97,7 +98,7 @@ function Journal() {
     
     if (user) {
       // Function to get filtered activity references
-      const filtActivities = getFilteredActivityRefs();
+      const filtActivities = getFilteredActivityRefs(dateIncrement);
       const activitiesRef1 = collection(firestore, 'users', user.uid, 'dates', filtActivities[0], 'activities');
       const activitiesRef2 = collection(firestore, 'users', user.uid, 'dates', filtActivities[1], 'activities');
       
@@ -149,7 +150,7 @@ function Journal() {
         unsubscribeFromRef2();
       };
     }
-  }, [user, version]);
+  }, [user, version, dateIncrement]);
   
   //toggle the state of the modal
     const [modalVisible, setModalVisible] = useState(false);
@@ -160,8 +161,16 @@ function Journal() {
       <View style={styles.layoutContainer}>
         <MyModal visible={modalVisible} onClose={toggleModal} />
         <View style={styles.contentContainer}>
-        <View style={styles.titleContainer}>
-          <ThemedText type="titleText">My Journal</ThemedText>
+          <View style={styles.headerContainer}>
+            <View style={styles.titleContainer}>
+              <TouchableOpacity onPress={() => setDateIncrement(dateIncrement-1)}>
+                <Ionicons name="return-up-back" size={25} color="black"/>
+              </TouchableOpacity>
+              <ThemedText type="titleText">My Journal</ThemedText>
+              <TouchableOpacity onPress={() => setDateIncrement(dateIncrement+1)}>
+                <Ionicons name="return-up-forward" size={25} color="black"/>
+              </TouchableOpacity>
+          </View>
         </View>
         {dbActivities ? 
         <FlatList 
@@ -194,7 +203,12 @@ contentContainer: {
   flex: 1,
   paddingBottom: height/11.6, // Space at the bottom to accommodate the button
 },
+headerContainer: {
+  alignItems: 'center',
+  
+},
 titleContainer: {
+  flexDirection: 'row',
   alignItems: 'center',
   padding: 10,
 },
