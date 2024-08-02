@@ -17,7 +17,7 @@ interface SearchProps  {
   onClose: () => void;
   onClick: (text: string) => void;
 }
-const ActivitySearch: React.FC<SearchProps> = ({visible, onClose, onClick}) => {
+const ActivitySearchModal: React.FC<SearchProps> = ({visible, onClose, onClick}) => {
   const [query, setQuery] = useState<string>('');
   const [results, setResults] = useState<ButtonState[]>(FlippedActivityButtons);
 
@@ -136,4 +136,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ActivitySearch;
+export default ActivitySearchModal;

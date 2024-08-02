@@ -9,7 +9,8 @@ const titleWidth = width/2;
 import {AntDesign, FontAwesome5, MaterialCommunityIcons, Ionicons, MaterialIcons} from '@expo/vector-icons';
 import uuid from 'react-native-uuid';
 import DurationModal from './DurationModal'
-import ActivitySearch from './SearchBarModal'
+import MultitaskModal from './MultitaskModal'
+import ActivitySearchModal from './ActivitySearchModal'
 import {ShuffledActivityButtons, useCustomSet} from '@/Data/ActivityButtons'
 import Toast from 'react-native-toast-message'
 
@@ -75,6 +76,10 @@ type ButtonState = {
   id?: string;
 };
 
+interface MultitaskButtons {
+  buttons: ButtonState[]
+}
+
 interface MyModalProps extends ModalProps {
   visible: boolean;
   onClose: () => void;
@@ -96,35 +101,13 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
   }, [finalArray]);
 
   const [searchModalVisible, setSearchModalVisible] = useState<boolean>(false);
+  const [MultitaskModalVisible, setMultitaskModalVisible] = useState<boolean>(false);
   const [durationModalVisible, setDurationModalVisible] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<ButtonState | null>(null);
-  const [selectedActivityIndex, setSelectedActivityIndex] = useState<number | null>(null);
-  const [isButton, setIsButton] = useState<boolean>(true)
+  const [multiActivity, setMultiActivity] = useState<MultitaskButtons | null>(null);
 
   const handlePress = (text: string) => {
-    const foundIndex = buttonStates.findIndex(item => item.text === text);
-    //add a pop-up modal requesting duration
-    if(foundIndex!==-1) {
-      const activity = { ...buttonStates[foundIndex] };
-      if(activity.pressed) {
-        buttonStates[foundIndex].pressed=false
-        setTimeout(() => {
-          if(activity.id) {removeActivity(activity.id as string, null)}
-        }, 0);
-      }
-      else {
-        setSelectedActivity(activity);
-        //note index is the index of the buttons, which indicates the activity it points it
-        setSelectedActivityIndex(foundIndex);
-        if(searchModalVisible) {
-          setSearchModalVisible(false);
-        }
-        setDurationModalVisible(true);
-        //if the activity was already pressed, change logic to unclick it (no button popup)
-      }
-    }
-    else {
-      setIsButton(false)
+
       const activity = ShuffledActivityButtons.find(item => item.text===text)
       if(activity)
       setSelectedActivity(activity);
@@ -133,29 +116,11 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
       }
       setDurationModalVisible(true);
       
-    }
   };
     const handleDurationSubmit = (block: TimeBlock) => {
-      if(isButton) {
-      if (selectedActivity && selectedActivityIndex !== null) {
-      setButtonStates(prevStates => {
-        const newStates = [...prevStates];
-        newStates[selectedActivityIndex].pressed = !newStates[selectedActivityIndex].pressed;
-        const currentButton = newStates[selectedActivityIndex]
-          setTimeout(() => {
-            const activity = {id: uuid.v4() as string, button: newStates[selectedActivityIndex], timeBlock: block};
-            //now send that id to the current button so it knows which activity it's linked to
-            currentButton.id = activity.id;
-            addActivity(activity);
-            Toast.show({ type: 'success', text1: 'Added Activity To Journal!' })
-          }, 0);
-        
-        return newStates;
-      });
-    }
-    }
-    else {
+
       setTimeout(() => {
+        const theActivity = selectedActivity ? selectedActivity : multiActivity
         if(selectedActivity) {
         selectedActivity.id="notimportant"
         const activity = {id: uuid.v4() as string, button: selectedActivity as ButtonState, timeBlock: block};
@@ -166,9 +131,14 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
           console.log("no selected activity")
         }
       }, 0);
-    }
       setDurationModalVisible(!durationModalVisible);
+    }
 
+    const handleMultitaskNext = (texts: string[]) => {
+      console.log(texts)
+      //set activity texts
+      setMultitaskModalVisible(false)
+      setDurationModalVisible(true)
     }
     // Define rows for grid layout
     const rows = [
@@ -192,7 +162,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
                   <IconComponent
                     name={button.icon}
                     size={width / 6.25}
-                    color={button.pressed ? 'black' : 'white'}
+                    color="white"
                   />
                 </TouchableOpacity>
                 <ThemedText type="subtitle">{button.text}</ThemedText>
@@ -202,24 +172,11 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
         </View>
       ));
     };
-    const resetButtonStates = () => {
-      setButtonStates(prevStates =>
-        prevStates.map(button => ({
-          ...button,
-          pressed: false
-        }))
-      );
-    };
+
     const closeModal = () => {
-      resetButtonStates();
       onClose();
     }
 
-    useEffect(() => {
-      if (!visible) {
-        setButtonStates(prevStates => prevStates.map(state => ({ ...state, pressed: false, id: undefined })));
-      }
-    }, [visible]);
     return (
       <Modal
       transparent={false}
@@ -242,8 +199,10 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
         </View>
         <View style={styles.searchContainer}>
           <Button onPress={() => setSearchModalVisible(true)}>Other</Button>
-            <ActivitySearch visible={searchModalVisible} onClick={handlePress} onClose={() => setSearchModalVisible(false)} />
+            <ActivitySearchModal visible={searchModalVisible} onClick={handlePress} onClose={() => setSearchModalVisible(false)} />
             <DurationModal style={styles.durationModal} durationModalVisible={durationModalVisible} onSubmit={handleDurationSubmit} onTapOut={() => setDurationModalVisible(false)} activity={selectedActivity as ButtonState}/>
+          <Button onPress={() => setMultitaskModalVisible(true)}>Multi Tasking</Button>
+          <MultitaskModal style={styles.durationModal} MultitaskModalVisible={MultitaskModalVisible} onNext={handleMultitaskNext} onTapOut={() => setMultitaskModalVisible(false)}/>
 
         </View>
       </View>
