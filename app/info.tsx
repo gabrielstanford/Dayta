@@ -20,17 +20,9 @@ export default function Info() {
     }
   }, [user]);
 
-  const handleSave = () => {
-    if (user) {
-      saveUserData(user.uid, { name: 'John Doe', age: 30 });
-    }
-  };
-  console.log(userData)
-
   return(
     <View style={styles.layoutContainer}>
-      {user && userData ? <ThemedText type="journalText"> Age: {userData.age} {"\n"} Name: {userData.name} {"\n"} Email: {user.email}</ThemedText> : <ThemedText type="journalText">Add "Data" To Firestore</ThemedText>}
-      <ThemedText>Change data... to be implemented for now everyone's john doe</ThemedText>
+      {user && userData ? <ThemedText type="journalText"> Email: {user.email}</ThemedText> : <ThemedText type="journalText">Add "Data" To Firestore</ThemedText>}
     </View>
   );
 }

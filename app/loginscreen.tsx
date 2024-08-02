@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Alert, Text, TouchableOpacity } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/firebase/firebase';
 import { useRouter } from 'expo-router';
@@ -14,10 +14,10 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const router = useRouter();
+
   const handleLogin = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // Navigate to home screen on successful login
       router.push('/');
     } catch (error: any) {
       console.error(error);
@@ -30,6 +30,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
       <TextInput
         style={styles.input}
         placeholder="Email"
+        placeholderTextColor="darkcyan"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
@@ -38,12 +39,17 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
       <TextInput
         style={styles.input}
         placeholder="Password"
+        placeholderTextColor="darkcyan"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
       />
-      <Button title="Login" onPress={handleLogin} />
-      <Button title="Go to Sign Up" onPress={() => router.push('/signupscreen')} />
+      <View style={styles.buttonContainer}>
+        <Button title="Login" onPress={handleLogin} color="mintcream" />
+      </View>
+      <TouchableOpacity style={styles.signUpContainer} onPress={() => router.push('/signupscreen')}>
+        <Text style={styles.signUpText}>Don't have an account? Sign Up</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -52,14 +58,34 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
     paddingHorizontal: 16,
+    backgroundColor: 'darkcyan',
   },
   input: {
-    height: 40,
-    borderColor: 'gray',
+    height: 50,
+    width: '100%',
+    borderColor: 'mintcream',
     borderWidth: 1,
-    marginBottom: 12,
-    paddingHorizontal: 8,
+    borderRadius: 8,
+    marginBottom: 16,
+    paddingHorizontal: 12,
+    color: 'darkcyan',
+    backgroundColor: 'mintcream',
+  },
+  buttonContainer: {
+    marginTop: 12,
+    width: '100%',
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  signUpContainer: {
+    marginTop: 16,
+    alignItems: 'center',
+  },
+  signUpText: {
+    color: 'bisque',
+    fontSize: 16,
   },
 });
 

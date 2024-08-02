@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, Switch, StyleSheet, Button, Alert, Pressable, Dimensions} from 'react-native';
+import { View, Text, Switch, StyleSheet, Alert, Pressable, Dimensions} from 'react-native';
 import {useLogout} from '@/utils/useLogout'
 import {useRouter} from 'expo-router'
 import {ThemedText} from '@/components/ThemedText'
+import {Button} from '@rneui/themed'
 
 const { width, height } = Dimensions.get('window');
 
@@ -45,12 +46,12 @@ const Settings = () => {
         />
       </View>
       <View style={styles.settingItem}>
-        <Pressable style={styles.settingLabel} onPress={logout}><ThemedText type="journalText">Log Out</ThemedText></Pressable>
+        <Button color="secondary" title="User Info" onPress={() => router.push("/info")} />
       </View>
       <View style={styles.settingItem}>
-        <Pressable style={styles.settingLabel} onPress={() => router.push("/info")}><ThemedText type="journalText">User Info</ThemedText></Pressable>
+        <Button color="secondary" title="Log Out" onPress={logout} />
       </View>
-      <Button title="Save" onPress={handleSave} />
+      <Button color="success" title="Save" onPress={handleSave} />
     </View>
   );
 };

@@ -5,6 +5,8 @@ import TimeDropdown from './TimeDropdown'
 import {useState, useEffect} from 'react'
 import Slider from '@react-native-community/slider';
 import {useAppContext} from '@/contexts/AppContext'
+import {useAuth} from '@/contexts/AuthContext'
+import FetchDayActivities from '@/Data/FetchDayActivities'
 
 const {width, height} = Dimensions.get("window");
 interface TimeBlock {
@@ -19,6 +21,16 @@ interface TimeBlock {
     pressed: boolean;
     id?: string;
   };
+  interface TimeBlock {
+    startTime: number,   // Unix timestamp for the start time
+    duration: number,    // Duration in seconds
+    endTime: number      // Unix timestamp for the end time (startTime + duration)
+  }
+  interface Activity {
+    id: string;
+    button: ButtonState;
+    timeBlock: TimeBlock;
+  }
   
   interface DurationModalProps extends ModalProps {
     durationModalVisible: boolean;
@@ -45,13 +57,20 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
     return [ hourString, minuteString, period ];
   }
   const {activities} = useAppContext();
-
+  const {user} = useAuth();
+  const [dbActivities, setDbActivities] = useState<Activity[]>([]);
   const [selectedHour, setSelectedHour] = useState("10");
   const [selectedMinute, setSelectedMinute] = useState("30");
   const [selectedPeriod, setSelectedPeriod] = useState("AM");
   const [hasInitialized, setHasInitialized] = useState(false);
-  if(activities) {
-  const sortedActivities = activities.sort((a, b) => a.timeBlock.startTime - b.timeBlock.startTime);
+
+  useEffect(() => {
+    FetchDayActivities(user, 0, setDbActivities)
+
+  }, [durationModalVisible, hasInitialized, user]);
+
+  if(dbActivities) {
+  const sortedActivities = dbActivities.sort((a, b) => a.timeBlock.startTime - b.timeBlock.startTime);
   useEffect(() => {
     if (durationModalVisible) {
       if (!hasInitialized && sortedActivities.length > 0) {

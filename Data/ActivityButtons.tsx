@@ -65,9 +65,9 @@ const ActivityButtons: ButtonState[] = [
     { text: 'Chores', iconLibrary: "materialIcons", icon: "local-laundry-service", keywords: ['Stroll'], pressed: false }, 
     { text: 'Laying In Bed', iconLibrary: "fontAwesome5", icon: "bed", keywords: ['Scrolling', 'Waking Up'], pressed: false }, 
     { text: 'Preparing a Meal', iconLibrary: "materialCommunityIcons", icon: "chef-hat", keywords: ['Cooking'], pressed: false }, 
-    { text: 'Family Time', iconLibrary: "materialCommunityIcons", icon: "mother-heart", keywords: ['Spending Time With Family', 'Socializing with family', 'Family Social', 'Game Night', 'Talking With parents'], pressed: false }, 
-
-
+    { text: 'Family Time', iconLibrary: "antDesign", icon: "heart", keywords: ['Spending Time With Family', 'Socializing with family', 'Family Social', 'Game Night', 'Talking With parents'], pressed: false }, 
+    { text: 'Helping Family', iconLibrary: "materialCommunityIcons", icon: "mother-heart", keywords: ['Services', 'Performing Services', 'Duties', 'Chores', 'Family Chores', 'Mother'], pressed: false }, 
+    { text: 'Volunteering', iconLibrary: "materialIcons", icon: "volunteer-activism", keywords: ['Services', 'Doing Volunteer Work', 'Work'], pressed: false }, 
     { text: 'Journaling', iconLibrary: "ionicons", icon: "journal-sharp", keywords: ['Writing'], pressed: false }
 ]
 const shuffle = (array: ButtonState[]) => {
