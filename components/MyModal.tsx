@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import { Modal, View, Text, StyleSheet, ModalProps, Dimensions, Pressable} from 'react-native';
+import { Modal, View, Text, StyleSheet, ModalProps, Dimensions, TouchableOpacity} from 'react-native';
 import {ThemedText} from './ThemedText'
 import {Button} from '@rneui/themed'
 import {useAppContext} from '@/contexts/AppContext'
@@ -9,9 +9,10 @@ const titleWidth = width/2;
 import {AntDesign, FontAwesome5, MaterialCommunityIcons, Ionicons, MaterialIcons} from '@expo/vector-icons';
 import uuid from 'react-native-uuid';
 import DurationModal from './DurationModal'
-import ActivitySearch from './SearchBar'
-import {ShuffledActivityButtons} from '../Data/ActivityButtons'
+import ActivitySearch from './SearchBarModal'
+import {ShuffledActivityButtons, useCustomSet} from '../Data/ActivityButtons'
 import Toast from 'react-native-toast-message'
+
 
 //next: add search
 //after: add functionality to change what shows up on quick add based on an array of 9 quick add options that we can pass in
@@ -85,15 +86,21 @@ interface TimeBlock {
 }
 
 const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) => {
-
+  const buttons = useCustomSet();
   const { addActivity, removeActivity } = useAppContext();
   //setting button states dynamically based on past user activities. 
-  const [buttonStates, setButtonStates] = useState<ButtonState[]>(ShuffledActivityButtons.slice(0, 9));
+  const [buttonStates, setButtonStates] = useState<ButtonState[]>([]);
 
+  useEffect(() => {
+    setButtonStates(buttons);
+  }, [buttons]);
+
+  const [searchModalVisible, setSearchModalVisible] = useState<boolean>(false);
   const [durationModalVisible, setDurationModalVisible] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<ButtonState | null>(null);
   const [selectedActivityIndex, setSelectedActivityIndex] = useState<number | null>(null);
   const [isButton, setIsButton] = useState<boolean>(true)
+
   const handlePress = (text: string) => {
     const foundIndex = buttonStates.findIndex(item => item.text === text);
     //add a pop-up modal requesting duration
@@ -109,6 +116,9 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
         setSelectedActivity(activity);
         //note index is the index of the buttons, which indicates the activity it points it
         setSelectedActivityIndex(foundIndex);
+        if(searchModalVisible) {
+          setSearchModalVisible(false);
+        }
         setDurationModalVisible(true);
         //if the activity was already pressed, change logic to unclick it (no button popup)
       }
@@ -118,6 +128,9 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
       const activity = ShuffledActivityButtons.find(item => item.text===text)
       if(activity)
       setSelectedActivity(activity);
+      if(searchModalVisible) {
+        setSearchModalVisible(false);
+      }
       setDurationModalVisible(true);
       
     }
@@ -172,7 +185,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
   
             return (
               <View key={buttonIndex} style={styles.addButtonContainer}>
-                <Pressable
+                <TouchableOpacity
                   style={styles.quickAddButton}
                   onPress={() => handlePress(button.text)}
                 >
@@ -181,7 +194,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
                     size={width / 6.25}
                     color={button.pressed ? 'black' : 'white'}
                   />
-                </Pressable>
+                </TouchableOpacity>
                 <ThemedText type="subtitle">{button.text}</ThemedText>
               </View>
             );
@@ -207,9 +220,8 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
         setButtonStates(prevStates => prevStates.map(state => ({ ...state, pressed: false, id: undefined })));
       }
     }, [visible]);
-  return (
-    
-    <Modal
+    return (
+      <Modal
       transparent={false}
       animationType="slide"
       visible={visible}
@@ -229,68 +241,69 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
           {renderButtons()}
         </View>
         <View style={styles.searchContainer}>
-            <ActivitySearch onclick={handlePress}/>
+          <Button onPress={() => setSearchModalVisible(true)}>Other</Button>
+            <ActivitySearch visible={searchModalVisible} onClick={handlePress} onClose={() => setSearchModalVisible(false)} />
+            <DurationModal style={styles.durationModal} durationModalVisible={durationModalVisible} onSubmit={handleDurationSubmit} onTapOut={() => setDurationModalVisible(false)} activity={selectedActivity as ButtonState}/>
+
         </View>
-      </View>
-      <View>
-        <DurationModal style={styles.durationModal} durationModalVisible={durationModalVisible} onSubmit={handleDurationSubmit} onTapOut={() => setDurationModalVisible(false)} activity={selectedActivity as ButtonState}/>
       </View>
       <Toast />
     </Modal>
-  );
-};
-
-const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'darkcyan',
-    paddingTop: height/18,
-    position: 'relative'
-  },
-    headerSection: {
+    );
+  };
+  
+  const styles = StyleSheet.create({
+    modalOverlay: {
       flex: 1,
-      flexDirection: 'row',
-      justifyContent: 'space-between',
+      backgroundColor: 'darkcyan',
+      paddingTop: height/18,
       position: 'relative'
     },
-      //close button
-  buttonContainer: {
-    flex: 1,
-  },
-  closeButton: {
-    width: buttonWidth,
-  },
-   titleContainer: {
-    flex: 1,
-    width: titleWidth,
-    position: 'absolute',
-    alignItems: 'center',
-    left: (width / 2) - (titleWidth / 2), // Center horizontally more precisely
-  },
-
-  quickAddContainer: {
-    flex: 7,
-    alignItems: 'center',
-  },
-  quickAddRow: {
-    flex: 1,
-    width: width,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-
-  addButtonContainer: {
-
-  },
-  quickAddButton: {
-    width: buttonWidth,
-  },
-  durationModal: {
-    flex: 1
-  },
-  searchContainer: {
-    flex: 5
-  },
-});
+      headerSection: {
+        flex: 1.5,
+        flexDirection: 'row',
+        position: 'relative'
+      },
+        //close button
+    buttonContainer: {
+      flex: 1,
+      padding: 10
+    },
+    closeButton: {
+      width: buttonWidth,
+    },
+     titleContainer: {
+      flex: 1,
+      padding: 10,
+      width: titleWidth,
+      position: 'absolute',
+      alignItems: 'center',
+      left: (width / 2) - (titleWidth / 2), // Center horizontally more precisely
+    },
+  
+    quickAddContainer: {
+      flex: 7,
+      alignItems: 'center',
+    },
+    quickAddRow: {
+      flex: 1,
+      width: width,
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+    },
+  
+    addButtonContainer: {
+  
+    },
+    quickAddButton: {
+      width: buttonWidth,
+    },
+    durationModal: {
+      flex: 1
+    },
+    searchContainer: {
+      flex: 1.5
+    },
+  });
 
 export default MyModal;

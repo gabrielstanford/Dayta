@@ -16,12 +16,11 @@ const TabBarIcon: React.FC<TabBarIconProps> = ({ name, color }) => (
 );
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: 'grey',
         headerShown: false,
       }}
     >

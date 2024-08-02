@@ -1,3 +1,8 @@
+import getAllActivitiesForUser from '@/Data/GetAllActivities'
+import {useEffect, useState} from 'react'
+import {useAuth} from '@/contexts/AuthContext'
+
+
 type ButtonState = {
     text: string;
     iconLibrary: string;
@@ -15,17 +20,29 @@ const ActivityButtons: ButtonState[] = [
     { text: 'Snacking', iconLibrary: "fontAwesome5", icon: "apple-alt", keywords: ['Eating', 'Meal', 'Snack', 'Quick Snack'], pressed: false },
     { text: 'Coffee', iconLibrary: "materialCommunityIcons", icon: "coffee", keywords: ['Cafe', 'Espresso', 'Black Coffee'], pressed: false },
     { text: 'Preparing My Coffee', iconLibrary: "materialIcons", icon: "coffee-maker", keywords: ['Cafe', 'Espresso', 'Espresso Machine', 'Coffee Machine'], pressed: false },
+    { text: 'Lunch', iconLibrary: "materialCommunityIcons", icon: "food-variant", keywords: ['Eating', 'Meal'], pressed: false },
+    { text: 'Dinner', iconLibrary: "materialCommunityIcons", icon: "food-variant", keywords: ['Eating', 'Meal'], pressed: false },
+    { text: 'Meal', iconLibrary: "materialCommunityIcons", icon: "food-variant", keywords: ['Eating', 'Breakfast', 'Lunch', 'Dinner', 'Snack'], pressed: false },
 
     //physical
     { text: 'Walk', iconLibrary: "fontAwesome5", icon: "walking", keywords: ['Stroll'], pressed: false },
     { text: 'Gym', iconLibrary: "materialCommunityIcons", icon: "weight-lifter", keywords: ['Exercise', 'Workout'], pressed: false },
     { text: 'Home Workout', iconLibrary: "materialCommunityIcons", icon: "jump-rope", keywords: ['Working Out', 'Exercise', 'Gym'], pressed: false },
-    { text: 'Home Physical Therapy', iconLibrary: "ionicons", icon: "med-kit", keywords: ['Working Out', 'Exercise', 'Gym', 'Physical Therapy', 'PT', 'Rehab'], pressed: false },
+    { text: 'Home Physical Therapy', iconLibrary: "ionicons", icon: "medkit", keywords: ['Working Out', 'Exercise', 'Gym', 'Physical Therapy', 'PT', 'Rehab'], pressed: false },
     { text: 'Playing a Sport', iconLibrary: "materialIcons", icon: "sports-football", keywords: ['Sport', 'Football', 'Soccer', 'Baseball'], pressed: false }, 
     //relax
     { text: 'Hot Tub', iconLibrary: "fontAwesome5", icon: "hot-tub", keywords: ['Relaxing', 'Jacuzzi', 'Bath', 'Hot Bath'], pressed: false }, 
     { text: 'Showering', iconLibrary: "fontAwesome5", icon: "shower", keywords: ['Shower', 'Water', 'Cleaning'], pressed: false }, 
     { text: 'Taking a Break', iconLibrary: "fontAwesome5", icon: "pause", keywords: ['Break', 'Quick Break', 'Rest', 'Resting', 'Pause', 'Pausing'], pressed: false }, 
+    { text: 'Wound Care', iconLibrary: "ionicons", icon: "bandage", keywords: ['Bandade', 'Injury'], pressed: false }, 
+
+    //Music
+    { text: 'Composing', iconLibrary: "ionicons", icon: "musical-note-sharp", keywords: ['Music'], pressed: false }, 
+    { text: 'Listening To Music', iconLibrary: "fontAwesome5", icon: "music", keywords: ['Stroll'], pressed: false }, 
+    { text: 'Playing an Instrument', iconLibrary: "materialCommunityIcons", icon: "piano", keywords: ['Piano', 'Playing Piano', 'Guitar', 'Plaing Guitar', 'Violin', 'Playing Violin'], pressed: false }, 
+    { text: 'Playing Piano', iconLibrary: "materialCommunityIcons", icon: "piano", keywords: ['Piano'], pressed: false }, 
+    { text: 'Playing Guitar', iconLibrary: "fontAwesome5", icon: "guitar", keywords: ['Guitar'], pressed: false }, 
+
     //
     { text: 'Scrolling', iconLibrary: "fontAwesome5", icon: "tiktok", keywords: ['Stroll'], pressed: false }, 
     { text: 'Driving', iconLibrary: "antDesign", icon: "car", keywords: ['Stroll'], pressed: false }, 
@@ -44,11 +61,10 @@ const ActivityButtons: ButtonState[] = [
     { text: 'Snapchatting', iconLibrary: "fontAwesome5", icon: "snapchat", keywords: ['Responding', 'Snapping', 'Snap', 'Snapchat'], pressed: false }, 
     { text: 'Class', iconLibrary: "materialIcons", icon: "class", keywords: ['Stroll'], pressed: false }, 
     { text: 'Writing', iconLibrary: "materialCommunityIcons", icon: "typewriter", keywords: ['Stroll'], pressed: false }, 
-    { text: 'Listening To Music', iconLibrary: "fontAwesome5", icon: "music", keywords: ['Stroll'], pressed: false }, 
     { text: 'Chores', iconLibrary: "materialIcons", icon: "local-laundry-service", keywords: ['Stroll'], pressed: false }, 
     { text: 'Laying In Bed', iconLibrary: "fontAwesome5", icon: "bed", keywords: ['Scrolling', 'Waking Up'], pressed: false }, 
     { text: 'Preparing a Meal', iconLibrary: "materialCommunityIcons", icon: "chef-hat", keywords: ['Cooking'], pressed: false }, 
-    { text: 'Composing', iconLibrary: "ionicons", icon: "musical-note-sharp", keywords: ['Music'], pressed: false }, 
+
     { text: 'Journaling', iconLibrary: "ionicons", icon: "journal-sharp", keywords: ['Writing'], pressed: false }
 ]
 const shuffle = (array: ButtonState[]) => {
@@ -67,4 +83,54 @@ const flip = (array: ButtonState[]) => {
 const ShuffledActivityButtons = shuffle(ActivityButtons)
 const FlippedActivityButtons = flip(ShuffledActivityButtons)
 
-export {ShuffledActivityButtons, FlippedActivityButtons, ActivityButtons}
+interface ValueCounts {
+  [key: string]: number;
+}
+const countValues = (array: string[]): ValueCounts => {
+  return array.reduce((acc: ValueCounts, value: string) => {
+    acc[value] = (acc[value] || 0) + 1;
+    return acc;
+  }, {});
+};
+const useCustomSet = (): ButtonState[] => {
+  const { user } = useAuth();
+  const [finalArray, setFinalArray] = useState<ButtonState[]>([]);
+
+  useEffect(() => {
+    const fetchActivities = async () => {
+      try {
+        const activities = await getAllActivitiesForUser(user);
+
+        const activityText = activities.map((activity) => activity.button.text);
+        const activityCounts = countValues(activityText);
+        const entries = Object.entries(activityCounts);
+        entries.sort(([, valueA], [, valueB]) => valueB - valueA);
+        const topEntries = entries.slice(0, 9);
+        console.log(topEntries)
+        const sortedDictTop = Object.fromEntries(topEntries);
+        const textKeys = Object.keys(sortedDictTop);
+        const correspondingButtons = ActivityButtons.filter((button) =>
+          textKeys.includes(button.text)
+        );
+
+        let updatedArray: ButtonState[] = [...correspondingButtons];
+        if (updatedArray.length < 9) {
+          const remainingSlots = 9 - updatedArray.length;
+          const additionalButtons = ShuffledActivityButtons.filter(
+            (button) => !textKeys.includes(button.text)
+          ).slice(0, remainingSlots);
+          updatedArray = [...updatedArray, ...additionalButtons];
+        }
+        setFinalArray(updatedArray);
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    };
+
+    fetchActivities();
+  }, [user]);
+
+  return finalArray;
+};
+
+export {useCustomSet, ShuffledActivityButtons, FlippedActivityButtons, ActivityButtons}
