@@ -92,9 +92,10 @@ const countValues = (array: string[]): ValueCounts => {
     return acc;
   }, {});
 };
-const useCustomSet = (): ButtonState[] => {
+const useCustomSet = (): any => {
   const { user } = useAuth();
   const [finalArray, setFinalArray] = useState<ButtonState[]>([]);
+  const [entries, setEntries] = useState<[string, number][]>([])
 
   useEffect(() => {
     const fetchActivities = async () => {
@@ -104,9 +105,9 @@ const useCustomSet = (): ButtonState[] => {
         const activityText = activities.map((activity) => activity.button.text);
         const activityCounts = countValues(activityText);
         const entries = Object.entries(activityCounts);
+        setEntries(entries)
         entries.sort(([, valueA], [, valueB]) => valueB - valueA);
         const topEntries = entries.slice(0, 9);
-        console.log(topEntries)
         const sortedDictTop = Object.fromEntries(topEntries);
         const textKeys = Object.keys(sortedDictTop);
         const correspondingButtons = ActivityButtons.filter((button) =>
@@ -130,7 +131,7 @@ const useCustomSet = (): ButtonState[] => {
     fetchActivities();
   }, [user]);
 
-  return finalArray;
+  return {finalArray, entries};
 };
 
 export {useCustomSet, ShuffledActivityButtons, FlippedActivityButtons, ActivityButtons}

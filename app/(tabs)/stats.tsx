@@ -10,6 +10,7 @@ import {firestore} from '@/firebase/firebase'
 import {useAuth} from '@/contexts/AuthContext'
 import {useAppContext, AppProvider} from '@/contexts/AppContext'
 import getAllActivitiesForUser from '@/Data/GetAllActivities';
+import {ShuffledActivityButtons, useCustomSet} from '@/Data/ActivityButtons'
 
 // Define a type for the counts object
 interface ValueCounts {
@@ -26,36 +27,19 @@ const countValues = (array: string[]): ValueCounts => {
 function Page() {
   
   const { user } = useAuth();
-  const {activities} = useAppContext()
-  
-  const [activityText, setActivityText] = useState<string[]>([]);
+  const {entries} = useCustomSet();
+
+  const [entryState, setEntryState] = useState<[string, number][]>([]);
 
   useEffect(() => {
-    // Use async function inside useEffect
-    const fetchActivities = async () => {
-      try {
-        const activities = await getAllActivitiesForUser(user);
+    setEntryState(entries);
+  }, [entries]);
 
-        // Map the activities to extract text
-        const texts = activities.map(activity => activity.button.text);
-
-        // Update state
-        setActivityText(texts);
-      } catch (error) {
-        console.error("Error:", error);
-      }
-    };
-
-    fetchActivities();
-  }, [user, activities]); // Dependency array, re-run effect if `user` changes
-
-  const activityCounts = countValues(activityText)
-  const entries = Object.entries(activityCounts)
-  entries.sort(([, valueA], [, valueB]) => valueB - valueA);
-  const topEntries = entries.slice(0,4)
+  const topEntries = entries.slice(0, 4);
   const sortedDictTop = Object.fromEntries(topEntries);
   let enoughDataForCommonChart = false;
   if(topEntries && topEntries[0] && topEntries[0][1]>3) {
+    console.log('Enough Data')
     enoughDataForCommonChart = true;
   }
   return (

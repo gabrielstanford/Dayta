@@ -10,7 +10,7 @@ import {AntDesign, FontAwesome5, MaterialCommunityIcons, Ionicons, MaterialIcons
 import uuid from 'react-native-uuid';
 import DurationModal from './DurationModal'
 import ActivitySearch from './SearchBarModal'
-import {ShuffledActivityButtons, useCustomSet} from '../Data/ActivityButtons'
+import {ShuffledActivityButtons, useCustomSet} from '@/Data/ActivityButtons'
 import Toast from 'react-native-toast-message'
 
 
@@ -86,14 +86,14 @@ interface TimeBlock {
 }
 
 const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) => {
-  const buttons = useCustomSet();
+  const {finalArray} = useCustomSet();
   const { addActivity, removeActivity } = useAppContext();
   //setting button states dynamically based on past user activities. 
   const [buttonStates, setButtonStates] = useState<ButtonState[]>([]);
 
   useEffect(() => {
-    setButtonStates(buttons);
-  }, [buttons]);
+    setButtonStates(finalArray);
+  }, [finalArray]);
 
   const [searchModalVisible, setSearchModalVisible] = useState<boolean>(false);
   const [durationModalVisible, setDurationModalVisible] = useState(false);
