@@ -27,6 +27,7 @@ interface Activity {
   id: string;
   button: ButtonState;
   timeBlock: TimeBlock;
+  Multi?: Activity[]
 }
 
 const convertUnixToTimeString = (startTime: number, endTime: number): string => {
@@ -63,24 +64,29 @@ const convertUnixToTimeString = (startTime: number, endTime: number): string => 
 
 interface ActivityItemProps {
   activity: Activity;
-  onpress: (activity: Activity) => void 
+  onRemove: (activity: Activity) => void 
+  onTap: (activity: Activity) => void
 }
 
-const ActivityItem = ({ activity, onpress }: ActivityItemProps) => {
+const ActivityItem = ({ activity, onRemove, onTap }: ActivityItemProps) => {
 
   return (
   
-  <View style={styles.activityContainer}>
-    <View style={styles.timeContainer}>
-      <Text style={styles.timeText}>{convertUnixToTimeString(activity.timeBlock.startTime, activity.timeBlock.endTime)}</Text>
-      <Text style={styles.timeText}> - </Text>
-      <Text style={styles.timeText}>{convertUnixToTimeString(activity.timeBlock.endTime, 0)}</Text>
+    <View style={styles.activityContainer}>
+      <View style={styles.detailsContainer}>
+        <TouchableOpacity onPress={() => onTap(activity)} style={styles.touchableContent}>
+          <View style={styles.timeContainer}>
+            <Text style={styles.timeText}>{convertUnixToTimeString(activity.timeBlock.startTime, activity.timeBlock.endTime)}</Text>
+            <Text style={styles.timeText}> - </Text>
+            <Text style={styles.timeText}>{convertUnixToTimeString(activity.timeBlock.endTime, 0)}</Text>
+          </View>
+          <Text style={styles.activityName}>{activity.button.text}</Text>
+        </TouchableOpacity>
+      </View>
+      <Pressable onPress={() => onRemove(activity)}>
+        <MaterialIcons name="delete" size={width / 15} color="black" />
+      </Pressable>
     </View>
-    <Text style={styles.activityName}>{activity.button.text}</Text>
-      <Pressable onPress={() => onpress(activity)}>
-     <MaterialIcons name="delete" size={width/15} color="black" />
-     </Pressable>
-  </View>
 );}
 
 function Journal() {
@@ -99,6 +105,7 @@ function Journal() {
     FetchDayActivities(user, dateIncrement, setDbActivities)
 
   }, [user, version, dateIncrement]);
+  console.log(dateIncrement)
   
   //toggle the state of the modal
     const [modalVisible, setModalVisible] = useState(false);
@@ -112,6 +119,22 @@ function Journal() {
       // Clean up the timer if the component unmounts
       return () => clearTimeout(timer);
     }, [dbActivities]); // Empty dependency array ensures this runs only on initial render
+
+    const activityTapped = (activity: Activity) => {
+      if(activity.button.text=="Multi Tasking") {
+        if(activity.Multi) {
+        let multiTexts = []
+        for(let i=0; i<activity.Multi.length; i++) {
+          multiTexts[i]=activity.Multi[i].button.text;
+          alert(multiTexts[i])
+        }
+        
+      }
+      }
+      else {
+        alert("will add activity editing functionality soon! For now you can only tap on Multi Tasking Blocks")
+      }
+    }
   return (
     
       <View style={styles.layoutContainer}>
@@ -136,7 +159,7 @@ function Journal() {
         <FlatList 
         ref={flatListRef}
         data={dbActivities}
-        renderItem={({ item }) => <ActivityItem activity={item} onpress={remove}/>}
+        renderItem={({ item }) => <ActivityItem activity={item} onRemove={remove} onTap={activityTapped}/>}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
         />
@@ -197,13 +220,20 @@ activityContainer: {
   flexDirection: 'row',
   alignItems: 'center',
 },
+detailsContainer: {
+  flex: 1, // Allows this section to take up the remaining space
+},
+touchableContent: {
+  flexDirection: 'row',
+  alignItems: 'center',
+},
 timeContainer: {
-  flex: 3,
+  flex: 2.5,
   flexDirection: 'row',
   flexWrap: 'nowrap',
 },
 timeText: {
-  fontSize: 13,
+  fontSize: 14.5,
   flexWrap: 'nowrap',
   color: '#333',
 },

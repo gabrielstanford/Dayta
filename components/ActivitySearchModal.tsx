@@ -56,6 +56,7 @@ const ActivitySearchModal: React.FC<SearchProps> = ({visible, onClose, onClick})
           onChangeText={handleSearch}
           onClear={clearSearch}
           platform="default" // Adjust to your platform, e.g., "ios" or "android"
+          autoFocus={true}
           round
           containerStyle={styles.searchBarContainer}
           inputContainerStyle={styles.searchBarInputContainer}

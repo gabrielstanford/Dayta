@@ -25,7 +25,7 @@ const ActivityButtons: ButtonState[] = [
     { text: 'Meal', iconLibrary: "materialCommunityIcons", icon: "food-variant", keywords: ['Eating', 'Breakfast', 'Lunch', 'Dinner', 'Snack'], pressed: false },
     { text: 'Watching Educational Video', iconLibrary: "fontAwesome5", icon: "video", keywords: ['Educational Video', 'Video', 'Watching Video'] , pressed: false },
     //physical
-    { text: 'Walk', iconLibrary: "fontAwesome5", icon: "walking", keywords: ['Stroll'], pressed: false },
+    { text: 'Walking', iconLibrary: "fontAwesome5", icon: "walking", keywords: ['Stroll'], pressed: false },
     { text: 'Gym', iconLibrary: "materialCommunityIcons", icon: "weight-lifter", keywords: ['Exercise', 'Workout'], pressed: false },
     { text: 'Home Workout', iconLibrary: "materialCommunityIcons", icon: "jump-rope", keywords: ['Working Out', 'Exercise', 'Gym'], pressed: false },
     { text: 'Home Physical Therapy', iconLibrary: "ionicons", icon: "medkit", keywords: ['Working Out', 'Exercise', 'Gym', 'Physical Therapy', 'PT', 'Rehab'], pressed: false },
@@ -48,7 +48,7 @@ const ActivityButtons: ButtonState[] = [
     { text: 'Scrolling', iconLibrary: "fontAwesome5", icon: "tiktok", keywords: ['Stroll'], pressed: false }, 
     { text: 'Driving', iconLibrary: "antDesign", icon: "car", keywords: ['Stroll'], pressed: false }, 
     { text: 'School', iconLibrary: "ionicons", icon: "school", keywords: ['Stroll'], pressed: false }, 
-    { text: 'Relaxation', iconLibrary: "fontAwesome5", icon: "umbrella-beach", keywords: ['Stroll'], pressed: false},
+    { text: 'Relaxing', iconLibrary: "fontAwesome5", icon: "umbrella-beach", keywords: ['Relaxation'], pressed: false},
     { text: 'Working', iconLibrary: "materialIcons", icon: "work", keywords: ['Concentrating', 'Concentration'], pressed: false },
     { text: 'Concentrating', iconLibrary: "materialIcons", icon: "center-focus-strong", keywords: ['Concentration', 'Focus', 'Focusing'], pressed: false },
     { text: 'Reading', iconLibrary: "fontAwesome5", icon: "book", keywords: ['Stroll'], pressed: false }, 

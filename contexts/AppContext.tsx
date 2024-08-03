@@ -16,6 +16,7 @@ interface Activity {
   id: string;
   button: ButtonState;
   timeBlock: TimeBlock;
+  Multi?: Activity[]
 }
 
 interface AppContextProps {
