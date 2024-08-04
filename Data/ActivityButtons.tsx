@@ -36,6 +36,9 @@ const ActivityButtons: ButtonState[] = [
     { text: 'Taking a Break', iconLibrary: "fontAwesome5", icon: "pause", keywords: ['Break', 'Quick Break', 'Rest', 'Resting', 'Pause', 'Pausing'], pressed: false }, 
     { text: 'Wound Care', iconLibrary: "ionicons", icon: "bandage", keywords: ['Bandade', 'Injury'], pressed: false }, 
     { text: 'Hygiene/Skin Care', iconLibrary: "fontAwesome5", icon: "smile-beam", keywords: ['Brushing Teeth', 'Tooth Brush', 'Brush', 'Washing Face', 'Face Mask'], pressed: false }, 
+    { text: 'Briefly Woke Up', iconLibrary: "ionicons", icon: "moon", keywords: ['Awoke', 'Woke Up', 'Fell Back Asleep'], pressed: false }, 
+    { text: 'Woke Up', iconLibrary: "materialIcons", icon: "sunny", keywords: ['Awoke', 'Woke Up', 'Fell Back Asleep'], pressed: false }, 
+    { text: 'Fell Asleep', iconLibrary: "materialCommunityIcons", icon: "sleep", keywords: ['Sleep', 'Asleep', 'Went To Bed', 'Night'], pressed: false }, 
 
     //Music
     { text: 'Composing', iconLibrary: "ionicons", icon: "musical-note-sharp", keywords: ['Music'], pressed: false }, 
@@ -56,6 +59,8 @@ const ActivityButtons: ButtonState[] = [
     { text: 'Shopping', iconLibrary: "materialCommunityIcons", icon: "purse", keywords: ['Stroll'], pressed: false }, 
     { text: 'Watching Show', iconLibrary: "materialCommunityIcons", icon: "netflix", keywords: ['Stroll'], pressed: false }, 
     { text: 'Watching Movie', iconLibrary: "materialIcons", icon: "theaters", keywords: ['Stroll'], pressed: false }, 
+    { text: 'Entering Activities', iconLibrary: "materialCommunityIcons", icon: "clock-digital", keywords: ['Journaling', 'Digital Journaling', 'App'], pressed: false }, 
+
     //social
     { text: 'Socializing', iconLibrary: "fontAwesome5", icon: "user-friends", keywords: ['Stroll'], pressed: false }, 
     { text: 'Partying', iconLibrary: "materialCommunityIcons", icon: "party-popper", keywords: ['Stroll'], pressed: false },
@@ -68,8 +73,13 @@ const ActivityButtons: ButtonState[] = [
     { text: 'Family Time', iconLibrary: "antDesign", icon: "heart", keywords: ['Spending Time With Family', 'Socializing with family', 'Family Social', 'Game Night', 'Talking With parents'], pressed: false }, 
     { text: 'Helping Family', iconLibrary: "materialCommunityIcons", icon: "mother-heart", keywords: ['Services', 'Performing Services', 'Duties', 'Chores', 'Family Chores', 'Mother'], pressed: false }, 
     { text: 'Volunteering', iconLibrary: "materialIcons", icon: "volunteer-activism", keywords: ['Services', 'Doing Volunteer Work', 'Work'], pressed: false }, 
-    { text: 'Journaling', iconLibrary: "ionicons", icon: "journal-sharp", keywords: ['Writing'], pressed: false }
-]
+    { text: 'Journaling', iconLibrary: "ionicons", icon: "journal-sharp", keywords: ['Writing'], pressed: false },
+    { text: 'Getting Ready', iconLibrary: "ionicons", icon: "shirt", keywords: ['Preparing', 'Night Out', 'Make Up', 'Dressing', 'Getting Dressed', 'Putting On Make Up'], pressed: false },
+    { text: 'Outing', iconLibrary: "fontAwesome5", icon: "car", keywords: ['Going Out', 'Eating Out', 'Having Lunch Out', 'Brunch', 'Family Lunch'], pressed: false },
+    { text: 'Driving', iconLibrary: "fontAwesome5", icon: "car", keywords: ['Drive', 'Navigating'], pressed: false },
+
+
+  ]
 const shuffle = (array: ButtonState[]) => {
     for (var i = array.length - 1; i > 0; i--) {
       var j = Math.floor(Math.random() * (i + 1));
@@ -89,6 +99,12 @@ const FlippedActivityButtons = flip(ShuffledActivityButtons)
 interface ValueCounts {
   [key: string]: number;
 }
+// Define the type for the summary result
+interface ActivitySummary {
+  text: string;
+  totalDuration: number;
+}
+
 const countValues = (array: string[]): ValueCounts => {
   return array.reduce((acc: ValueCounts, value: string) => {
     acc[value] = (acc[value] || 0) + 1;
@@ -99,13 +115,29 @@ const useCustomSet = (): any => {
   const { user } = useAuth();
   const [finalArray, setFinalArray] = useState<ButtonState[]>([]);
   const [entries, setEntries] = useState<[string, number][]>([])
-
+  const [durationSummary, setDurationSummary] = useState<ActivitySummary[]>([])
   useEffect(() => {
     const fetchActivities = async () => {
       try {
         const activities = await getAllActivitiesForUser(user);
-
+        
         const activityText = activities.map((activity) => activity.button.text);
+        // Step 1: Group activities by name and sum durations
+        const totalTimePerActivity = activities.reduce<Record<string, number>>((acc, activity) => {
+          if (acc[activity.button.text]) {
+            acc[activity.button.text] += activity.timeBlock.duration/60;
+          } else {
+            acc[activity.button.text] = activity.timeBlock.duration/60;
+          }
+          return acc;
+        }, {});
+        // Step 2: Convert the result into an array of ActivitySummary objects
+        const result: ActivitySummary[] = Object.entries(totalTimePerActivity).map(([text, totalDuration]) => ({
+          text,
+          totalDuration
+        }));
+        setDurationSummary(result)
+        console.log(result)
         const activityCounts = countValues(activityText);
         const entries = Object.entries(activityCounts);
         setEntries(entries)
@@ -126,6 +158,7 @@ const useCustomSet = (): any => {
           updatedArray = [...updatedArray, ...additionalButtons];
         }
         setFinalArray(updatedArray);
+
       } catch (error) {
         console.error('Error:', error);
       }
@@ -134,7 +167,7 @@ const useCustomSet = (): any => {
     fetchActivities();
   }, [user]);
 
-  return {finalArray, entries};
+  return {finalArray, entries, durationSummary};
 };
 
 export {useCustomSet, ShuffledActivityButtons, FlippedActivityButtons, ActivityButtons}

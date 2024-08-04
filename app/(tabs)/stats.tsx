@@ -16,6 +16,11 @@ import {ShuffledActivityButtons, useCustomSet} from '@/Data/ActivityButtons'
 interface ValueCounts {
   [key: string]: number;
 }
+// Define the type for the summary result
+interface ActivitySummary {
+  text: string;
+  totalDuration: number;
+}
 
 // Utility function to count value occurrences
 const countValues = (array: string[]): ValueCounts => {
@@ -27,13 +32,17 @@ const countValues = (array: string[]): ValueCounts => {
 function Page() {
   
   const { user } = useAuth();
-  const {entries} = useCustomSet();
+  const {entries, durationSummary} = useCustomSet();
 
   const [entryState, setEntryState] = useState<[string, number][]>([]);
-
+  const [durationSumState, setDurationSumState] = useState<ActivitySummary[]>([]);
   useEffect(() => {
     setEntryState(entries);
-  }, [entries]);
+    const sortedDescending = durationSummary.sort((a: any, b: any) => a.duration - b.duration)
+    setDurationSumState(sortedDescending)
+   
+    
+  }, [entries, durationSummary]);
 
   const topEntries = entries.slice(0, 4);
   const sortedDictTop = Object.fromEntries(topEntries);
@@ -42,15 +51,20 @@ function Page() {
     console.log('Enough Data')
     enoughDataForCommonChart = true;
   }
+ 
   return (
     <View style={styles.layoutContainer}>
       <View style={styles.titleContainer}>
         <ThemedText type="titleText">Statistics</ThemedText>
       </View>
       <View style={styles.chartContainer}>
+          {enoughDataForCommonChart ? <DashboardChart x={durationSumState.map(activity => activity.text[0])} y={durationSumState.map(activity => activity.totalDuration)} /> : <ThemedText type="titleText">We Need More Data! Come Back Later :)</ThemedText>}
+      </View>
+      <View style={styles.chartContainer}>
           {enoughDataForCommonChart ? <DashboardChart x={Object.keys(sortedDictTop)} y={Object.values(sortedDictTop)} /> : <ThemedText type="titleText">We Need More Data! Come Back Later :)</ThemedText>}
       </View>
     </View>
+    
   );
 }
 

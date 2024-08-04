@@ -9,6 +9,7 @@ import {firestore} from '@/firebase/firebase'
 import {useAuth} from '@/contexts/AuthContext'
 import getFilteredActivityRefs from '@/Data/HandleTime'
 import FetchDayActivities from '@/Data/FetchDayActivities'
+import ActivityDescribeModal from '@/components/ActivityDescribeModal'
 
 // Get screen width. This is for more responsive layouts
 const { width, height } = Dimensions.get('window');
@@ -95,17 +96,17 @@ function Journal() {
   const [dbActivities, setDbActivities] = useState<any>(null);
   const [version, setVersion] = useState(0)
   const [dateIncrement, setDateIncrement] = useState(0)
+  const [activityInfo, setActivityInfo] = useState<string[]>([])
   const { removeActivity } = useAppContext();
   const remove = (act: Activity) => {
     removeActivity(null, act);
     setVersion(prevVersion => prevVersion + 1)
   }
-
+  const [activityDescribeVisible, setActivityDescribeVisible] = useState<boolean>(false);
   useEffect(() => {
     FetchDayActivities(user, dateIncrement, setDbActivities)
 
   }, [user, version, dateIncrement]);
-  console.log(dateIncrement)
   
   //toggle the state of the modal
     const [modalVisible, setModalVisible] = useState(false);
@@ -121,24 +122,25 @@ function Journal() {
     }, [dbActivities]); // Empty dependency array ensures this runs only on initial render
 
     const activityTapped = (activity: Activity) => {
-      if(activity.button.text=="Multi Tasking") {
+      if(activity.button.text=="Multi-Activity") {
         if(activity.Multi) {
         let multiTexts = []
         for(let i=0; i<activity.Multi.length; i++) {
           multiTexts[i]=activity.Multi[i].button.text;
-          alert(multiTexts[i])
         }
-        
+        setActivityInfo(multiTexts)
       }
       }
       else {
-        alert("will add activity editing functionality soon! For now you can only tap on Multi Tasking Blocks")
+        setActivityInfo([activity.button.text])
       }
+      setActivityDescribeVisible(true);
     }
   return (
     
       <View style={styles.layoutContainer}>
         <MyModal visible={modalVisible} onClose={toggleModal} />
+        <ActivityDescribeModal style={styles.durationModal} ActivityDescribeVisible={activityDescribeVisible} Info={activityInfo} onClose={() => setActivityDescribeVisible(false)} onTapOut={() => setActivityDescribeVisible(false)}/>
         <View style={styles.contentContainer}>
           <View style={styles.headerContainer}>
               <TouchableOpacity onPress={() => setDateIncrement(dateIncrement-1)}>
@@ -241,6 +243,9 @@ activityName: {
   flex: 3,
   fontSize: 16,
   fontWeight: 'bold',
+},
+durationModal: {
+  flex: 1
 },
 plusButtonContainer: {
     position: 'absolute', // Absolute positioning to overlay everything

@@ -85,7 +85,7 @@ interface TimeBlock {
   duration: number;  // Duration in seconds
   endTime: number;   // Unix timestamp
 }
-const MultiButton: ButtonState = {text: 'Multi Tasking', iconLibrary: "fontAwesome5", icon: "tasks", keywords: [], pressed: false}
+const MultiButton: ButtonState = {text: 'Multi-Activity', iconLibrary: "fontAwesome5", icon: "tasks", keywords: [], pressed: false}
 
 const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) => {
   const {finalArray} = useCustomSet();
@@ -224,7 +224,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
           <Button onPress={() => setSearchModalVisible(true)}>Other</Button>
             <ActivitySearchModal visible={searchModalVisible} onClick={handlePress} onClose={() => setSearchModalVisible(false)} />
             <DurationModal style={styles.durationModal} durationModalVisible={durationModalVisible} onSubmit={handleDurationSubmit} onTapOut={() => setDurationModalVisible(false)} activity={selectedActivity as ButtonState}/>
-          <Button color="secondary" onPress={() => setMultitaskModalVisible(true)}>Multi Tasking</Button>
+          <Button color="secondary" onPress={() => setMultitaskModalVisible(true)}>Multi-Activity Block</Button>
           <MultitaskModal style={styles.durationModal} MultitaskModalVisible={MultitaskModalVisible} onNext={handleMultitaskNext} onTapOut={() => setMultitaskModalVisible(false)}/>
 
         </View>

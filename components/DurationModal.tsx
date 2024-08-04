@@ -7,6 +7,7 @@ import Slider from '@react-native-community/slider';
 import {useAppContext} from '@/contexts/AppContext'
 import {useAuth} from '@/contexts/AuthContext'
 import FetchDayActivities from '@/Data/FetchDayActivities'
+import TimeInput from './HourPicker'
 
 const {width, height} = Dimensions.get("window");
 interface TimeBlock {
@@ -43,7 +44,7 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
   const unixEndTimeToHMS = (endTime: number) => {
     const date = new Date(endTime * 1000); // Convert Unix timestamp to utc date
     const offset = date.getTimezoneOffset(); // Time zone offset in minutes
-    const utcZonedDate = new Date(date.getTime() - offset * 60000);
+    const utcZonedDate = new Date(date.getTime() - (offset-1) * 60000);
     //zone the date
     let hour = utcZonedDate.getUTCHours();
     const minute = utcZonedDate.getUTCMinutes();
@@ -89,7 +90,12 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
   }, [durationModalVisible, hasInitialized, sortedActivities]);
   }
   //could implement logic here for making this most likely based on the activity
-  const [duration, setDuration] = useState(15);
+  const [durationMinutes, setDurationMinutes] = useState(15)
+  const [durationHours, setDurationHours] = useState(0);
+ 
+  const handleDurationHourChange = (hour: number) => {
+    setDurationHours(hour)
+  }
 
   const handleHourChange = (hour: string) => {
     setSelectedHour(hour);
@@ -102,7 +108,7 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
   const handlePeriodChange = (period: string) => {
     setSelectedPeriod(period);
   };
-
+  
   const generateTimeString = () => {
     //const localTime = 
     
@@ -168,7 +174,7 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
             <TouchableWithoutFeedback>
                 <View style={styles.durationModalContent}>
                   <View style={styles.titleContainer}>
-                    <ThemedText type="title"> Start Time</ThemedText>
+                    <ThemedText type="durationTitle"> Start Time</ThemedText>
                   </View>
                   <View style={styles.timeDropdown}>
                     <View style={Platform.OS === 'ios' ? styles.dropdownContainer : androidCustom.dropdownContainer}>
@@ -183,25 +189,31 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
                     </View>
                   </View>
                 <View style={styles.titleContainer}>
-                  <ThemedText type="title"> Duration: {formatTime(duration)} </ThemedText>
+                  <ThemedText type="durationTitle"> Duration: {formatTime(durationMinutes + durationHours*60)} </ThemedText>
+                </View>
+                <View style={styles.durationContainer}>
+                <View style={styles.hourContainer}>
+                  <Text style={styles.hours}>Hours: </Text>
+                  <TimeInput onHourChange={handleDurationHourChange}/>
                 </View>
                 <View style={styles.slider}>
                   <Text>0</Text>
                   <Slider
                   style={styles.slider}
                   minimumValue={0}
-                  maximumValue={120}
+                  maximumValue={59}
                   step={1}
-                  value={duration}
-                  onValueChange={(value) => setDuration(value)}
+                  value={durationMinutes}
+                  onValueChange={(value) => setDurationMinutes(value)}
                   minimumTrackTintColor="#1FB28A"
                   maximumTrackTintColor="#d3d3d3"
                   thumbTintColor="#1FB28A"
                   />
-                  <Text>2 hrs</Text>
+                  <Text>59</Text>
+                  </View>
                 </View>
                 <View style={styles.submitContainer}>
-                  <Button title="Submit" style={styles.submitButton} onPress={() => onSubmit(createTimeBlock(generateTimeString(), duration))} />
+                  <Button title="Submit" style={styles.submitButton} onPress={() => onSubmit(createTimeBlock(generateTimeString(), durationMinutes+durationHours*60))} />
                 </View>
             </View>
             </TouchableWithoutFeedback>
@@ -220,7 +232,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
       },
       durationModalContent: {
-        flex: 0.5,
+        flex: 0.55,
         width: width/1.1,
         height: height/2,
         padding: 10,
@@ -228,12 +240,15 @@ const styles = StyleSheet.create({
         borderRadius: 10,
       },
       titleContainer: {
+        flex: 1,
+        backgroundColor: 'darkgreen',
         marginTop: 10,
         marginBottom: 5,
-        alignItems: 'center'
+        alignItems: 'center',
+        justifyContent: 'center',
       },
       timeDropdown: {
-
+        flex: 7
       },
 
       dropdownContainer: {
@@ -242,18 +257,35 @@ const styles = StyleSheet.create({
         overflow: 'hidden', // Ensures dropdown content does not spill outside
         padding: 10, // Optional padding
       },
+      durationContainer: {
+        flex: 3,
+        alignItems: 'center'
+      },
+      hourContainer: {
+        flexDirection: 'row',
+        marginTop: 8,
+        alignItems: 'center',
+        borderColor: 'grey',
+        borderWidth: 2,
+        borderRadius: 10
+      },
+      hours: {
+        fontSize: 17,
+        fontWeight: 'bold',
+        padding: 5
+      },
       submitContainer: {
-        alignContent: 'flex-start',
+        flex: 1.5,
+        alignItems: 'center',
 
       },
       slider: {
           flex: 1,
           flexDirection: 'row',
           width: '100%',
-          height: 40,
+          //height: 40,
       },
       submitButton: {
-        paddingTop: 10,
         width: '30%'
       }
 })
