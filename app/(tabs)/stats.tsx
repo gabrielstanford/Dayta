@@ -64,15 +64,30 @@ function Page() {
       <View style={styles.titleContainer}>
         <ThemedText type="titleText">Statistics</ThemedText>
       </View>
-      <SafeAreaView style={styles.pieChartContainer}>
-        <PieChart labels={durationSumState.map(activity => activity.text)} values={durationSumState.map(activity => activity.totalDuration)} />
-      </SafeAreaView>
-      <View style={styles.barChartContainer}>
-          <ThemedText type="subtitle" style={{paddingBottom:10}}>
-            Click On Bars To Get Info!
-          </ThemedText>
-          {enoughDataForCommonChart ? <DashboardChart x={durationSumState.map(activity => activity.text)} y={durationSumState.map(activity => activity.totalDuration)} /> : <ThemedText type="titleText">We Need More Data! Come Back Later :)</ThemedText>}
-      </View>
+      {enoughDataForCommonChart && (
+        <View style={styles.chartsContainer}>
+        <SafeAreaView style={styles.pieChartContainer}>
+          <PieChart
+            labels={durationSumState.map(activity => activity.text)}
+            values={durationSumState.map(activity => activity.totalDuration)}
+          />
+         </SafeAreaView>
+          <View style={styles.barChartContainer}>
+            <ThemedText type="subtitle">
+              Click On Bars To Get Info!
+            </ThemedText>
+            <DashboardChart
+              x={durationSumState.map(activity => activity.text)}
+              y={durationSumState.map(activity => activity.totalDuration)}
+            />
+          </View>
+        </View>
+      )}
+      {!enoughDataForCommonChart && (
+        <View style={styles.noDataContainer}>
+          <ThemedText type="titleText">We Need More Data! Come Back Later :)</ThemedText>
+        </View>
+      )}
     </View>
     
   );
@@ -88,18 +103,23 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingBottom: height/11.6, // Space at the bottom to accommodate the button
   },
+  chartsContainer: {
+    flex: 1
+  },
+  noDataContainer: {
+
+  },
   titleContainer: {
     alignItems: 'center',
     padding: 10,
   },
   barChartContainer: {
-    flex: 0.5,
+    flex: 0.6,
     width: width,
-    padding: 10,
     alignItems: 'center'
   },
   pieChartContainer: {
-    flex: 0.4,
+    flex: 0.35,
     width: width,
     alignItems: 'flex-start'
   },
