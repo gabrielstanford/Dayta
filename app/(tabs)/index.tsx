@@ -1,4 +1,4 @@
-import { StyleSheet, Pressable, View, Dimensions, FlatList, Text, TouchableOpacity} from 'react-native';
+import { StyleSheet, View, Dimensions, FlatList, Text, TouchableOpacity} from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { useState, useEffect, useRef } from 'react';
 import {AntDesign, MaterialIcons, Ionicons} from '@expo/vector-icons';
@@ -15,10 +15,13 @@ import ActivityDescribeModal from '@/components/ActivityDescribeModal'
 const { width, height } = Dimensions.get('window');
 const buttonWidth = width/6.25
 
-interface ButtonState {
+type ButtonState = {
   text: string;
+  iconLibrary: string;
+  icon: string;
   pressed: boolean;
-}
+  id?: string;
+};
 interface TimeBlock {
   startTime: number,   // Unix timestamp for the start time
   duration: number,    // Duration in seconds
@@ -70,13 +73,16 @@ interface ActivityItemProps {
 }
 
 const ActivityItem = ({ activity, onRemove, onTap }: ActivityItemProps) => {
-
+  let specialButton = false
+  if(activity.button.text=='Woke Up' || activity.button.text=='Went To Bed') {
+    specialButton=true
+  }
   return (
   
-    <View style={styles.activityContainer}>
+    <View style={specialButton ? styles2.activityContainer : styles.activityContainer}>
       <View style={styles.detailsContainer}>
         <TouchableOpacity onPress={() => onTap(activity)} style={styles.touchableContent}>
-          <View style={styles.timeContainer}>
+          <View style={(activity.button.text=='Woke Up' || activity.button.text=='Went To Bed') ? styles2.timeContainer : styles.timeContainer}>
             <Text style={styles.timeText}>{convertUnixToTimeString(activity.timeBlock.startTime, activity.timeBlock.endTime)}</Text>
             <Text style={styles.timeText}> - </Text>
             <Text style={styles.timeText}>{convertUnixToTimeString(activity.timeBlock.endTime, 0)}</Text>
@@ -84,9 +90,9 @@ const ActivityItem = ({ activity, onRemove, onTap }: ActivityItemProps) => {
           <Text style={styles.activityName}>{activity.button.text}</Text>
         </TouchableOpacity>
       </View>
-      <Pressable onPress={() => onRemove(activity)}>
+      <TouchableOpacity onPress={() => onRemove(activity)}>
         <MaterialIcons name="delete" size={width / 15} color="black" />
-      </Pressable>
+      </TouchableOpacity>
     </View>
 );}
 
@@ -96,7 +102,7 @@ function Journal() {
   const [dbActivities, setDbActivities] = useState<any>(null);
   const [version, setVersion] = useState(0)
   const [dateIncrement, setDateIncrement] = useState(0)
-  const [activityInfo, setActivityInfo] = useState<string[]>([])
+  const [activityInfo, setActivityInfo] = useState<Activity[]>([])
   const { removeActivity } = useAppContext();
   const remove = (act: Activity) => {
     removeActivity(null, act);
@@ -124,15 +130,15 @@ function Journal() {
     const activityTapped = (activity: Activity) => {
       if(activity.button.text=="Multi-Activity") {
         if(activity.Multi) {
-        let multiTexts = []
+        let multiActivities: Activity[] = []
         for(let i=0; i<activity.Multi.length; i++) {
-          multiTexts[i]=activity.Multi[i].button.text;
+          multiActivities[i]=activity.Multi[i];
         }
-        setActivityInfo(multiTexts)
+        setActivityInfo(multiActivities)
       }
       }
       else {
-        setActivityInfo([activity.button.text])
+        setActivityInfo([activity])
       }
       setActivityDescribeVisible(true);
     }
@@ -169,9 +175,9 @@ function Journal() {
           <></>}
         </View>
         <View style={styles.plusButtonContainer}>
-          <Pressable onPress={toggleModal}>
+          <TouchableOpacity onPress={toggleModal}>
             <AntDesign name="pluscircle" size={width/6.25} color="black" />
-          </Pressable>
+          </TouchableOpacity>
         </View>
       </View>
   );
@@ -256,7 +262,24 @@ plusButtonContainer: {
 });
 
 const styles2 = StyleSheet.create({
-
+  activityContainer: {
+    flex: 1,
+    backgroundColor: 'darkturquoise',
+    borderRadius: 10,
+    padding: 15,
+    marginTop: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  timeContainer: {
+    flex: 2.5,
+    flexDirection: 'row',
+    flexWrap: 'nowrap',
+  },
 })
 
 const Index: React.FC = () => {

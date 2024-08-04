@@ -66,7 +66,7 @@ const MultitaskModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible, 
         }
         setMultiSearchVisible(false);
     }
-    console.log(buttonTexts)
+  
     return(
         <Modal 
         transparent={true}

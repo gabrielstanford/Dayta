@@ -8,6 +8,7 @@ type ButtonState = {
     iconLibrary: string;
     icon: string;
     keywords: string[];
+    tags?: string[];
     pressed: boolean;
     id?: string;
   };
@@ -37,8 +38,9 @@ const ActivityButtons: ButtonState[] = [
     { text: 'Wound Care', iconLibrary: "ionicons", icon: "bandage", keywords: ['Bandade', 'Injury'], pressed: false }, 
     { text: 'Hygiene/Skin Care', iconLibrary: "fontAwesome5", icon: "smile-beam", keywords: ['Brushing Teeth', 'Tooth Brush', 'Brush', 'Washing Face', 'Face Mask'], pressed: false }, 
     { text: 'Briefly Woke Up', iconLibrary: "ionicons", icon: "moon", keywords: ['Awoke', 'Woke Up', 'Fell Back Asleep'], pressed: false }, 
-    { text: 'Woke Up', iconLibrary: "materialIcons", icon: "sunny", keywords: ['Awoke', 'Woke Up', 'Fell Back Asleep'], pressed: false }, 
-    { text: 'Fell Asleep', iconLibrary: "materialCommunityIcons", icon: "sleep", keywords: ['Sleep', 'Asleep', 'Went To Bed', 'Night'], pressed: false }, 
+    { text: 'Went To Bed', iconLibrary: "materialCommunityIcons", icon: "sleep", keywords: ['Sleep', 'Fell Asleep', 'Fall Asleep', 'Asleep', 'Good Night', 'Night', 'Konked Out'], pressed: false }, 
+    { text: 'Woke Up', iconLibrary: "ionicons", icon: "alarm", keywords: ['Awoke', 'Good Morning', 'Woken Up', 'Wake Up', 'Alarm Rang', 'Started Day'], pressed: false }, 
+
 
     //Music
     { text: 'Composing', iconLibrary: "ionicons", icon: "musical-note-sharp", keywords: ['Music'], pressed: false }, 
@@ -47,12 +49,15 @@ const ActivityButtons: ButtonState[] = [
     { text: 'Playing Piano', iconLibrary: "materialCommunityIcons", icon: "piano", keywords: ['Piano'], pressed: false }, 
     { text: 'Playing Guitar', iconLibrary: "fontAwesome5", icon: "guitar", keywords: ['Guitar'], pressed: false }, 
 
-    //
+    //other
     { text: 'Scrolling', iconLibrary: "fontAwesome5", icon: "tiktok", keywords: ['Stroll'], pressed: false }, 
     { text: 'Driving', iconLibrary: "antDesign", icon: "car", keywords: ['Stroll'], pressed: false }, 
     { text: 'School', iconLibrary: "ionicons", icon: "school", keywords: ['Stroll'], pressed: false }, 
     { text: 'Relaxing', iconLibrary: "fontAwesome5", icon: "umbrella-beach", keywords: ['Relaxation'], pressed: false},
-    { text: 'Working', iconLibrary: "materialIcons", icon: "work", keywords: ['Concentrating', 'Concentration'], pressed: false },
+    { text: 'Working', iconLibrary: "materialIcons", icon: "work", keywords: ['Concentrating', 'Concentration'], tags: ['Concentration'], pressed: false },
+    { text: 'Working On App', iconLibrary: "fontAwesome5", icon: "app-store", keywords: ['App', 'Comp Sci', 'Concentrating On App'], tags: ['Concentration'], pressed: false },
+    { text: 'French Study', iconLibrary: "ionicons", icon: "language", keywords: ['Language Study', 'Working On Language'], tags: ['Concentration'], pressed: false },
+
     { text: 'Concentrating', iconLibrary: "materialIcons", icon: "center-focus-strong", keywords: ['Concentration', 'Focus', 'Focusing'], pressed: false },
     { text: 'Reading', iconLibrary: "fontAwesome5", icon: "book", keywords: ['Stroll'], pressed: false }, 
     { text: 'Errands', iconLibrary: "ionicons", icon: "cart", keywords: ['Stroll'], pressed: false }, 
@@ -76,8 +81,6 @@ const ActivityButtons: ButtonState[] = [
     { text: 'Journaling', iconLibrary: "ionicons", icon: "journal-sharp", keywords: ['Writing'], pressed: false },
     { text: 'Getting Ready', iconLibrary: "ionicons", icon: "shirt", keywords: ['Preparing', 'Night Out', 'Make Up', 'Dressing', 'Getting Dressed', 'Putting On Make Up'], pressed: false },
     { text: 'Outing', iconLibrary: "fontAwesome5", icon: "car", keywords: ['Going Out', 'Eating Out', 'Having Lunch Out', 'Brunch', 'Family Lunch'], pressed: false },
-    { text: 'Driving', iconLibrary: "fontAwesome5", icon: "car", keywords: ['Drive', 'Navigating'], pressed: false },
-
 
   ]
 const shuffle = (array: ButtonState[]) => {
@@ -125,9 +128,9 @@ const useCustomSet = (): any => {
         // Step 1: Group activities by name and sum durations
         const totalTimePerActivity = activities.reduce<Record<string, number>>((acc, activity) => {
           if (acc[activity.button.text]) {
-            acc[activity.button.text] += activity.timeBlock.duration/60;
+            acc[activity.button.text] += activity.timeBlock.duration/3600;
           } else {
-            acc[activity.button.text] = activity.timeBlock.duration/60;
+            acc[activity.button.text] = activity.timeBlock.duration/3600;
           }
           return acc;
         }, {});
@@ -137,7 +140,7 @@ const useCustomSet = (): any => {
           totalDuration
         }));
         setDurationSummary(result)
-        console.log(result)
+
         const activityCounts = countValues(activityText);
         const entries = Object.entries(activityCounts);
         setEntries(entries)

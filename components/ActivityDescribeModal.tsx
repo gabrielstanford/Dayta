@@ -1,14 +1,7 @@
-import {ModalProps, Modal, View, StyleSheet, Dimensions, Text, TouchableWithoutFeedback, Platform, TouchableOpacity} from 'react-native'
+import {ModalProps, Modal, View, StyleSheet, Dimensions, Text, TouchableWithoutFeedback, FlatList, TouchableOpacity} from 'react-native'
 import {ThemedText} from './ThemedText'
 import {Button} from '@rneui/themed'
-import TimeDropdown from './TimeDropdown'
-import {useState, useEffect} from 'react'
-import Slider from '@react-native-community/slider';
-import {useAppContext} from '@/contexts/AppContext'
-import {useAuth} from '@/contexts/AuthContext'
-import FetchDayActivities from '@/Data/FetchDayActivities'
-import ActivitySearchModal from './ActivitySearchModal'
-import { SearchBar } from '@rneui/themed'
+
 
 const {width, height} = Dimensions.get("window");
 const buttonWidth = width/6.25
@@ -24,27 +17,37 @@ interface TimeBlock {
     pressed: boolean;
     id?: string;
   };
-  interface TimeBlock {
-    startTime: number,   // Unix timestamp for the start time
-    duration: number,    // Duration in seconds
-    endTime: number      // Unix timestamp for the end time (startTime + duration)
-  }
   interface Activity {
     id: string;
     button: ButtonState;
     timeBlock: TimeBlock;
+    Multi?: Activity[];
   }
   
   interface MultitaskModalProps extends ModalProps {
     ActivityDescribeVisible: boolean;
-    Info: any[]
+    Info: Activity[]
     onClose: () => void;
     onTapOut: () => void;
   }
+  interface ActivityItemProps {
+    activity: Activity;
+    onTap: () => void
+  }
 
-const MultitaskModal: React.FC<MultitaskModalProps> = ({ ActivityDescribeVisible, Info, onClose, onTapOut, ...modalProps }) => {
+  const ActivityItem = ({ activity, onTap }: ActivityItemProps) => {
 
-  const [multiSearchVisible, setMultiSearchVisible] = useState(false);
+    return (
+    
+      <View style={styles.activityContainer}>
+        <View style={styles.detailsContainer}>
+          <TouchableOpacity onPress={onTap} style={styles.touchableContent}>
+            <Text style={styles.activityName}>{activity.button.text}</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+  );}
+const ActivityDescribeModal: React.FC<MultitaskModalProps> = ({ ActivityDescribeVisible, Info, onClose, onTapOut, ...modalProps }) => {
 
     return(
         <Modal 
@@ -56,13 +59,16 @@ const MultitaskModal: React.FC<MultitaskModalProps> = ({ ActivityDescribeVisible
           <TouchableWithoutFeedback onPress={onTapOut}>
             <View style={styles.MultitaskModalOverlay}>
             <TouchableWithoutFeedback>
-                <View style={styles.MultitaskModalContent}>
+                <View style={styles.ActivityDescribeModalContent}>
                   <View style={styles.titleContainer}>
                     <ThemedText type="title">Activity Info</ThemedText>
                   </View>
-                <View>
-                    <Text>{Info}</Text>
-                </View>
+                  <FlatList 
+                    data={Info}
+                    renderItem={({ item }) => <ActivityItem activity={item} onTap={() => alert("Not Pressable")}/>}
+                    keyExtractor={(item) => item.id}
+                    contentContainerStyle={styles.listContent}
+                    />
                 <View style={styles.nextContainer}>
                   <Button title="Next" style={styles.nextButton} onPress={onClose} />
                 </View>
@@ -82,7 +88,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
       },
-      MultitaskModalContent: {
+      ActivityDescribeModalContent: {
         flex: 0.5,
         width: width/1.1,
         height: height/2,
@@ -95,32 +101,33 @@ const styles = StyleSheet.create({
         marginBottom: 5,
         alignItems: 'center'
       },
-      stepContainer: {
+      activityName: {
+        flex: 3,
+        fontSize: 16,
+        fontWeight: 'bold',
+      },
+      listContent: {
+        paddingHorizontal: 20,
+      },
+      activityContainer: {
+        flex: 1,
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        padding: 15,
+        marginTop: 10,
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+        shadowOffset: { width: 0, height: 4 },
         flexDirection: 'row',
         alignItems: 'center',
       },
-      activitiesContainer: {
-        flex: 0.5
+      detailsContainer: {
+        flex: 1, // Allows this section to take up the remaining space
       },
-      searchContainer: {
-        flex: 0.5,
-      },
-      searchBarContainer: {
-        backgroundColor: 'transparent',
-        borderBottomColor: 'transparent',
-        borderTopColor: 'transparent',
-      },
-      searchBarInputContainer: {
-        backgroundColor: '#fff',
-      },
-      searchBarInput: {
-        fontSize: 16,
-      },
-      dropdownContainer: {
-        height: height/4, // Adjust this value as needed
-        width: '100%', // Or a fixed width if required
-        overflow: 'hidden', // Ensures dropdown content does not spill outside
-        padding: 10, // Optional padding
+      touchableContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
       },
       nextContainer: {
         left: ((width/1.1) / 2) - (buttonWidth / 2), // Center horizontally more precisely
@@ -146,4 +153,4 @@ const androidCustom = StyleSheet.create({
     padding: 10, // Optional padding
   },
 })
-export default MultitaskModal;
+export default ActivityDescribeModal;
