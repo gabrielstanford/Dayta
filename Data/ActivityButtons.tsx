@@ -47,7 +47,7 @@ type ButtonState = {
     { text: 'Playing Golf', iconLibrary: "materialIcons", icon: "sports-golf", keywords: ['Sport'], pressed: false, tags: ['Physical', 'Sports'] },
     { text: 'Playing Ping Pong', iconLibrary: "materialIcons", icon: "sports-tennis", keywords: ['Sport', 'Table Tennis'], pressed: false, tags: ['Physical', 'Sports'] },
     { text: 'Hiking', iconLibrary: "fontAwesome5", icon: "hiking", keywords: ['Going For A Hike', 'Taking A Hike', 'Hike'], pressed: false, tags: ['Physical', 'Outdoor'] },
-    { text: 'Maximum Tabata', iconLibrary: "materialCommunityIcons", icon: "run", keywords: ['Jogging'], pressed: false, tags: ['Physical'] },
+    { text: 'Maximum Tabata', iconLibrary: "materialCommunityIcons", icon: "run", keywords: ['20 Minute', 'The Maximum'], pressed: false, tags: ['Physical'] },
     { text: 'Other Physical Activity', iconLibrary: "materialIcons", icon: "more-horiz", keywords: ['Miscellaneous'], pressed: false, tags: ['Physical'] },
   
     // Relax
@@ -59,7 +59,7 @@ type ButtonState = {
     { text: 'Briefly Woke Up', iconLibrary: "ionicons", icon: "moon", keywords: ['Awoke', 'Woke Up', 'Fell Back Asleep'], pressed: false, tags: ['Relax'] },
     { text: 'Went To Bed', iconLibrary: "materialCommunityIcons", icon: "sleep", keywords: ['Sleep', 'Fell Asleep', 'Fall Asleep', 'Asleep', 'Good Night', 'Night', 'Konked Out'], pressed: false, tags: ['Relax'] },
     { text: 'Woke Up', iconLibrary: "ionicons", icon: "alarm", keywords: ['Awoke', 'Good Morning', 'Woken Up', 'Wake Up', 'Alarm Rang', 'Started Day'], pressed: false, tags: ['Relax'] },
-    { text: 'Meditating', iconLibrary: "materialCommunityIcons", icon: "meditation", keywords: ['Relaxing', 'Mindfulness'], pressed: false, tags: ['Relax'] },
+    { text: 'Meditating', iconLibrary: "materialCommunityIcons", icon: "meditation", keywords: ['Relaxing', 'Mindfulness', 'Yoga Nidra', 'NSDR'], pressed: false, tags: ['Relax'] },
     { text: 'Taking a Nap', iconLibrary: "materialIcons", icon: "bed", keywords: ['Rest', 'Sleep'], pressed: false, tags: ['Relax'] },
     { text: 'Other Relaxing Activity', iconLibrary: "materialIcons", icon: "more-horiz", keywords: ['Miscellaneous'], pressed: false, tags: ['Relax'] },
   

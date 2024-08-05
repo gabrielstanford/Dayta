@@ -57,7 +57,7 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
     const minuteString = minute < 10 ? `0${minute}` : `${minute}`;
     return [ hourString, minuteString, period ];
   }
-  const {activities} = useAppContext();
+  const {dateIncrement} = useAppContext();
   const {user} = useAuth();
   const [dbActivities, setDbActivities] = useState<Activity[]>([]);
   const [durationHours, setDurationHours] = useState(0);
@@ -67,6 +67,7 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
   const [hasInitialized, setHasInitialized] = useState(false);
 
   useEffect(() => {
+    //consider adding functionality for setting this for past days but not necessary now
     FetchDayActivities(user, 0, setDbActivities)
     setDurationHours(0);
     setDurationMinutes(15);
@@ -141,13 +142,32 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
       return Math.floor(utcDate.getTime() / 1000);
     };
     
+    function adjustDateByDays(date: Date, days: number): Date {
+      // Create a copy of the original date to avoid mutating it
+      const adjustedDate = new Date(date);
+    
+      // Get the current date components
+      const currentDate = adjustedDate.getDate();
+    
+      // Set the new date
+      adjustedDate.setDate(currentDate + days);
+    
+      // Preserve time components (hours, minutes, seconds, milliseconds)
+      adjustedDate.setHours(date.getHours());
+      adjustedDate.setMinutes(date.getMinutes());
+      adjustedDate.setSeconds(date.getSeconds());
+      adjustedDate.setMilliseconds(date.getMilliseconds());
+    
+      return adjustedDate;
+    }
     // Function to create a TimeBlock based on user input
     function createTimeBlock(startTime: string, durationMinutes: number): TimeBlock {
+      // am i turning time into unix and then right back? seems strange
       const startTimeUnix = convertTimeToUnix(startTime); // Convert start time to Unix timestamp
       const durationSeconds = convertDurationToSeconds(durationMinutes); // Convert duration to seconds
-      const utcDate = new Date(startTimeUnix * 1000); 
-      const offset = utcDate.getTimezoneOffset(); // Time zone offset in minutes
-      const utcZonedTime = new Date(utcDate.getTime() + offset * 60000);
+      const localDate = new Date(startTimeUnix * 1000); 
+      const offset = localDate.getTimezoneOffset(); // Time zone offset in minutes
+      const utcZonedTime = dateIncrement==0 ? new Date(localDate.getTime() + offset * 60000) : adjustDateByDays(new Date(localDate.getTime() + offset * 60000), dateIncrement);
       const unixTimestamp = Math.floor(utcZonedTime.getTime() / 1000);
       const endTimeUnix = unixTimestamp + durationSeconds; // Calculate end time
       return {
@@ -163,7 +183,7 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
       return `${hours}h ${remainingMinutes}m`; 
     
     }
-    console.log('Current Hour: ', durationHours)
+
     return(
         <Modal 
         transparent={true}

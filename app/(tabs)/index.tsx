@@ -101,9 +101,8 @@ function Journal() {
   const { user } = useAuth();
   const [dbActivities, setDbActivities] = useState<any>(null);
   const [version, setVersion] = useState(0)
-  const [dateIncrement, setDateIncrement] = useState(0)
   const [activityInfo, setActivityInfo] = useState<Activity[]>([])
-  const { removeActivity } = useAppContext();
+  const { removeActivity, dateIncrement, setDateIncrement } = useAppContext();
   const remove = (act: Activity) => {
     removeActivity(null, act);
     setVersion(prevVersion => prevVersion + 1)

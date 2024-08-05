@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, ReactNode, useEffect, useRe
 import { setDoc, doc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { firestore } from '@/firebase/firebase';
 import { useAuth } from './AuthContext'; // Assume you have a context for auth
+import { DateTime } from 'luxon';
 
 interface ButtonState {
   text: string;
@@ -21,6 +22,8 @@ interface Activity {
 
 interface AppContextProps {
   activities: Activity[];
+  dateIncrement: number;
+  setDateIncrement: React.Dispatch<React.SetStateAction<number>>;
   addActivity: (activity: Activity) => void;
   removeActivity: (id: string | null, activ: Activity | null) => void;
 }
@@ -34,11 +37,13 @@ const AppContext = createContext<AppContextProps | undefined>(undefined);
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [activities, setActivities] = useState<Activity[]>([]);
+  const [dateIncrement, setDateIncrement] = useState(0);
   const { user } = useAuth(); // Get the authenticated user from your auth context
 
   const addActivity = async (activity: Activity) => {
     try {
       if (user) {
+
         const startDate = new Date(activity.timeBlock.startTime * 1000).toISOString().split('T')[0];
         const dateRef = doc(firestore, 'users', user.uid, 'dates', startDate);
         const activityRef = doc(dateRef, 'activities', activity.id);
@@ -82,6 +87,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       }
       else if(activ ){
         const startDate = new Date(activ.timeBlock.startTime * 1000).toISOString().split('T')[0];
+        console.log(startDate)
         await deleteDoc(doc(firestore, 'users', user.uid, 'dates', startDate, 'activities', activ.id));
 
         setTimeout(() => {
@@ -101,9 +107,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
   };
 
-
   return (
-    <AppContext.Provider value={{ activities, addActivity, removeActivity }}>
+    <AppContext.Provider value={{ activities, dateIncrement, setDateIncrement, addActivity, removeActivity }}>
       {children}
     </AppContext.Provider>
   );
