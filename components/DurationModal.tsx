@@ -60,6 +60,7 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
   const {activities} = useAppContext();
   const {user} = useAuth();
   const [dbActivities, setDbActivities] = useState<Activity[]>([]);
+  const [durationHours, setDurationHours] = useState(0);
   const [selectedHour, setSelectedHour] = useState("10");
   const [selectedMinute, setSelectedMinute] = useState("30");
   const [selectedPeriod, setSelectedPeriod] = useState("AM");
@@ -67,7 +68,8 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
 
   useEffect(() => {
     FetchDayActivities(user, 0, setDbActivities)
-
+    setDurationHours(0);
+    setDurationMinutes(15);
   }, [durationModalVisible, hasInitialized, user]);
 
   if(dbActivities) {
@@ -91,8 +93,7 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
   }
   //could implement logic here for making this most likely based on the activity
   const [durationMinutes, setDurationMinutes] = useState(15)
-  const [durationHours, setDurationHours] = useState(0);
- 
+
   const handleDurationHourChange = (hour: number) => {
     setDurationHours(hour)
   }
@@ -162,6 +163,7 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
       return `${hours}h ${remainingMinutes}m`; 
     
     }
+    console.log('Current Hour: ', durationHours)
     return(
         <Modal 
         transparent={true}

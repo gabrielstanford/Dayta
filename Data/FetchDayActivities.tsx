@@ -46,7 +46,7 @@ function FetchDayActivities(user: any, dateIncrement: number, setDbActivities: a
           ];
     
           // Sort by startTime
-          allActivities.sort((a, b) => a.timeBlock.startTime - b.timeBlock.startTime);
+          allActivities.sort((a, b) => a.timeBlock.endTime - b.timeBlock.endTime);
     
           // Update state with the sorted activities
           setDbActivities(allActivities);
