@@ -10,7 +10,7 @@ const androidFirebaseConfig = {
   projectId: "absorb-34b0e",
   storageBucket: "absorb-34b0e.appspot.com",
   messagingSenderId: "897083396063",
-  appId: "1:897083396063:android:b2b2f2e7a1a89739fc3e6a",
+  appId: "1:897083396063:android:f2522a0b834749e5fc3e6a",
 };
 
 const iosFirebaseConfig = {
