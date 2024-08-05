@@ -20,8 +20,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
       await signInWithEmailAndPassword(auth, email, password);
       router.push('/');
     } catch (error: any) {
-      console.error(error);
-      Alert.alert('Login Error', error.message);
+      Alert.alert('Incorrect Email/Password. Please Try Again');
     }
   };
 

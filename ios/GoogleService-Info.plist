@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>897083396063-iloe73jfel7gj5kjath7l75f8v8s01d6.apps.googleusercontent.com</string>
+	<string>897083396063-1lprsrp5i5l9kh61kohtq7ndul3d7vgq.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.897083396063-iloe73jfel7gj5kjath7l75f8v8s01d6</string>
+	<string>com.googleusercontent.apps.897083396063-1lprsrp5i5l9kh61kohtq7ndul3d7vgq</string>
 	<key>ANDROID_CLIENT_ID</key>
 	<string>897083396063-hur7fkib2u4rv33ea1pihnladuuegvke.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
@@ -15,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.gabrielcode.absorb</string>
+	<string>com.gabrielcode.dayta</string>
 	<key>PROJECT_ID</key>
 	<string>absorb-34b0e</string>
 	<key>STORAGE_BUCKET</key>
@@ -31,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:897083396063:ios:1010835559ba25eefc3e6a</string>
+	<string>1:897083396063:ios:cbeb3429b5b65deefc3e6a</string>
 </dict>
 </plist>

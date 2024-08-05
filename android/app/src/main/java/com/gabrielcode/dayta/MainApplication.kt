@@ -1,4 +1,4 @@
-package com.gabrielcode.absorb
+package com.gabrielcode.dayta
 
 import android.app.Application
 import android.content.res.Configuration

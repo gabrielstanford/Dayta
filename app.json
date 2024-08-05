@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "absorb",
-    "slug": "absorb",
+    "name": "Dayta",
+    "slug": "dayta",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.gabrielcode.absorb",
+      "bundleIdentifier": "com.gabrielcode.dayta",
       "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
@@ -22,7 +22,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.gabrielcode.absorb",
+      "package": "com.gabrielcode.dayta",
       "googleServicesFile": "./google-services.json"
     },
     "web": {

@@ -39,8 +39,7 @@ const SignUpScreen: React.FC = () => {
       // Navigate to the home page
       router.push('/');
     } catch (error: any) {
-      console.error(error);
-      Alert.alert('Error', 'Failed to create account. Please try again.');
+      Alert.alert('Failed to create account. Please try again.');
     }
   };
 

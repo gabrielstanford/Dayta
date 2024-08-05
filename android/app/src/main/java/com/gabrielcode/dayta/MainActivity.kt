@@ -1,4 +1,4 @@
-package com.gabrielcode.absorb
+package com.gabrielcode.dayta
 
 import android.os.Build
 import android.os.Bundle

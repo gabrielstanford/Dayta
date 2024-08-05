@@ -171,8 +171,11 @@ function Journal() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
         />
-          : 
-          <></>}
+          : <>
+            {/* <ThemedText type="subtitle">
+              Add Your First Activity For The Day!
+            </ThemedText> */}
+          </>}
         </View>
         <View style={styles.plusButtonContainer}>
           <TouchableOpacity onPress={toggleModal}>

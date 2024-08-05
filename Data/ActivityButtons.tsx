@@ -31,6 +31,8 @@ const ActivityButtons: ButtonState[] = [
     { text: 'Home Workout', iconLibrary: "materialCommunityIcons", icon: "jump-rope", keywords: ['Working Out', 'Exercise', 'Gym'], pressed: false },
     { text: 'Home Physical Therapy', iconLibrary: "ionicons", icon: "medkit", keywords: ['Working Out', 'Exercise', 'Gym', 'Physical Therapy', 'PT', 'Rehab'], pressed: false },
     { text: 'Playing a Sport', iconLibrary: "materialIcons", icon: "sports-football", keywords: ['Sport', 'Football', 'Soccer', 'Baseball'], pressed: false }, 
+    { text: 'Hiking', iconLibrary: "fontAwesome5", icon: "hiking", keywords: ['Going For A Hike', 'Taking A Hike', 'Hike'], pressed: false }, 
+
     //relax
     { text: 'Hot Tub', iconLibrary: "fontAwesome5", icon: "hot-tub", keywords: ['Relaxing', 'Jacuzzi', 'Bath', 'Hot Bath'], pressed: false }, 
     { text: 'Showering', iconLibrary: "fontAwesome5", icon: "shower", keywords: ['Shower', 'Water', 'Cleaning'], pressed: false }, 

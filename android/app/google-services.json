@@ -7,18 +7,18 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:897083396063:android:b2b2f2e7a1a89739fc3e6a",
+        "mobilesdk_app_id": "1:897083396063:android:f2522a0b834749e5fc3e6a",
         "android_client_info": {
-          "package_name": "com.gabrielcode.absorb"
+          "package_name": "com.gabrielcode.dayta"
         }
       },
       "oauth_client": [
         {
-          "client_id": "897083396063-hur7fkib2u4rv33ea1pihnladuuegvke.apps.googleusercontent.com",
+          "client_id": "897083396063-91d75sqvsnarkjhrrevrp3v34tr7n58i.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.gabrielcode.absorb",
-            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+            "package_name": "com.gabrielcode.dayta",
+            "certificate_hash": "90c9509342fb06b930c13da5545c42926aefd73d"
           }
         },
         {
@@ -39,10 +39,10 @@
               "client_type": 3
             },
             {
-              "client_id": "897083396063-iloe73jfel7gj5kjath7l75f8v8s01d6.apps.googleusercontent.com",
+              "client_id": "897083396063-1lprsrp5i5l9kh61kohtq7ndul3d7vgq.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.gabrielcode.absorb"
+                "bundle_id": "com.gabrielcode.dayta"
               }
             }
           ]

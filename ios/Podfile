@@ -20,7 +20,7 @@ prepare_react_native_project!
 
 use_frameworks! :linkage => :static
 
-target 'absorb' do
+target 'dayta' do
   use_expo_modules!
   config = use_native_modules!
 

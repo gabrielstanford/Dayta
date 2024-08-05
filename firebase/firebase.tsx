@@ -19,7 +19,7 @@ const iosFirebaseConfig = {
   projectId: "absorb-34b0e",
   storageBucket: "absorb-34b0e.appspot.com",
   messagingSenderId: "897083396063",
-  appId: "1:897083396063:ios:1010835559ba25eefc3e6a",
+  appId: "1:897083396063:ios:cbeb3429b5b65deefc3e6a",
 };
 
 // Select the appropriate configuration based on the platform
