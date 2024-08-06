@@ -5,7 +5,7 @@ import { useThemeColor } from '@/hooks/useThemeColor';
 export type ThemedTextProps = TextProps & {
   lightColor?: string;
   darkColor?: string;
-  type?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link' | 'titleText' | 'journalText' | 'durationTitle';
+  type?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link' | 'titleText' | 'journalText' | 'durationTitle' | 'buttons';
 };
 
 export function ThemedText({
@@ -29,6 +29,8 @@ export function ThemedText({
         type === 'titleText' ? styles.titleText : undefined,
         type === 'journalText' ? styles.journalText : undefined,
         type === 'durationTitle' ? styles.durationTitle : undefined,
+        type === 'buttons' ? styles.buttons : undefined,
+
         style,
       ]}
       {...rest}
@@ -70,6 +72,17 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: 'white'
+  },
+  buttons: {
+    textAlign: 'center',
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: 'bisque',
+    // Ensure text does not wrap and show ellipsis
+    overflow: 'hidden',
+    // Additional style to ensure consistent two-line display
+    maxHeight: 36, // Adjust based on font size, assumes roughly 18px line height
+    lineHeight: 18, // Line height to control spacing between lines
   },
   titleText: {
     fontSize: 32,

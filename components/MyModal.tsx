@@ -4,8 +4,8 @@ import {ThemedText} from './ThemedText'
 import {Button} from '@rneui/themed'
 import {useAppContext} from '@/contexts/AppContext'
 const {width, height} = Dimensions.get("window");
-const buttonWidth = width/5;
-const titleWidth = width/2;
+const buttonWidth = width/4;
+const titleWidth = width/1.5;
 import {AntDesign, FontAwesome5, MaterialCommunityIcons, Ionicons, MaterialIcons} from '@expo/vector-icons';
 import uuid from 'react-native-uuid';
 import DurationModal from './DurationModal'
@@ -185,7 +185,9 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
                     color="white"
                   />
                 </TouchableOpacity>
-                <ThemedText type="subtitle">{button.text}</ThemedText>
+                <View style={styles.buttonTextContainer}>
+                  <ThemedText type="buttons">{button.text}</ThemedText>
+                </View>
               </View>
             );
           })}
@@ -262,7 +264,9 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
       alignItems: 'center',
       left: (width / 2) - (titleWidth / 2), // Center horizontally more precisely
     },
-  
+    buttonTextContainer: {
+      flex: 1,
+    },
     quickAddContainer: {
       flex: 7,
       alignItems: 'center',
@@ -275,7 +279,8 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
     },
   
     addButtonContainer: {
-  
+      flex: 1,
+      alignItems: 'center'
     },
     quickAddButton: {
       width: buttonWidth,

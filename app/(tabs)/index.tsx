@@ -243,7 +243,7 @@ timeContainer: {
   flexWrap: 'nowrap',
 },
 timeText: {
-  fontSize: 14.5,
+  fontSize: 13,
   flexWrap: 'nowrap',
   color: '#333',
 },
