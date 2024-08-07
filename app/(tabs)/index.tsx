@@ -1,6 +1,6 @@
-import { StyleSheet, View, Dimensions, FlatList, Text, TouchableOpacity} from 'react-native';
+import { StyleSheet, View, Dimensions, FlatList, Text, TouchableOpacity, NativeSyntheticEvent, NativeScrollEvent} from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, RefObject} from 'react';
 import {AntDesign, MaterialIcons, Ionicons} from '@expo/vector-icons';
 import MyModal from '@/components/MyModal'
 import { AppProvider, useAppContext } from '@/contexts/AppContext';
@@ -11,6 +11,7 @@ import getFilteredActivityRefs from '@/Data/HandleTime'
 import FetchDayActivities from '@/Data/FetchDayActivities'
 import ActivityDescribeModal from '@/components/ActivityDescribeModal'
 
+
 // Get screen width. This is for more responsive layouts
 const { width, height } = Dimensions.get('window');
 const buttonWidth = width/6.25
@@ -20,6 +21,8 @@ type ButtonState = {
   iconLibrary: string;
   icon: string;
   pressed: boolean;
+  keywords: string[];
+  tags?: string[];
   id?: string;
 };
 interface TimeBlock {
@@ -71,7 +74,17 @@ interface ActivityItemProps {
   onRemove: (activity: Activity) => void 
   onTap: (activity: Activity) => void
 }
+const hoursOfDay = Array.from({ length: 12 }, (_, i) => {
+  const hour = i + 1;
+  const period = hour < 12 ? 'AM' : 'PM';
+  const formattedHour = hour % 12 || 12; // Convert 12-hour format
+  return `${formattedHour}:00${period}`;
+}).concat(['12:00PM']); // Add 12:00 PM separately to handle the end of the 12-hour cycle
 
+const dayHours = [
+  ...Array.from({ length: 12 }, (_, i) => `${i + 1}:00AM`),
+  ...Array.from({ length: 12 }, (_, i) => `${i + 1}:00PM`),
+];
 const ActivityItem = ({ activity, onRemove, onTap }: ActivityItemProps) => {
   let specialButton = false
   if(activity.button.text=='Woke Up' || activity.button.text=='Went To Bed') {
@@ -82,11 +95,6 @@ const ActivityItem = ({ activity, onRemove, onTap }: ActivityItemProps) => {
     <View style={specialButton ? styles2.activityContainer : styles.activityContainer}>
       <View style={styles.detailsContainer}>
         <TouchableOpacity onPress={() => onTap(activity)} style={styles.touchableContent}>
-          <View style={(activity.button.text=='Woke Up' || activity.button.text=='Went To Bed') ? styles2.timeContainer : styles.timeContainer}>
-            <Text style={styles.timeText}>{convertUnixToTimeString(activity.timeBlock.startTime, activity.timeBlock.endTime)}</Text>
-            <Text style={styles.timeText}> - </Text>
-            <Text style={styles.timeText}>{convertUnixToTimeString(activity.timeBlock.endTime, 0)}</Text>
-          </View>
           <Text style={styles.activityName}>{activity.button.text}</Text>
         </TouchableOpacity>
       </View>
@@ -94,6 +102,7 @@ const ActivityItem = ({ activity, onRemove, onTap }: ActivityItemProps) => {
         <MaterialIcons name="delete" size={width / 15} color="black" />
       </TouchableOpacity>
     </View>
+
 );}
 
 function Journal() {
@@ -116,10 +125,11 @@ function Journal() {
   //toggle the state of the modal
     const [modalVisible, setModalVisible] = useState(false);
     const toggleModal = () => setModalVisible(!modalVisible)
-    const flatListRef = useRef<FlatList>(null);
+    const list1Ref = useRef<FlatList>(null);
     useEffect(() => {
       const timer = setTimeout(() => {
-        flatListRef.current?.scrollToEnd({ animated: true });
+        list1Ref.current?.scrollToEnd({ animated: true });
+        list2Ref.current?.scrollToEnd({ animated: true });
       }, 100); // Slight delay to ensure list is rendered
   
       // Clean up the timer if the component unmounts
@@ -141,6 +151,21 @@ function Journal() {
       }
       setActivityDescribeVisible(true);
     }
+
+    const list2Ref: RefObject<FlatList> = useRef(null);
+    const [scrollY, setScrollY] = useState<number>(0);
+  
+    const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const y = event.nativeEvent.contentOffset.y;
+      setScrollY(y);
+      if (list1Ref.current) {
+        list1Ref.current.scrollToOffset({ offset: y });
+      }
+      if (list2Ref.current) {
+        list2Ref.current.scrollToOffset({ offset: y });
+      }
+    };
+  
   return (
     
       <View style={styles.layoutContainer}>
@@ -162,19 +187,36 @@ function Journal() {
                 </View>
               </TouchableOpacity>
         </View>
-        {dbActivities ? 
-        <FlatList 
-        ref={flatListRef}
-        data={dbActivities}
-        renderItem={({ item }) => <ActivityItem activity={item} onRemove={remove} onTap={activityTapped}/>}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
+        <View style={styles.fullBlockContainer}>
+        <View style={styles.timeListContainer}>
+        <FlatList
+        ref={list1Ref}
+        data={["9:00 AM", '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM', '6:00 PM', '7:00 PM', '8:00 PM', '9:00 PM', '10:00 PM']}
+        renderItem={({ item }) => <Text style={styles.timeText}>{item}</Text>}
+        keyExtractor={(item) => item}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+        showsVerticalScrollIndicator={false}
         />
+        </View>
+        {dbActivities ? 
+        <View style={styles.activityListContainer}>
+          <FlatList 
+          ref={list2Ref}
+          data={dbActivities}
+          renderItem={({ item }) => <ActivityItem activity={item} onRemove={remove} onTap={activityTapped}/>}
+          keyExtractor={(item) => item.id}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+          showsVerticalScrollIndicator={false}
+          />
+        </View>
           : <>
             {/* <ThemedText type="subtitle">
               Add Your First Activity For The Day!
             </ThemedText> */}
           </>}
+          </View>
         </View>
         <View style={styles.plusButtonContainer}>
           <TouchableOpacity onPress={toggleModal}>
@@ -196,6 +238,8 @@ const styles = StyleSheet.create({
 contentContainer: {
   flex: 1,
   paddingBottom: height/9, // Space at the bottom to accommodate the button
+  borderWidth: 4,
+  borderColor: 'yellow'
 },
 headerContainer: {
   marginHorizontal: width/13,
@@ -209,16 +253,12 @@ titleContainer: {
 incrementButtonContainer: {
   backgroundColor: 'white'
 },
-container: {
+fullBlockContainer: {
   flex: 1,
-  backgroundColor: '#f0f0f0',
-  paddingTop: 20,
-},
-listContent: {
-  paddingHorizontal: 20,
+  flexDirection: 'row'
 },
 activityContainer: {
-  flex: 1,
+  flex: 4,
   backgroundColor: '#fff',
   borderRadius: 10,
   padding: 15,
@@ -237,16 +277,25 @@ touchableContent: {
   flexDirection: 'row',
   alignItems: 'center',
 },
-timeContainer: {
-  flex: 2.5,
-  flexDirection: 'row',
-  flexWrap: 'nowrap',
-},
+
 timeText: {
-  fontSize: 13,
+  fontSize: 20,
+  paddingBottom: 150,
   flexWrap: 'nowrap',
-  color: '#333',
+  color: 'orange',
 },
+timeListContainer: {
+  flex: 1,
+  borderColor: 'green',
+  borderWidth: 3
+},
+activityListContainer: {
+  flex: 3,
+  borderColor: 'green',
+  borderWidth: 3,
+  paddingHorizontal: 20,
+},
+
 activityName: {
   flex: 3,
   fontSize: 16,
@@ -277,11 +326,7 @@ const styles2 = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  timeContainer: {
-    flex: 2.5,
-    flexDirection: 'row',
-    flexWrap: 'nowrap',
-  },
+
 })
 
 const Index: React.FC = () => {

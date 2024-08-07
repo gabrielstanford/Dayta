@@ -266,6 +266,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
     },
     buttonTextContainer: {
       flex: 1,
+      alignItems: 'flex-start'
     },
     quickAddContainer: {
       flex: 7,
