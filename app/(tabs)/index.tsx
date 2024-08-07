@@ -70,41 +70,88 @@ const convertUnixToTimeString = (startTime: number, endTime: number): string => 
 };
 
 interface ActivityItemProps {
-  activity: Activity;
+  TimeActPair: TimeActiviesPair;
   onRemove: (activity: Activity) => void 
   onTap: (activity: Activity) => void
 }
-const hoursOfDay = Array.from({ length: 12 }, (_, i) => {
-  const hour = i + 1;
-  const period = hour < 12 ? 'AM' : 'PM';
-  const formattedHour = hour % 12 || 12; // Convert 12-hour format
-  return `${formattedHour}:00${period}`;
-}).concat(['12:00PM']); // Add 12:00 PM separately to handle the end of the 12-hour cycle
-
-const dayHours = [
-  ...Array.from({ length: 12 }, (_, i) => `${i + 1}:00AM`),
-  ...Array.from({ length: 12 }, (_, i) => `${i + 1}:00PM`),
-];
-const ActivityItem = ({ activity, onRemove, onTap }: ActivityItemProps) => {
-  let specialButton = false
+interface BlockProps {
+  activity: Activity;
+  onRemove: () => void;
+  onTap: () => void;
+}
+const ActivityBlock = ({ activity, onRemove, onTap }: BlockProps) => {
+      let specialButton = false
   if(activity.button.text=='Woke Up' || activity.button.text=='Went To Bed') {
     specialButton=true
   }
-  return (
-  
-    <View style={specialButton ? styles2.activityContainer : styles.activityContainer}>
-      <View style={styles.detailsContainer}>
-        <TouchableOpacity onPress={() => onTap(activity)} style={styles.touchableContent}>
-          <Text style={styles.activityName}>{activity.button.text}</Text>
-        </TouchableOpacity>
-      </View>
-      <TouchableOpacity onPress={() => onRemove(activity)}>
-        <MaterialIcons name="delete" size={width / 15} color="black" />
+  return(
+  <View style={styles.activityContainer}>
+    <View style={styles.detailsContainer}>
+      <TouchableOpacity onPress={onTap} style={styles.touchableContent}>
+        <View style={styles.timeContainer}>
+          <Text style={styles.timeText}>{convertUnixToTimeString(activity.timeBlock.startTime, activity.timeBlock.endTime)}</Text>
+          <Text style={styles.timeText}> - </Text>
+          <Text style={styles.timeText}>{convertUnixToTimeString(activity.timeBlock.endTime, 0)}</Text>
+        </View>
+        <Text style={styles.activityName}>{activity.button.text}</Text>
       </TouchableOpacity>
     </View>
+    <TouchableOpacity onPress={onRemove}>
+      <MaterialIcons name="delete" size={width / 15} color="black" />
+    </TouchableOpacity>
+  </View>
+)};
+// const ActivityItem = ({ TimeActPair, onRemove, onTap }: ActivityItemProps) => {
+//   let specialButton = false
+//   if(TimeActPair.activities[0].button.text=='Woke Up' || TimeActPair.activities[0].button.text=='Went To Bed') {
+//     specialButton=true
+//   }
 
-);}
+//   return (
+//     <View style={styles.timeActivityPairContainer}>
+//       <View style={styles.leftTimeContainer}>
+//         <Text style={{color: 'white', fontSize: 13}}>{TimeActPair.time}</Text>
+//       </View>
+//       <ActivityBlock TimeActPair={TimeActPair} onTap={() => onTap(TimeActPair.activities[0])} onRemove={() => onRemove(TimeActPair.activities[0])} />
+//     </View>
+// );}
+const ActivityList: React.FC<ActivityItemProps> = ({ TimeActPair, onTap, onRemove }) => {
 
+  return (
+  <>
+    {TimeActPair.activities.map((activity, index) => (
+      <ActivityBlock
+        key={index}
+        activity={activity}
+        onTap={() => onTap(activity)}
+        onRemove={() => onRemove(activity)}
+      />
+    ))}
+  </>
+)};
+
+interface TimeActiviesPair {
+  time: number,
+  activities: Activity[]
+}
+interface TimeRange {
+  time: number;
+  minTime: number;
+  maxTime: number;
+}
+
+const setMinutesToZero = (unixTimestamp: number) => {
+    // Create a Date object from the Unix timestamp (which is in seconds)
+    const date = new Date(unixTimestamp * 1000); // Convert seconds to milliseconds
+  
+    // Set minutes, seconds, and milliseconds to zero
+    date.setMinutes(0);
+    date.setSeconds(0);
+    date.setMilliseconds(0);
+    
+    // Convert the Date object back to a Unix timestamp (in seconds)
+    return Math.floor(date.getTime() / 1000); // Convert milliseconds to seconds
+}
 function Journal() {
 
   const { user } = useAuth();
@@ -121,14 +168,27 @@ function Journal() {
     FetchDayActivities(user, dateIncrement, setDbActivities)
 
   }, [user, version, dateIncrement]);
-  
+
+console.log(setMinutesToZero(dbActivities[0].timeBlock.startTime))
+const dayStartHour = setMinutesToZero(dbActivities[0].timeBlock.startTime)
+  const timeRanges: TimeRange[] = [
+    { time: 1, minTime: dayStartHour, maxTime: (dayStartHour + 3600) },
+    { time: 2, minTime: (dayStartHour + 3600), maxTime: (dayStartHour + 7200)  },
+    { time: 3, minTime: (dayStartHour + 7200), maxTime: (dayStartHour + 10800) }
+  ];
+  const result: TimeActiviesPair[] = timeRanges.map(range => ({
+    time: range.time,
+    activities: dbActivities.filter((activity: Activity) => activity.timeBlock.startTime >= range.minTime && activity.timeBlock.startTime <= range.maxTime)
+  }));
+
   //toggle the state of the modal
     const [modalVisible, setModalVisible] = useState(false);
     const toggleModal = () => setModalVisible(!modalVisible)
-    const list1Ref = useRef<FlatList>(null);
+    const list2Ref: RefObject<FlatList> = useRef(null);
+    // const list1Ref = useRef<FlatList>(null);
     useEffect(() => {
       const timer = setTimeout(() => {
-        list1Ref.current?.scrollToEnd({ animated: true });
+        // list1Ref.current?.scrollToEnd({ animated: true });
         list2Ref.current?.scrollToEnd({ animated: true });
       }, 100); // Slight delay to ensure list is rendered
   
@@ -151,20 +211,6 @@ function Journal() {
       }
       setActivityDescribeVisible(true);
     }
-
-    const list2Ref: RefObject<FlatList> = useRef(null);
-    const [scrollY, setScrollY] = useState<number>(0);
-  
-    const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const y = event.nativeEvent.contentOffset.y;
-      setScrollY(y);
-      if (list1Ref.current) {
-        list1Ref.current.scrollToOffset({ offset: y });
-      }
-      if (list2Ref.current) {
-        list2Ref.current.scrollToOffset({ offset: y });
-      }
-    };
   
   return (
     
@@ -187,9 +233,8 @@ function Journal() {
                 </View>
               </TouchableOpacity>
         </View>
-        <View style={styles.fullBlockContainer}>
-        <View style={styles.timeListContainer}>
-        <FlatList
+
+        {/* <FlatList
         ref={list1Ref}
         data={["9:00 AM", '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM', '6:00 PM', '7:00 PM', '8:00 PM', '9:00 PM', '10:00 PM']}
         renderItem={({ item }) => <Text style={styles.timeText}>{item}</Text>}
@@ -197,18 +242,14 @@ function Journal() {
         onScroll={handleScroll}
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
-        />
-        </View>
+        /> */}
         {dbActivities ? 
-        <View style={styles.activityListContainer}>
+        <View style={styles.listContent}>
           <FlatList 
           ref={list2Ref}
-          data={dbActivities}
-          renderItem={({ item }) => <ActivityItem activity={item} onRemove={remove} onTap={activityTapped}/>}
+          data={result}
+          renderItem={({ item }) => <ActivityList TimeActPair={item} onRemove={remove} onTap={activityTapped}/>}
           keyExtractor={(item) => item.id}
-          onScroll={handleScroll}
-          scrollEventThrottle={16}
-          showsVerticalScrollIndicator={false}
           />
         </View>
           : <>
@@ -216,7 +257,6 @@ function Journal() {
               Add Your First Activity For The Day!
             </ThemedText> */}
           </>}
-          </View>
         </View>
         <View style={styles.plusButtonContainer}>
           <TouchableOpacity onPress={toggleModal}>
@@ -226,108 +266,111 @@ function Journal() {
       </View>
   );
 }
-
 const styles = StyleSheet.create({
- //colors darkcyan, mintcream, bisque
- layoutContainer: {
-  flex: 1,
-  paddingTop: height/18,
-  backgroundColor: 'darkcyan',
-  position: 'relative', // Container must be relative for absolute positioning of child
-},
-contentContainer: {
-  flex: 1,
-  paddingBottom: height/9, // Space at the bottom to accommodate the button
-  borderWidth: 4,
-  borderColor: 'yellow'
-},
-headerContainer: {
-  marginHorizontal: width/13,
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-},
-titleContainer: {
-  padding: 10,
-},
-incrementButtonContainer: {
-  backgroundColor: 'white'
-},
-fullBlockContainer: {
+  //colors darkcyan, mintcream, bisque
+  layoutContainer: {
+   flex: 1,
+   paddingTop: height/18,
+   backgroundColor: 'darkcyan',
+   position: 'relative', // Container must be relative for absolute positioning of child
+ },
+ contentContainer: {
+   flex: 1,
+   paddingBottom: height/9, // Space at the bottom to accommodate the button
+ },
+ headerContainer: {
+   marginHorizontal: width/13,
+   flexDirection: 'row',
+   justifyContent: 'space-between',
+   alignItems: 'center',
+ },
+ titleContainer: {
+   padding: 10,
+ },
+ incrementButtonContainer: {
+   backgroundColor: 'white'
+ },
+ timeActivityPairContainer: {
   flex: 1,
   flexDirection: 'row'
-},
-activityContainer: {
-  flex: 4,
-  backgroundColor: '#fff',
-  borderRadius: 10,
-  padding: 15,
-  marginTop: 10,
-  shadowColor: '#000',
-  shadowOpacity: 0.1,
-  shadowRadius: 10,
-  shadowOffset: { width: 0, height: 4 },
-  flexDirection: 'row',
-  alignItems: 'center',
-},
-detailsContainer: {
-  flex: 1, // Allows this section to take up the remaining space
-},
-touchableContent: {
-  flexDirection: 'row',
-  alignItems: 'center',
-},
-
-timeText: {
-  fontSize: 20,
-  paddingBottom: 150,
-  flexWrap: 'nowrap',
-  color: 'orange',
-},
-timeListContainer: {
-  flex: 1,
-  borderColor: 'green',
-  borderWidth: 3
-},
-activityListContainer: {
-  flex: 3,
-  borderColor: 'green',
-  borderWidth: 3,
-  paddingHorizontal: 20,
-},
-
-activityName: {
-  flex: 3,
-  fontSize: 16,
-  fontWeight: 'bold',
-},
-durationModal: {
+ },
+ leftTimeContainer: {
   flex: 1
-},
-plusButtonContainer: {
-    position: 'absolute', // Absolute positioning to overlay everything
-    bottom: height/40.6, // Space from the bottom of the container
-    left: (width / 2) - (buttonWidth / 2), // Center horizontally more precisely
-    width: buttonWidth
-},
-});
-
-const styles2 = StyleSheet.create({
-  activityContainer: {
-    flex: 1,
-    backgroundColor: 'darkturquoise',
-    borderRadius: 10,
-    padding: 15,
-    marginTop: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-
-})
+ },
+ container: {
+   flex: 1,
+   backgroundColor: '#f0f0f0',
+   paddingTop: 20,
+ },
+ listContent: {
+   paddingHorizontal: 20,
+ },
+ activityContainer: {
+   flex: 3,
+   backgroundColor: '#fff',
+   borderRadius: 10,
+   padding: 15,
+   marginTop: 10,
+   shadowColor: '#000',
+   shadowOpacity: 0.1,
+   shadowRadius: 10,
+   shadowOffset: { width: 0, height: 4 },
+   flexDirection: 'row',
+   alignItems: 'center',
+ },
+ detailsContainer: {
+   flex: 1, // Allows this section to take up the remaining space
+ },
+ touchableContent: {
+   flexDirection: 'row',
+   alignItems: 'center',
+ },
+ timeContainer: {
+   flex: 2.5,
+   flexDirection: 'row',
+   flexWrap: 'nowrap',
+ },
+ timeText: {
+   fontSize: 13,
+   flexWrap: 'nowrap',
+   color: '#333',
+ },
+ activityName: {
+   flex: 3,
+   fontSize: 16,
+   fontWeight: 'bold',
+ },
+ durationModal: {
+   flex: 1
+ },
+ plusButtonContainer: {
+     position: 'absolute', // Absolute positioning to overlay everything
+     bottom: height/40.6, // Space from the bottom of the container
+     left: (width / 2) - (buttonWidth / 2), // Center horizontally more precisely
+     width: buttonWidth
+ },
+ });
+ 
+ const styles2 = StyleSheet.create({
+   activityContainer: {
+     flex: 3,
+     backgroundColor: 'darkturquoise',
+     borderRadius: 10,
+     padding: 15,
+     marginTop: 10,
+     shadowColor: '#000',
+     shadowOpacity: 0.1,
+     shadowRadius: 10,
+     shadowOffset: { width: 0, height: 4 },
+     flexDirection: 'row',
+     alignItems: 'center',
+   },
+   timeContainer: {
+     flex: 2.5,
+     flexDirection: 'row',
+     flexWrap: 'nowrap',
+   },
+ })
 
 const Index: React.FC = () => {
   return (
