@@ -8,6 +8,7 @@ import {useAuth} from '@/contexts/AuthContext'
 import {AppProvider} from '@/contexts/AppContext'
 import {useCustomSet} from '@/Data/ActivityButtons'
 import PieChart from '@/components/PieChart'
+import Index from '@/components/BlockedTime'
 
 // Define a type for the counts object
 interface ValueCounts {
@@ -72,7 +73,10 @@ function Page() {
             values={durationSumState.map(activity => activity.totalDuration)}
           />
          </SafeAreaView>
-          <View style={styles.barChartContainer}>
+         <View style={styles.timeBlocksContainer}>
+          <Index />
+         </View>
+          {/* <View style={styles.barChartContainer}>
             <ThemedText type="subtitle">
               Click On Bars To Get Info!
             </ThemedText>
@@ -80,7 +84,7 @@ function Page() {
               x={durationSumState.map(activity => activity.text)}
               y={durationSumState.map(activity => activity.totalDuration)}
             />
-          </View>
+          </View> */}
         </View>
       )}
       {!enoughDataForCommonChart && (
@@ -113,7 +117,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 10,
   },
-  barChartContainer: {
+  timeBlocksContainer: {
     flex: 0.6,
     width: width,
     alignItems: 'center'

@@ -255,6 +255,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
     },
     closeButton: {
       width: buttonWidth,
+      
     },
      titleContainer: {
       flex: 1,

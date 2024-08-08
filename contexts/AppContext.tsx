@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect, useRef } from 'react';
-import { setDoc, doc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { setDoc, doc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { firestore } from '@/firebase/firebase';
 import { useAuth } from './AuthContext'; // Assume you have a context for auth
 import { DateTime } from 'luxon';
@@ -24,6 +24,7 @@ interface AppContextProps {
   activities: Activity[];
   dateIncrement: number;
   setDateIncrement: React.Dispatch<React.SetStateAction<number>>;
+  updateActivity: (activity: Activity, updates: Partial<Activity>) => void
   addActivity: (activity: Activity) => void;
   removeActivity: (id: string | null, activ: Activity | null) => void;
 }
@@ -39,6 +40,30 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [dateIncrement, setDateIncrement] = useState(0);
   const { user } = useAuth(); // Get the authenticated user from your auth context
+// Function to update an activity
+const updateActivity = async (activity: Activity, updates: Partial<Activity>) => {
+  //if start time's date is different, then after updating the times, call a diff function, moveactivity and pass in the updated one to change date ref.
+  try {
+    if(user) {
+    // Convert the start time to the date format used in Firestore
+    const startDate = new Date(activity.timeBlock.startTime * 1000).toISOString().split('T')[0];
+    const dateRef = doc(firestore, 'users', user.uid, 'dates', startDate);
+    const activityRef = doc(dateRef, 'activities', activity.id);
+    
+    // Add a timestamp to the updates
+    const updatedFields = {
+      ...updates,
+      updatedAt: serverTimestamp(), // Optional: add an update timestamp
+    };
+
+    // Update the activity document
+    await updateDoc(activityRef, updatedFields);
+    console.log('Activity updated successfully!');
+  }
+  } catch (error) {
+    console.error('Error updating activity: ', error);
+  }
+};
 
   const addActivity = async (activity: Activity) => {
     try {
@@ -108,7 +133,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   };
 
   return (
-    <AppContext.Provider value={{ activities, dateIncrement, setDateIncrement, addActivity, removeActivity }}>
+    <AppContext.Provider value={{ activities, dateIncrement, setDateIncrement, addActivity, updateActivity, removeActivity }}>
       {children}
     </AppContext.Provider>
   );

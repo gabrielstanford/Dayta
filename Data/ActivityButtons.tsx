@@ -73,17 +73,24 @@ type ButtonState = {
     // Entertainment
     { text: 'TV Watching', iconLibrary: "materialIcons", icon: "tv", keywords: ['Television', 'Netflix', 'Hulu', 'TV Shows', 'Movies'], pressed: false, tags: ['Entertainment'] },
     { text: 'Movie Watching', iconLibrary: "fontAwesome5", icon: "film", keywords: ['Cinema', 'Film', 'Theater', 'Theatre'], pressed: false, tags: ['Entertainment'] },
-    { text: 'Social Media', iconLibrary: "materialCommunityIcons", icon: "twitter", keywords: ['Instagram', 'Facebook', 'Twitter', 'Snapchat', 'Socializing', 'Online'], pressed: false, tags: ['Entertainment'] },
+    { text: 'Social Media', iconLibrary: "materialCommunityIcons", icon: "twitter", keywords: ['Instagram', 'Facebook', 'Twitter', 'Snapchat', 'Socializing', 'Online', 'Scrolling'], pressed: false, tags: ['Entertainment'] },
     { text: 'Gaming', iconLibrary: "materialCommunityIcons", icon: "gamepad-variant-outline", keywords: ['Video Games', 'Computer Games', 'PlayStation', 'Xbox', 'Nintendo'], pressed: false, tags: ['Entertainment'] },
     { text: 'Reading', iconLibrary: "materialIcons", icon: "menu-book", keywords: ['Books', 'Novels', 'Comics'], pressed: false, tags: ['Entertainment'] },
     { text: 'Going to a Museum', iconLibrary: "fontAwesome5", icon: "university", keywords: ['Art', 'History', 'Exhibits'], pressed: false, tags: ['Entertainment'] },
-    { text: 'Going to a Concert', iconLibrary: "ionicons", icon: "musical-notes", keywords: ['Music', 'Live Music', 'Band'], pressed: false, tags: ['Entertainment'] },
-    { text: 'Going to a Party', iconLibrary: "materialCommunityIcons", icon: "party-popper", keywords: ['Celebration', 'Friends', 'Social'], pressed: false, tags: ['Entertainment'] },
     { text: 'Other Entertainment Activity', iconLibrary: "materialIcons", icon: "more-horiz", keywords: ['Miscellaneous'], pressed: false, tags: ['Entertainment'] },
-  
+    // Social
+    { text: 'Going to a Party', iconLibrary: "materialCommunityIcons", icon: "party-popper", keywords: ['Celebration', 'Friends', 'Social'], pressed: false, tags: ['Social'] },
+    { text: 'Going to a Concert', iconLibrary: "ionicons", icon: "musical-notes", keywords: ['Music', 'Live Music', 'Band'], pressed: false, tags: ['Social', 'Entertainment'] },
+    // Add Logos
+    { text: 'Hanging Out With Friends', iconLibrary: "materialCommunityIcons", icon: "party-popper", keywords: ['Celebration', 'Friends', 'Social'], pressed: false, tags: ['Social'] },
+    { text: 'Other Social', iconLibrary: "materialCommunityIcons", icon: "party-popper", keywords: ['Celebration', 'Friends', 'Social'], pressed: false, tags: ['Social'] },
+    { text: 'Family Time', iconLibrary: "materialCommunityIcons", icon: "party-popper", keywords: ['Celebration', 'Friends', 'Social'], pressed: false, tags: ['Social'] },
+
     // Work/Study
     { text: 'Working', iconLibrary: "materialIcons", icon: "work", keywords: ['Job', 'Occupation'], pressed: false, tags: ['Work/Study'] },
     { text: 'Studying', iconLibrary: "ionicons", icon: "school", keywords: ['Learning', 'Homework'], pressed: false, tags: ['Work/Study'] },
+    { text: 'Passion Project', iconLibrary: "materialIcons", icon: "work", keywords: ['Project', 'Working On '], pressed: false, tags: ['Work/Study'] },
+
     { text: 'Researching', iconLibrary: "ionicons", icon: "search", keywords: ['Academic', 'Work', 'Project'], pressed: false, tags: ['Work/Study'] },
     { text: 'Reading Articles', iconLibrary: "materialIcons", icon: "menu-book", keywords: ['News', 'Online Reading', 'Research'], pressed: false, tags: ['Work/Study'] },
     { text: 'Meeting', iconLibrary: "materialIcons", icon: "meeting-room", keywords: ['Work', 'Business'], pressed: false, tags: ['Work/Study'] },
@@ -98,24 +105,33 @@ type ButtonState = {
     { text: 'Taking a Bus', iconLibrary: "materialCommunityIcons", icon: "bus", keywords: ['Travel', 'Commuting'], pressed: false, tags: ['Travel/Commute'] },
     { text: 'Traveling', iconLibrary: "fontAwesome5", icon: "suitcase-rolling", keywords: ['Vacation', 'Trip'], pressed: false, tags: ['Travel/Commute'] },
     { text: 'Other Travel/Commute Activity', iconLibrary: "materialIcons", icon: "more-horiz", keywords: ['Miscellaneous'], pressed: false, tags: ['Travel/Commute'] },
-  
+    //self improvement could be another tag
     // Hobbies
     { text: 'Gardening', iconLibrary: "materialCommunityIcons", icon: "flower", keywords: ['Plants', 'Outdoors'], pressed: false, tags: ['Hobbies'] },
     { text: 'Painting', iconLibrary: "materialIcons", icon: "brush", keywords: ['Art'], pressed: false, tags: ['Hobbies'] },
-    { text: 'Drawing', iconLibrary: "materialIcons", icon: "pencil", keywords: ['Art'], pressed: false, tags: ['Hobbies'] },
+    { text: 'Drawing', iconLibrary: "ionicons", icon: "pencil", keywords: ['Art'], pressed: false, tags: ['Hobbies'] },
     { text: 'Photography', iconLibrary: "fontAwesome5", icon: "camera", keywords: ['Photos', 'Art'], pressed: false, tags: ['Hobbies'] },
     { text: 'Knitting', iconLibrary: "materialIcons", icon: "knit", keywords: ['Crafts'], pressed: false, tags: ['Hobbies'] },
     { text: 'Woodworking', iconLibrary: "materialIcons", icon: "handyman", keywords: ['Crafts'], pressed: false, tags: ['Hobbies'] },
     { text: 'Playing Chess', iconLibrary: "fontAwesome5", icon: "chess", keywords: ['Game', 'Board Game'], pressed: false, tags: ['Hobbies'] },
     { text: 'Playing Board Games', iconLibrary: "materialCommunityIcons", icon: "game-board", keywords: ['Games', 'Board Games'], pressed: false, tags: ['Hobbies'] },
     { text: 'Collecting', iconLibrary: "materialIcons", icon: "collections", keywords: ['Stamps', 'Coins', 'Antiques'], pressed: false, tags: ['Hobbies'] },
+    //add icon, edit keywords
+    { text: 'Journaling', iconLibrary: "materialIcons", icon: "collections", keywords: ['Stamps', 'Coins', 'Antiques'], pressed: false, tags: ['Self-Improvement', 'Hobbies'] },
+    //
     { text: 'Other Hobbies', iconLibrary: "materialIcons", icon: "more-horiz", keywords: ['Miscellaneous'], pressed: false, tags: ['Hobbies'] },
-  
-    // Other
+    //Chores
     { text: 'Shopping', iconLibrary: "materialIcons", icon: "shopping-cart", keywords: ['Buying', 'Stores', 'Online Shopping'], pressed: false, tags: ['Other'] },
-    { text: 'Running Errands', iconLibrary: "materialIcons", icon: "local-grocery-store", keywords: ['Tasks', 'Chores'], pressed: false, tags: ['Other'] },
-    { text: 'Cleaning', iconLibrary: "materialIcons", icon: "cleaning-services", keywords: ['Housework'], pressed: false, tags: ['Other'] },
-    { text: 'Cooking', iconLibrary: "materialIcons", icon: "restaurant", keywords: ['Food Preparation'], pressed: false, tags: ['Other'] },
+    //add icon
+    { text: 'Grocery Shopping', iconLibrary: "materialCommunityIcons", icon: "food-variant", keywords: ['Eating', 'Meal'], pressed: false, tags: ['Chores'] },
+    { text: 'Running Errands', iconLibrary: "materialIcons", icon: "local-grocery-store", keywords: ['Tasks', 'Chores'], pressed: false, tags: ['Chores'] },
+    { text: 'Cleaning', iconLibrary: "materialIcons", icon: "cleaning-services", keywords: ['Housework'], pressed: false, tags: ['Chores'] },
+    { text: 'Cooking', iconLibrary: "materialIcons", icon: "restaurant", keywords: ['Food Preparation'], pressed: false, tags: ['Chores'] },
+    //add icon
+    { text: 'Other Chores', iconLibrary: "materialIcons", icon: "restaurant", keywords: ['Other', 'Chores'], pressed: false, tags: ['Chores'] },
+    // Other
+    //add icon
+    { text: 'Getting Ready', iconLibrary: "materialIcons", icon: "cleaning-services", keywords: ['Dressing', 'Getting Dressed', 'Clothes', 'Putting On Clothes'], pressed: false, tags: ['Other'] },
     { text: 'Other', iconLibrary: "materialIcons", icon: "more-horiz", keywords: ['Miscellaneous'], pressed: false, tags: ['Other'] },
   ];
   
