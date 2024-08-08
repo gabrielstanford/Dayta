@@ -74,7 +74,6 @@ const ActivityItem = ({ activity, onRemove, timeState, dateIncrement, updateActi
 
   const [inputValue, setInputValue] = useState<string>(convertUnixToTimeString(activity.timeBlock.startTime, activity.timeBlock.endTime, true));
   const [input2Value, setInput2Value] = useState<string>(convertUnixToTimeString(activity.timeBlock.endTime, 0, true));
-  console.log(inputValue)
 
   const maxLength = 7;
   const handleInputChange = (text: string) => {

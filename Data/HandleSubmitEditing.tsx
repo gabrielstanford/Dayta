@@ -3,7 +3,6 @@ import Activity from '@/Types/ActivityTypes';
 
 export default function HandleSubmitEditing(inputValue: string, input2Value: string, maxLength: number, activity: Activity, dateIncrement: number, updateActivity: any) {
 
-    const validTimeNumsFirst = ['0', '1']
     const validTimeNumsSec = ['0', '1', '2']
     const validTimeNumsOthers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
@@ -21,10 +20,11 @@ export default function HandleSubmitEditing(inputValue: string, input2Value: str
                   }
                   
                   const userTimeZone = getUserTimeZone();
-              
-                  const nowInUserTimezone = DateTime.now().setZone(userTimeZone).plus(dateIncrement)
+                  console.log('applied date increment: ', dateIncrement)
+                  const nowInUserTimezone = DateTime.now().setZone(userTimeZone).plus({days: dateIncrement})
                   const startUnixTimestamp = convertLocalDateTimeToUnix(nowInUserTimezone, inputValue);
                   const endUnixTimestamp = convertLocalDateTimeToUnix(nowInUserTimezone, input2Value);
+                  console.log(endUnixTimestamp)
                   if(endUnixTimestamp-startUnixTimestamp<0) {
                     alert('Make sure your end time is after your start time')
                   }
@@ -38,8 +38,9 @@ export default function HandleSubmitEditing(inputValue: string, input2Value: str
                         endTime: endUnixTimestamp,   // New end time in Unix timestamp
                       },
                     };
+                    console.log(nowInUserTimezone)
                     updateActivity(activity, updates)
-                    alert('Valid Input; Activity Updated');
+                    alert('Activity Updated');
                   }
                  }
                  else {
