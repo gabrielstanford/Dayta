@@ -34,6 +34,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="personalize"
+        options={{
+          title: 'Personalize',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? 'repeat' : 'repeat-outline'} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="recommendations"
         options={{
           title: 'Recs',

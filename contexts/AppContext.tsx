@@ -1,31 +1,18 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect, useRef } from 'react';
-import { setDoc, doc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { setDoc, doc, getDoc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { firestore } from '@/firebase/firebase';
 import { useAuth } from './AuthContext'; // Assume you have a context for auth
 import { DateTime } from 'luxon';
-
-interface ButtonState {
-  text: string;
-  pressed: boolean;
-}
-interface TimeBlock {
-  startTime: number,   // Unix timestamp for the start time
-  duration: number,    // Duration in seconds
-  endTime: number      // Unix timestamp for the end time (startTime + duration)
-}
-interface Activity {
-  id: string;
-  button: ButtonState;
-  timeBlock: TimeBlock;
-  Multi?: Activity[]
-}
+import {Activity, ButtonState} from '@/Types/ActivityTypes'
 
 interface AppContextProps {
   activities: Activity[];
   dateIncrement: number;
   setDateIncrement: React.Dispatch<React.SetStateAction<number>>;
-  updateActivity: (activity: Activity, updates: Partial<Activity>) => void
+  updateActivity: (activity: Activity, updates: Partial<Activity>) => void;
+  moveActivity: (activity: Activity, updates: Partial<Activity>) => void;
   addActivity: (activity: Activity) => void;
+  addCustomActivity: (button: ButtonState) => void;
   removeActivity: (id: string | null, activ: Activity | null) => void;
 }
 
@@ -65,6 +52,83 @@ const updateActivity = async (activity: Activity, updates: Partial<Activity>) =>
   }
 };
 
+const moveActivity = async (
+  activity: Activity,
+  updates: Partial<Activity>
+) => {
+  if (!user) {
+    console.log('User is not authenticated.');
+    return;
+  }
+
+  try {
+    const currentStartDate = new Date(activity.timeBlock.startTime * 1000).toISOString().split('T')[0];
+    
+    if (updates.timeBlock && updates.timeBlock.startTime) {
+      const newStartDate = new Date(updates.timeBlock.startTime * 1000).toISOString().split('T')[0];
+
+      // References to the current and new date documents
+      const currentDateRef = doc(firestore, 'users', user.uid, 'dates', currentStartDate);
+      const newDateRef = doc(firestore, 'users', user.uid, 'dates', newStartDate);
+
+      // References to the current and new activity documents
+      const currentActivityRef = doc(currentDateRef, 'activities', activity.id);
+      const newActivityRef = doc(newDateRef, 'activities', activity.id);
+
+      // Fetch the current activity data
+      const activityDoc = await getDoc(currentActivityRef);
+      if (!activityDoc.exists()) {
+        console.error('Activity does not exist!');
+        return;
+      }
+
+      const activityData = activityDoc.data();
+
+      // Add the updated timeBlock to the activity data
+      const updatedActivityData = {
+        ...activityData,
+        timeBlock: {
+          startTime: updates.timeBlock.startTime,
+          endTime: updates.timeBlock.endTime,
+        },
+        updatedAt: serverTimestamp(), // Optional: add an update timestamp
+      };
+
+      // Copy the activity data to the new location
+      await setDoc(newActivityRef, updatedActivityData);
+      console.log('Activity moved successfully!');
+
+      // Delete the original activity document
+      await deleteDoc(currentActivityRef);
+      console.log('Original activity document deleted successfully!');
+
+      // Update or create the new date document with a timestamp
+      await setDoc(newDateRef, { createdAt: serverTimestamp() }, { merge: true });
+      console.log('New date document updated successfully!');
+    } else {
+      console.log('No valid timeBlock update provided!');
+    }
+  } catch (error) {
+    console.error('Error moving activity: ', error);
+  }
+};
+const addCustomActivity = async (button: ButtonState) => {
+  if (user) {
+    try {
+      const activityRef = doc(firestore, `users/${user.uid}/customActivities`, button.text); // Using activity name as ID, or you can generate a random ID
+      const newActivity = {
+        ...button,
+      };
+
+      await setDoc(activityRef, newActivity);
+      console.log("Custom activity added successfully");
+    } catch (error) {
+      console.error("Error adding custom activity: ", error);
+    }
+  } else {
+    console.log("No user logged in");
+  }
+};
   const addActivity = async (activity: Activity) => {
     try {
       if (user) {
@@ -133,7 +197,7 @@ const updateActivity = async (activity: Activity, updates: Partial<Activity>) =>
   };
 
   return (
-    <AppContext.Provider value={{ activities, dateIncrement, setDateIncrement, addActivity, updateActivity, removeActivity }}>
+    <AppContext.Provider value={{ activities, dateIncrement, setDateIncrement, addActivity, addCustomActivity, updateActivity, moveActivity, removeActivity }}>
       {children}
     </AppContext.Provider>
   );

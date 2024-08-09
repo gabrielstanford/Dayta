@@ -1,7 +1,7 @@
 import {DateTime} from 'luxon'
-import Activity from '@/Types/ActivityTypes';
+import {Activity} from '@/Types/ActivityTypes';
 
-export default function HandleSubmitEditing(inputValue: string, input2Value: string, maxLength: number, activity: Activity, dateIncrement: number, updateActivity: any) {
+export default function HandleSubmitEditing(inputValue: string, input2Value: string, maxLength: number, activity: Activity, dateIncrement: number, updateActivity: any, moveActivity: any) {
 
     const validTimeNumsSec = ['0', '1', '2']
     const validTimeNumsOthers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
@@ -20,11 +20,9 @@ export default function HandleSubmitEditing(inputValue: string, input2Value: str
                   }
                   
                   const userTimeZone = getUserTimeZone();
-                  console.log('applied date increment: ', dateIncrement)
                   const nowInUserTimezone = DateTime.now().setZone(userTimeZone).plus({days: dateIncrement})
                   const startUnixTimestamp = convertLocalDateTimeToUnix(nowInUserTimezone, inputValue);
                   const endUnixTimestamp = convertLocalDateTimeToUnix(nowInUserTimezone, input2Value);
-                  console.log(endUnixTimestamp)
                   if(endUnixTimestamp-startUnixTimestamp<0) {
                     alert('Make sure your end time is after your start time')
                   }
@@ -38,9 +36,17 @@ export default function HandleSubmitEditing(inputValue: string, input2Value: str
                         endTime: endUnixTimestamp,   // New end time in Unix timestamp
                       },
                     };
-                    console.log(nowInUserTimezone)
+                    const dayDiff = calculateDayDifference(startUnixTimestamp, activity.timeBlock.startTime)
+                    if(dayDiff==0) {
                     updateActivity(activity, updates)
                     alert('Activity Updated');
+                    }
+                    else {
+                    alert('Activity Updated (Moved Day)')
+                    moveActivity(activity, updates)
+                    alert('Activity Moved')
+                    }
+                    
                   }
                  }
                  else {
@@ -98,4 +104,17 @@ const convertLocalDateTimeToUnix = (date: DateTime, time: string): number => {
       console.error('Error converting local date and time to Unix timestamp:', error);
       return 0; // Return 0 or handle error as needed
     }
+  };
+
+// Function to calculate the difference in calendar days between two Unix timestamps
+const calculateDayDifference = (timestamp1: number, timestamp2: number): number => {
+    // Convert Unix timestamps to Luxon DateTime objects
+    const dateTime1 = DateTime.fromSeconds(timestamp1, { zone: 'utc' }).startOf('day');
+    const dateTime2 = DateTime.fromSeconds(timestamp2, { zone: 'utc' }).startOf('day');
+    
+    // Calculate the difference in days
+    const differenceInDays = dateTime2.diff(dateTime1, 'days').days;
+  
+    // Return the difference rounded to the nearest whole number
+    return Math.round(differenceInDays);
   };

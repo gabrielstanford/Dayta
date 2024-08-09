@@ -4,7 +4,8 @@ import {ThemedText} from './ThemedText'
 import {Button} from '@rneui/themed'
 import {useAppContext} from '@/contexts/AppContext'
 const {width, height} = Dimensions.get("window");
-const buttonWidth = width/4;
+const buttonWidth = width/5;
+const buttonHeight = height/19;
 const titleWidth = width/1.5;
 import {AntDesign, FontAwesome5, MaterialCommunityIcons, Ionicons, MaterialIcons} from '@expo/vector-icons';
 import uuid from 'react-native-uuid';
@@ -13,6 +14,7 @@ import MultitaskModal from './MultitaskModal'
 import ActivitySearchModal from './ActivitySearchModal'
 import {ShuffledActivityButtons, useCustomSet} from '@/Data/ActivityButtons'
 import Toast from 'react-native-toast-message'
+import {ButtonState, Activity, TimeBlock} from '@/Types/ActivityTypes'
 
 
 //next: add search
@@ -66,26 +68,13 @@ const getIconComponent = (iconLibrary: string): IconComponent => {
   }
 };
 
-// Example of button states
-type ButtonState = {
-  text: string;
-  iconLibrary: string;
-  icon: string;
-  keywords: string[];
-  pressed: boolean;
-  id?: string;
-};
 
 interface MyModalProps extends ModalProps {
   visible: boolean;
   onClose: () => void;
 }
-interface TimeBlock {
-  startTime: number; // Unix timestamp
-  duration: number;  // Duration in seconds
-  endTime: number;   // Unix timestamp
-}
-const MultiButton: ButtonState = {text: 'Multi-Activity', iconLibrary: "fontAwesome5", icon: "tasks", keywords: [], pressed: false}
+
+const MultiButton: ButtonState = {text: 'Multi-Activity', iconLibrary: "fontAwesome5", keywords: [], icon: "tasks", pressed: false}
 
 const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) => {
   const {finalArray} = useCustomSet();
@@ -212,13 +201,15 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
     >
       <View style={styles.modalOverlay}>
         <View style={styles.headerSection}>
-          <View style={styles.buttonContainer}>
-            <Button buttonStyle={styles.closeButton} color="secondary" title="Close" onPress={() => closeModal()} />
+            <TouchableOpacity onPress={() => closeModal()} style={styles.closeButton}>
+            <View style={styles.buttonContainer}>
+              <Text style={{fontSize: 21, color: 'white'}}>Close</Text>
           </View>
+          </TouchableOpacity>
           <View style={styles.titleContainer}>
             <ThemedText type="titleText">Quick Add</ThemedText>
           </View>
-        </View>
+          </View>
         <View style={styles.quickAddContainer}>
           {renderButtons()}
         </View>
@@ -250,12 +241,14 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
       },
         //close button
     buttonContainer: {
-      flex: 1,
       padding: 10
     },
     closeButton: {
       width: buttonWidth,
-      
+      height: buttonHeight,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#b4245c',
     },
      titleContainer: {
       flex: 1,

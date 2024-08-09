@@ -12,6 +12,10 @@ const colors = [
   '#FF4500', // OrangeRed
   '#7FFF00', // Chartreuse
   '#00CED1', // DarkTurquoise
+  '#00CED1', // DarkTurquoise
+  '#00CED1', // DarkTurquoise
+  '#00CED1', // DarkTurquoise
+
 ];
 
 interface PieChartProps {

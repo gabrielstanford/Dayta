@@ -11,7 +11,7 @@ import getFilteredActivityRefs from '@/Data/HandleTime'
 import FetchDayActivities from '@/Data/FetchDayActivities'
 import ActivityDescribeModal from '@/components/ActivityDescribeModal'
 import {DateTime} from 'luxon'
-import Activity from '@/Types/ActivityTypes';
+import {Activity} from '@/Types/ActivityTypes';
 import HandleSubmitEditing from '@/Data/HandleSubmitEditing';
 
 // Get screen width. This is for more responsive layouts
@@ -62,11 +62,12 @@ interface ActivityItemProps {
   timeState:(boolean | string)[];
   dateIncrement: number,
   updateActivity: any,
+  moveActivity: any,
   onTimeTap: (activity: Activity) => void
   onTap: (activity: Activity) => void
 }
 
-const ActivityItem = ({ activity, onRemove, timeState, dateIncrement, updateActivity, onTimeTap, onTap }: ActivityItemProps) => {
+const ActivityItem = ({ activity, onRemove, timeState, dateIncrement, updateActivity, moveActivity, onTimeTap, onTap }: ActivityItemProps) => {
   let specialButton = false
   if(activity.button.text=='Woke Up' || activity.button.text=='Went To Bed') {
     specialButton=true
@@ -98,7 +99,7 @@ const ActivityItem = ({ activity, onRemove, timeState, dateIncrement, updateActi
                 onChangeText={handleInputChange}
                 maxLength={maxLength}
                 keyboardType="default" 
-                onSubmitEditing={() => HandleSubmitEditing(inputValue, input2Value, maxLength, activity, dateIncrement, updateActivity)}
+                onSubmitEditing={() => HandleSubmitEditing(inputValue, input2Value, maxLength, activity, dateIncrement, updateActivity, moveActivity)}
                 returnKeyType="done"
                 style={styles.timeText} />
                 <Text style={styles.timeText}> - </Text>
@@ -107,7 +108,7 @@ const ActivityItem = ({ activity, onRemove, timeState, dateIncrement, updateActi
                 onChangeText={handleInput2Change}
                 maxLength={maxLength}
                 keyboardType="default"
-                onSubmitEditing={() => HandleSubmitEditing(inputValue, input2Value, maxLength, activity, dateIncrement, updateActivity)}
+                onSubmitEditing={() => HandleSubmitEditing(inputValue, input2Value, maxLength, activity, dateIncrement, updateActivity, moveActivity)}
                 returnKeyType="done" 
                 style={styles.timeText} />
               </>
@@ -130,13 +131,14 @@ const ActivityItem = ({ activity, onRemove, timeState, dateIncrement, updateActi
 );}
 
 function Journal() {
-
+  
   const { user } = useAuth();
   const [dbActivities, setDbActivities] = useState<any>(null);
   const [version, setVersion] = useState(0)
   const [activityInfo, setActivityInfo] = useState<Activity[]>([])
-  const { removeActivity, updateActivity, dateIncrement, setDateIncrement } = useAppContext();
+  const { removeActivity, updateActivity, moveActivity, dateIncrement, setDateIncrement } = useAppContext();
   const [isTimeTapped, setTimedTapped] = useState<(boolean | string)[]>([false, ""]);
+  const [localTime, setLocalTime] = useState<DateTime>(DateTime.local().plus({ days: dateIncrement }))
   const remove = (act: Activity) => {
     removeActivity(null, act);
     setVersion(prevVersion => prevVersion + 1)
@@ -144,12 +146,13 @@ function Journal() {
   const [activityDescribeVisible, setActivityDescribeVisible] = useState<boolean>(false);
   useEffect(() => {
     FetchDayActivities(user, dateIncrement, setDbActivities)
-
+    setLocalTime(DateTime.local().plus({ days: dateIncrement }))
+    setTimedTapped([false, ""])
   }, [user, version, dateIncrement]);
   
   //toggle the state of the modal
     const [modalVisible, setModalVisible] = useState(false);
-    const toggleModal = () => setModalVisible(!modalVisible)
+    const toggleModal = () => {setModalVisible(!modalVisible); setTimedTapped([false, ""]);}
     const flatListRef = useRef<FlatList>(null);
     useEffect(() => {
       const timer = setTimeout(() => {
@@ -157,6 +160,7 @@ function Journal() {
       }, 100); // Slight delay to ensure list is rendered
   
       // Clean up the timer if the component unmounts
+      setTimedTapped([false, ""])
       return () => clearTimeout(timer);
     }, [dbActivities]); // Empty dependency array ensures this runs only on initial render
 
@@ -164,6 +168,7 @@ function Journal() {
       setTimedTapped([true, activity.id]);
     }
     const activityTapped = (activity: Activity) => {
+      setTimedTapped([false, ""])
       if(activity.button.text=="Multi-Activity") {
         if(activity.Multi) {
         let multiActivities: Activity[] = []
@@ -184,26 +189,27 @@ function Journal() {
         <MyModal visible={modalVisible} onClose={toggleModal} />
         <ActivityDescribeModal style={styles.durationModal} ActivityDescribeVisible={activityDescribeVisible} Info={activityInfo} onClose={() => setActivityDescribeVisible(false)} onTapOut={() => setActivityDescribeVisible(false)}/>
         <View style={styles.contentContainer}>
-          <View style={styles.headerContainer}>
-              <TouchableOpacity onPress={() => setDateIncrement(dateIncrement-1)}>
+              <View style={{alignItems: 'center'}}>
+                <ThemedText type="titleText">My Journal</ThemedText>
+              </View>
+        <View style={styles.headerContainer}>
+        <TouchableOpacity onPress={() => setDateIncrement(dateIncrement-1)}>
                 <View style={styles.incrementButtonContainer}>
                   <Ionicons name="return-up-back" size={height/27} color="black"/>
                 </View>
-              </TouchableOpacity>
-              <View style={styles.titleContainer}>
-                <ThemedText type="titleText">My Journal</ThemedText>
-              </View>
-              <TouchableOpacity onPress={() => setDateIncrement(dateIncrement+1)}>
+        </TouchableOpacity>   
+        <ThemedText type="subtitle" style={styles.titleContainer}>{localTime.toFormat('cccc')}</ThemedText>
+        <TouchableOpacity onPress={() => setDateIncrement(dateIncrement+1)}>
               <View style={styles.incrementButtonContainer}>
                 <Ionicons name="return-up-forward" size={height/27} color="black"/>
-                </View>
-              </TouchableOpacity>
+              </View>
+        </TouchableOpacity>
         </View>
         {dbActivities ? 
         <FlatList 
         ref={flatListRef}
         data={dbActivities}
-        renderItem={({ item }) => <ActivityItem activity={item} onRemove={remove} timeState={isTimeTapped} dateIncrement={dateIncrement} updateActivity={updateActivity} onTimeTap={timeTapped} onTap={activityTapped}/>}
+        renderItem={({ item }) => <ActivityItem activity={item} onRemove={remove} timeState={isTimeTapped} dateIncrement={dateIncrement} updateActivity={updateActivity} moveActivity={moveActivity} onTimeTap={timeTapped} onTap={activityTapped}/>}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
         />
@@ -242,6 +248,9 @@ headerContainer: {
 },
 titleContainer: {
   padding: 10,
+},
+dateContainer: {
+  alignItems: 'center'
 },
 incrementButtonContainer: {
   backgroundColor: 'white'
@@ -295,8 +304,6 @@ timeText: {
   fontSize: 13,
   flexWrap: 'nowrap',
   color: '#333',
-  borderColor: 'yellow',
-  borderWidth: 3
 },
 activityName: {
   flex: 3,

@@ -1,17 +1,7 @@
 import getAllActivitiesForUser from '@/Data/GetAllActivities'
 import {useEffect, useState} from 'react'
 import {useAuth} from '@/contexts/AuthContext'
-
-
-type ButtonState = {
-    text: string;
-    iconLibrary: string;
-    icon: string;
-    keywords: string[];
-    tags?: string[];
-    pressed: boolean;
-    id?: string;
-  };
+import {ButtonState} from '@/Types/ActivityTypes'
 
   const ActivityButtons: ButtonState[] = [
     // Food/Drink Related
@@ -117,7 +107,7 @@ type ButtonState = {
     { text: 'Playing Board Games', iconLibrary: "materialCommunityIcons", icon: "game-board", keywords: ['Games', 'Board Games'], pressed: false, tags: ['Hobbies'] },
     { text: 'Collecting', iconLibrary: "materialIcons", icon: "collections", keywords: ['Stamps', 'Coins', 'Antiques'], pressed: false, tags: ['Hobbies'] },
     //add icon, edit keywords
-    { text: 'Journaling', iconLibrary: "materialIcons", icon: "collections", keywords: ['Stamps', 'Coins', 'Antiques'], pressed: false, tags: ['Self-Improvement', 'Hobbies'] },
+    { text: 'Journaling', iconLibrary: "materialIcons", icon: "book", keywords: ['Journal', 'Logging'], pressed: false, tags: ['Self-Improvement', 'Hobbies'] },
     //
     { text: 'Other Hobbies', iconLibrary: "materialIcons", icon: "more-horiz", keywords: ['Miscellaneous'], pressed: false, tags: ['Hobbies'] },
     //Chores
@@ -191,6 +181,7 @@ const useCustomSet = (): any => {
           text,
           totalDuration
         }));
+        console.log(activities)
         setDurationSummary(result)
 
         const activityCounts = countValues(activityText);
