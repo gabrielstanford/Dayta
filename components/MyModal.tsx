@@ -12,7 +12,8 @@ import uuid from 'react-native-uuid';
 import DurationModal from './DurationModal'
 import MultitaskModal from './MultitaskModal'
 import ActivitySearchModal from './ActivitySearchModal'
-import {ShuffledActivityButtons, useCustomSet} from '@/Data/ActivityButtons'
+import { useCustomSet} from '@/Data/ActivityButtons'
+import FetchActivityButtons from '@/Data/FetchCustomActivities'
 import Toast from 'react-native-toast-message'
 import {ButtonState, Activity, TimeBlock} from '@/Types/ActivityTypes'
 
@@ -77,14 +78,8 @@ interface MyModalProps extends ModalProps {
 const MultiButton: ButtonState = {text: 'Multi-Activity', iconLibrary: "fontAwesome5", keywords: [], icon: "tasks", pressed: false}
 
 const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) => {
-  const {finalArray} = useCustomSet();
-  const { addActivity, removeActivity } = useAppContext();
-  //setting button states dynamically based on past user activities. 
-  const [buttonStates, setButtonStates] = useState<ButtonState[]>([]);
-
-  useEffect(() => {
-    setButtonStates(finalArray);
-  }, [finalArray]);
+  const { addActivity, shuffledActButtons } = useAppContext();
+  const {finalArray} = useCustomSet(shuffledActButtons);
 
   const [searchModalVisible, setSearchModalVisible] = useState<boolean>(false);
   const [MultitaskModalVisible, setMultitaskModalVisible] = useState<boolean>(false);
@@ -95,7 +90,8 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
 
   const handlePress = (text: string) => {
 
-      const activity = ShuffledActivityButtons.find(item => item.text===text)
+      const activity = shuffledActButtons.find((item: ButtonState) => item.text===text)
+      
       if(activity) {
       setSelectedActivity(activity);
       }
@@ -140,7 +136,8 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
       //   setSearchModalVisible(false);
       // }
       // setDurationModalVisible(true);
-      const activities = ShuffledActivityButtons.filter(item => texts.includes(item.text))
+      
+      const activities = shuffledActButtons.filter((item: ButtonState) => texts.includes(item.text))
       if(activities) {
       setMultiActivity(activities)
       setSelectedActivity(null)
@@ -151,15 +148,15 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
     }
     // Define rows for grid layout
     const rows = [
-      buttonStates.slice(0, 3), // First row
-      buttonStates.slice(3, 6), // Second row
-      buttonStates.slice(6, 9)  // Third row
+      finalArray.slice(0, 3), // First row
+      finalArray.slice(3, 6), // Second row
+      finalArray.slice(6, 9)  // Third row
     ];  
 
     const renderButtons = () => {
       return rows.map((row, rowIndex) => (
         <View key={rowIndex} style={styles.quickAddRow}>
-          {row.map((button, buttonIndex) => {
+          {row.map((button: ButtonState, buttonIndex: number) => {
             const IconComponent = getIconComponent(button.iconLibrary);
   
             return (
@@ -193,6 +190,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
     }
     return (
       <Modal
+      key={shuffledActButtons.length}
       transparent={false}
       animationType="slide"
       visible={visible}

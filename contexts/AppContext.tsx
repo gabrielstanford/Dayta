@@ -4,12 +4,14 @@ import { firestore } from '@/firebase/firebase';
 import { useAuth } from './AuthContext'; // Assume you have a context for auth
 import { DateTime } from 'luxon';
 import {Activity, ButtonState} from '@/Types/ActivityTypes'
+import fetchCustomActivities from '@/Data/FetchCustomActivities';
 
 interface AppContextProps {
   activities: Activity[];
   dateIncrement: number;
   setDateIncrement: React.Dispatch<React.SetStateAction<number>>;
   updateActivity: (activity: Activity, updates: Partial<Activity>) => void;
+  shuffledActButtons: ButtonState[];
   moveActivity: (activity: Activity, updates: Partial<Activity>) => void;
   addActivity: (activity: Activity) => void;
   addCustomActivity: (button: ButtonState) => void;
@@ -27,6 +29,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [dateIncrement, setDateIncrement] = useState(0);
   const { user } = useAuth(); // Get the authenticated user from your auth context
+  const [shuffledActButtons, setShuffledActButtons] = useState<ButtonState[]>([]);
+  const [newCustomActivity, setNewCustomActivity] = useState<number>(0)
+
 // Function to update an activity
 const updateActivity = async (activity: Activity, updates: Partial<Activity>) => {
   //if start time's date is different, then after updating the times, call a diff function, moveactivity and pass in the updated one to change date ref.
@@ -45,7 +50,6 @@ const updateActivity = async (activity: Activity, updates: Partial<Activity>) =>
 
     // Update the activity document
     await updateDoc(activityRef, updatedFields);
-    console.log('Activity updated successfully!');
   }
   } catch (error) {
     console.error('Error updating activity: ', error);
@@ -115,13 +119,15 @@ const moveActivity = async (
 const addCustomActivity = async (button: ButtonState) => {
   if (user) {
     try {
-      const activityRef = doc(firestore, `users/${user.uid}/customActivities`, button.text); // Using activity name as ID, or you can generate a random ID
+      const activityRef = doc(firestore, 'users', user.uid, 'customActivities', button.text); // Using activity name as ID, or you can generate a random ID
       const newActivity = {
         ...button,
       };
 
       await setDoc(activityRef, newActivity);
       console.log("Custom activity added successfully");
+      await fetchActivities();
+      console.log('Activities Fetched')
     } catch (error) {
       console.error("Error adding custom activity: ", error);
     }
@@ -129,6 +135,23 @@ const addCustomActivity = async (button: ButtonState) => {
     console.log("No user logged in");
   }
 };
+
+const fetchActivities = async () => {
+  try {
+    if (!user) return;
+
+    await fetchCustomActivities(user, (updatedButtons: ButtonState[]) => {
+      setShuffledActButtons(updatedButtons);
+    });
+  } catch (error) {
+    console.error('Error fetching activities:', error);
+  }
+};
+
+useEffect(() => {
+  fetchActivities();
+}, [user]);
+
   const addActivity = async (activity: Activity) => {
     try {
       if (user) {
@@ -176,7 +199,6 @@ const addCustomActivity = async (button: ButtonState) => {
       }
       else if(activ ){
         const startDate = new Date(activ.timeBlock.startTime * 1000).toISOString().split('T')[0];
-        console.log(startDate)
         await deleteDoc(doc(firestore, 'users', user.uid, 'dates', startDate, 'activities', activ.id));
 
         setTimeout(() => {
@@ -197,7 +219,7 @@ const addCustomActivity = async (button: ButtonState) => {
   };
 
   return (
-    <AppContext.Provider value={{ activities, dateIncrement, setDateIncrement, addActivity, addCustomActivity, updateActivity, moveActivity, removeActivity }}>
+    <AppContext.Provider value={{ activities, dateIncrement, shuffledActButtons, setDateIncrement, addActivity, addCustomActivity, updateActivity, moveActivity, removeActivity }}>
       {children}
     </AppContext.Provider>
   );

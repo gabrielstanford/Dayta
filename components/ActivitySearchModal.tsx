@@ -2,31 +2,28 @@
 import React, { useState } from 'react';
 import { View, FlatList, Text, StyleSheet, Pressable, Modal, Dimensions, TouchableWithoutFeedback , TouchableOpacity} from 'react-native';
 import { SearchBar } from '@rneui/themed';
-import {FlippedActivityButtons} from '@/Data/ActivityButtons'
+import {ButtonState} from '@/Types/ActivityTypes'
+import {useAppContext} from '@/contexts/AppContext'
 
 const {width, height} = Dimensions.get("window");
-type ButtonState = {
-  text: string;
-  iconLibrary: string;
-  icon: string;
-  pressed: boolean;
-  id?: string;
-};
+
 interface SearchProps  {
   visible: boolean;
   onClose: () => void;
   onClick: (text: string) => void;
 }
 const ActivitySearchModal: React.FC<SearchProps> = ({visible, onClose, onClick}) => {
+  const {shuffledActButtons} = useAppContext();
+  // console.log('Did activity search find it ', shuffledActButtons.filter((button: ButtonState) => button.text==="Runnana"))
   const [query, setQuery] = useState<string>('');
-  const [results, setResults] = useState<ButtonState[]>(FlippedActivityButtons);
+  const [results, setResults] = useState<ButtonState[]>(shuffledActButtons);
 
   const handleSearch = (text: string) => {
     setQuery(text);
     if (text.trim() === '') {
-      setResults(FlippedActivityButtons);
+      setResults(shuffledActButtons);
     } else {
-      const filteredResults = FlippedActivityButtons.filter(activity =>
+      const filteredResults = shuffledActButtons.filter((activity: ButtonState) =>
         activity.text.toLowerCase().includes(text.toLowerCase()) ||
         activity.keywords.some(keyword => keyword.toLowerCase().includes(text.toLowerCase()))
       );
@@ -36,7 +33,7 @@ const ActivitySearchModal: React.FC<SearchProps> = ({visible, onClose, onClick})
 
   const clearSearch = () => {
     setQuery('');
-    setResults(FlippedActivityButtons);
+    setResults(shuffledActButtons);
   };
 
   return (

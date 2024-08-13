@@ -5,7 +5,7 @@ import {useEffect, useState} from 'react'
 const { width, height } = Dimensions.get('window');
 const buttonWidth = width/6.25
 import {useAuth} from '@/contexts/AuthContext'
-import {AppProvider} from '@/contexts/AppContext'
+import {AppProvider, useAppContext} from '@/contexts/AppContext'
 import {useCustomSet} from '@/Data/ActivityButtons'
 import PieChart from '@/components/PieChart'
 import Index from '@/components/BlockedTime'
@@ -42,8 +42,8 @@ const getTop9WithOther = (activities: ActivitySummary[]): ActivitySummary[] => {
 
 function Page() {
   
-  const { user } = useAuth();
-  const {entries, durationSummary} = useCustomSet();
+  const {shuffledActButtons} = useAppContext()
+  const {entries, durationSummary} = useCustomSet(shuffledActButtons);
 
   const [entryState, setEntryState] = useState<[string, number][]>([]);
   const [durationSumState, setDurationSumState] = useState<ActivitySummary[]>([]);

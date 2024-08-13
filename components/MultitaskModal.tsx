@@ -12,28 +12,6 @@ import { SearchBar } from '@rneui/themed'
 
 const {width, height} = Dimensions.get("window");
 const buttonWidth = width/6.25
-interface TimeBlock {
-  startTime: number; // Unix timestamp
-  duration: number;  // Duration in seconds
-  endTime: number;   // Unix timestamp
-  }
-  type ButtonState = {
-    text: string;
-    iconLibrary: string;
-    icon: string;
-    pressed: boolean;
-    id?: string;
-  };
-  interface TimeBlock {
-    startTime: number,   // Unix timestamp for the start time
-    duration: number,    // Duration in seconds
-    endTime: number      // Unix timestamp for the end time (startTime + duration)
-  }
-  interface Activity {
-    id: string;
-    button: ButtonState;
-    timeBlock: TimeBlock;
-  }
   
   interface MultitaskModalProps extends ModalProps {
     MultitaskModalVisible: boolean;
