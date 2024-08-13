@@ -15,8 +15,10 @@ const titleWidth = width/1.5;
 function Logic() {
     const {addCustomActivity} = useAppContext();
     const {user} = useAuth();
-    const [inputText, setInputText] = useState<string>("filler")
-    const [tagValue, setTagValue] = useState<string[]>([""])
+    const [inputText, setInputText] = useState<string>("")
+    const [tag1Value, setTag1Value] = useState<string>("")
+    const [tag2Value, setTag2Value] = useState<string>("")
+
 
     const [newButton, setNewButton] = useState<ButtonState>()
    
@@ -25,8 +27,18 @@ function Logic() {
        };
 
     const handleSubmit = () => {
-        if(inputText.length>3 && tagValue.length>0) {
-        const newButton = {text: inputText,  iconLibrary: "materialIcons", icon: "more-horiz", keywords: ['Miscellaneous'], pressed: false, tags: tagValue}
+        if(inputText.length>3 && tag1Value.length>0) {
+        let tags=[""];
+        if(tag1Value.length>0 && tag2Value.length>0) {
+            tags=[tag1Value, tag2Value]
+        }
+        else if (tag1Value.length>0 && tag2Value=="") {
+          tags=[tag1Value]
+        }
+        else if(tag2Value.length>0 && tag1Value=="") {
+          tags=[tag2Value]
+        }
+        const newButton = {text: inputText,  iconLibrary: "materialIcons", icon: "more-horiz", keywords: ['Miscellaneous'], pressed: false, tags: tags}
         addCustomActivity(newButton);
         alert("successfully added custom activity. feel free to use it now as often as you'd like!")
         }
@@ -39,10 +51,11 @@ function Logic() {
         <View style={styles.modalOverlay}>
           <View style={styles.headerSection}>
             <View style={styles.titleContainer}>
-              <ThemedText type="titleText">Quick Add</ThemedText>
+              <ThemedText type="titleText">Create Custom Activities</ThemedText>
             </View>
             </View>
-          <View style={styles.quickAddContainer}>
+          <View style={styles.textContainer}>
+            <ThemedText type="subtitle">Activity Name: </ThemedText>
             <View style={styles.textSection}>
             <TextInput value={inputText} 
                 onChangeText={handleInputChange}
@@ -53,22 +66,24 @@ function Logic() {
                 style={styles.textInputContainer}
             />
             </View>
-            <View style={styles.tagSection}>
-            <TagDropdown setTagValue={setTagValue}/>
+          </View>
+          <View style={styles.tagSection}>
+            <ThemedText type="subtitle">Add Tags: </ThemedText>
+            <TagDropdown setTagValue={setTag1Value}/>
+            <TagDropdown setTagValue={setTag2Value}/>
             </View>
-          </View>
-          <TouchableOpacity onPress={() => handleSubmit()} style={styles.closeButton}>
-            <View style={styles.buttonContainer}>
-              <Text style={{fontSize: 21, color: 'white'}}>Create Activity</Text>
-          </View>
-          </TouchableOpacity>
+            <View style={styles.createContainer}>
+              <TouchableOpacity onPress={() => handleSubmit()} style={styles.closeButton}>
+                <Text style={styles.buttonText}>Create Activity</Text>
+              </TouchableOpacity>
+            </View>
         </View>
         </>
     )
 }
 
 interface TagDropdownProps {
-    setTagValue: Dispatch<SetStateAction<string[]>>;
+    setTagValue: Dispatch<SetStateAction<string>>;
   }
   const TagDropdown: React.FC<TagDropdownProps> = ({ setTagValue }) => {
     const tags = [
@@ -89,7 +104,7 @@ interface TagDropdownProps {
     ]
     return (
       <RNPickerSelect
-        onValueChange={(value) => setTagValue([value])}
+        onValueChange={(value) => setTagValue(value)}
         items={tags}
       />
     );
@@ -129,33 +144,42 @@ const Personalize: React.FC = () => {
       flex: 1,
       alignItems: 'flex-start'
     },
-    quickAddContainer: {
-      flex: 7,
-      alignItems: 'center',
+    textContainer: {
+      flex: 2,
+      flexDirection: 'row',
+      padding: 30,
+      rowGap: 20,
     },
     textSection: {
         flex: 1,
         flexDirection: 'row'
     },
     tagSection: {
-        flex: 1,
-        flexDirection: 'row'
+        flex: 7,
+        flexDirection: 'row',
+        justifyContent: 'space-around'
 
     },
-    buttonContainer: {
-        alignItems: 'center',
-        padding: 10
-      },
-      closeButton: {
-        width: buttonWidth,
-        height: buttonHeight,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#b4245c',
-      },
+
+    createContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    closeButton: {
+      backgroundColor: 'blue', // Example background color
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      borderRadius: 5,
+    },
+    buttonText: {
+      fontSize: 21,
+      color: 'white',
+    },
     textInputContainer: {
      backgroundColor: 'white',
-     width: 100,
-     height: 50
+     width: width/2,
+     height: 50,
+     padding: 20
     },
   });
