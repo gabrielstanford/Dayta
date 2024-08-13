@@ -7,31 +7,11 @@ import Slider from '@react-native-community/slider';
 import {useAppContext} from '@/contexts/AppContext'
 import {useAuth} from '@/contexts/AuthContext'
 import FetchDayActivities from '@/Data/FetchDayActivities'
+import {RadioButton} from 'react-native-paper'
 import TimeInput from './HourPicker'
+import {ButtonState, Activity, TimeBlock, ActivityWithEnd} from '@/Types/ActivityTypes'
 
 const {width, height} = Dimensions.get("window");
-interface TimeBlock {
-  startTime: number; // Unix timestamp
-  duration: number;  // Duration in seconds
-  endTime: number;   // Unix timestamp
-  }
-  type ButtonState = {
-    text: string;
-    iconLibrary: string;
-    icon: string;
-    pressed: boolean;
-    id?: string;
-  };
-  interface TimeBlock {
-    startTime: number,   // Unix timestamp for the start time
-    duration: number,    // Duration in seconds
-    endTime: number      // Unix timestamp for the end time (startTime + duration)
-  }
-  interface Activity {
-    id: string;
-    button: ButtonState;
-    timeBlock: TimeBlock;
-  }
   
   interface DurationModalProps extends ModalProps {
     durationModalVisible: boolean;
@@ -74,13 +54,20 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
   }, [durationModalVisible, hasInitialized, user]);
 
   if(dbActivities) {
-  const sortedActivities = dbActivities.sort((a, b) => a.timeBlock.startTime - b.timeBlock.startTime);
+// Filter out activities without an endTime
+  const filteredWithEnd: ActivityWithEnd[] = dbActivities.filter(
+    (act): act is Activity & { timeBlock: { endTime: number } } => act.timeBlock.endTime !== null
+  );
+
+  // Sort the filtered activities by endTime
+  const sortedActivities = filteredWithEnd.sort(
+    (a, b) => (a.timeBlock.endTime || 0) - (b.timeBlock.endTime || 0)
+  );
   useEffect(() => {
     if (durationModalVisible) {
       if (!hasInitialized && sortedActivities.length > 0) {
         const mostRecentEndTime = unixEndTimeToHMS(
-          sortedActivities[sortedActivities.length-1].timeBlock.endTime
-        );
+          sortedActivities[sortedActivities.length-1].timeBlock.endTime);
         setSelectedHour(mostRecentEndTime[0]);
         setSelectedMinute(mostRecentEndTime[1]);
         setSelectedPeriod(mostRecentEndTime[2]);
@@ -113,8 +100,13 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
   
   const generateTimeString = () => {
     //const localTime = 
-    
-    const timeString = selectedHour + ":" + selectedMinute + " " + selectedPeriod
+    let timeString="888"
+    if(value=="With Start Time" && selectedHour) {
+    timeString = selectedHour + ":" + selectedMinute + " " + selectedPeriod
+    }
+    else {
+      alert("no start time included")
+    }
     return timeString
   }
   
@@ -124,6 +116,7 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
     }
     const convertTimeToUnix = (timeString: string, date: Date = new Date()): number => {
       // Parse the time string
+      if(timeString!=="888") {
       const [time, period] = timeString.split(' ');
       const [hours, minutes] = time.split(':').map(Number);
     
@@ -140,6 +133,19 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
     
       // Convert to Unix timestamp and return
       return Math.floor(utcDate.getTime() / 1000);
+    }
+    else {
+      // Convert the local Date object to UTC time
+      const utcDate = new Date(Date.UTC(
+        date.getUTCFullYear(),
+        date.getUTCMonth(),
+        date.getUTCDate(),
+        3,
+        25,
+        31
+      ));
+      return utcDate.getTime() / 1000;
+    }
     };
     
     function adjustDateByDays(date: Date, days: number): Date {
@@ -169,7 +175,10 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
       const offset = localDate.getTimezoneOffset(); // Time zone offset in minutes
       const utcZonedTime = dateIncrement==0 ? new Date(localDate.getTime() + offset * 60000) : adjustDateByDays(new Date(localDate.getTime() + offset * 60000), dateIncrement);
       const unixTimestamp = Math.floor(utcZonedTime.getTime() / 1000);
-      const endTimeUnix = unixTimestamp + durationSeconds; // Calculate end time
+      let endTimeUnix = null
+      if(startTimeUnix % 60 !== 31) {
+        endTimeUnix = unixTimestamp + durationSeconds; // Calculate end time
+      }
       return {
         startTime: unixTimestamp,
         duration: durationSeconds,
@@ -183,6 +192,7 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
       return `${hours}h ${remainingMinutes}m`; 
     
     }
+    const [value, setValue] = useState<string>("With Start Time");
 
     return(
         <Modal 
@@ -195,6 +205,21 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
             <View style={styles.durationModalOverlay}>
             <TouchableWithoutFeedback>
                 <View style={styles.durationModalContent}>
+                <RadioButton.Group onValueChange={value => setValue(value)} value={value}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-around', margin: 20 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <RadioButton color="darkcyan" value="With Start Time" />
+                      <Text>With Start Time</Text>
+                    </View>
+
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <RadioButton color="darkcyan" value="Without start Time" />
+                      <Text>No Start Time</Text>
+                    </View>
+                  </View>
+                </RadioButton.Group>
+                {value=="With Start Time" ? 
+                <>
                   <View style={styles.titleContainer}>
                     <ThemedText type="durationTitle"> Start Time</ThemedText>
                   </View>
@@ -209,7 +234,7 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
                       onPeriodChange={handlePeriodChange}
                       />
                     </View>
-                  </View>
+                  </View></> : <></>}
                 <View style={styles.titleContainer}>
                   <ThemedText type="durationTitle"> Duration: {formatTime(durationMinutes + durationHours*60)} </ThemedText>
                 </View>

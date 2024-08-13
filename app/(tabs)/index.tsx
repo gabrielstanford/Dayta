@@ -11,7 +11,7 @@ import getFilteredActivityRefs from '@/Data/HandleTime'
 import FetchDayActivities from '@/Data/FetchDayActivities'
 import ActivityDescribeModal from '@/components/ActivityDescribeModal'
 import {DateTime} from 'luxon'
-import {Activity} from '@/Types/ActivityTypes';
+import {Activity, ActivityWithEnd} from '@/Types/ActivityTypes';
 import HandleSubmitEditing from '@/Data/HandleSubmitEditing';
 
 // Get screen width. This is for more responsive layouts
@@ -57,7 +57,7 @@ const convertUnixToTimeString = (startTime: number, endTime: number, isInput: bo
 };
 
 interface ActivityItemProps {
-  activity: Activity;
+  activity: ActivityWithEnd;
   onRemove: (activity: Activity) => void 
   timeState:(boolean | string)[];
   dateIncrement: number,
@@ -133,7 +133,10 @@ const ActivityItem = ({ activity, onRemove, timeState, dateIncrement, updateActi
 function Journal() {
   
   const { user } = useAuth();
-  const [dbActivities, setDbActivities] = useState<any>(null);
+  const [dbActivities, setDbActivities] = useState<Activity[]>([]);
+  const filteredWithEnd: ActivityWithEnd[] = dbActivities.filter(
+    (act): act is Activity & { timeBlock: { endTime: number } } => act.timeBlock.endTime !== null
+  );
   const [version, setVersion] = useState(0)
   const [activityInfo, setActivityInfo] = useState<Activity[]>([])
   const { removeActivity, updateActivity, moveActivity, dateIncrement, setDateIncrement } = useAppContext();
@@ -205,10 +208,10 @@ function Journal() {
               </View>
         </TouchableOpacity>
         </View>
-        {dbActivities ? 
+        {filteredWithEnd.length>0 ? 
         <FlatList 
         ref={flatListRef}
-        data={dbActivities}
+        data={filteredWithEnd}
         renderItem={({ item }) => <ActivityItem activity={item} onRemove={remove} timeState={isTimeTapped} dateIncrement={dateIncrement} updateActivity={updateActivity} moveActivity={moveActivity} onTimeTap={timeTapped} onTap={activityTapped}/>}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}

@@ -119,6 +119,9 @@ const ActivityButtons: ButtonState[] = [
   { text: 'Cooking', iconLibrary: "materialIcons", icon: "restaurant", keywords: ['Food Preparation'], pressed: false, tags: ['Chores'] },
   //add icon
   { text: 'Other Chores', iconLibrary: "materialIcons", icon: "restaurant", keywords: ['Other', 'Chores'], pressed: false, tags: ['Chores'] },
+  //Helping Others
+  { text: 'Cooking For Family', iconLibrary: "materialIcons", icon: "restaurant", keywords: ['Food Preparation'], pressed: false, tags: ['Helping Others'] },
+
   // Other
   //add icon
   { text: 'Getting Ready', iconLibrary: "materialIcons", icon: "cleaning-services", keywords: ['Dressing', 'Getting Dressed', 'Clothes', 'Putting On Clothes'], pressed: false, tags: ['Other'] },

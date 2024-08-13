@@ -71,23 +71,26 @@ interface TagDropdownProps {
     setTagValue: Dispatch<SetStateAction<string[]>>;
   }
   const TagDropdown: React.FC<TagDropdownProps> = ({ setTagValue }) => {
+    const tags = [
+      { label: 'Food/Drink', value: 'Food/Drink'},
+      { label: 'Physical', value: 'Physical' },
+      { label: 'Relax', value: 'Relax' },
+      { label: 'Music', value: 'Music' },
+      { label: 'Entertainment', value: 'Entertainment' },
+      { label: 'Social', value: 'Social' },
+      { label: 'Work/Study', value: 'Work/Study' },
+      { label: 'Travel/Commute', value: 'Travel/Commute' },
+      { label: 'Hobbies', value: 'Hobbies' },
+      { label: 'Chores', value: 'Chores' },
+      { label: 'Self-Improvement', value: 'Self-Improvement' },
+      { label: 'Helping Others', value: 'Helping Others' },
+
+      { label: 'Other', value: 'Other' },
+    ]
     return (
       <RNPickerSelect
         onValueChange={(value) => setTagValue([value])}
-        items={[
-          { label: 'Food/Drink', value: 'Food/Drink'},
-          { label: 'Physical', value: 'Physical' },
-          { label: 'Relax', value: 'Relax' },
-          { label: 'Music', value: 'Music' },
-          { label: 'Entertainment', value: 'Entertainment' },
-          { label: 'Social', value: 'Social' },
-          { label: 'Work/Study', value: 'Work/Study' },
-          { label: 'Travel/Commute', value: 'Travel/Commute' },
-          { label: 'Hobbies', value: 'Hobbies' },
-          { label: 'Chores', value: 'Chores' },
-          { label: 'Other', value: 'Other' },
-          { label: 'Self-Improvement', value: 'Self-Improvement' },
-        ]}
+        items={tags}
       />
     );
   };

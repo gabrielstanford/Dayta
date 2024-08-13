@@ -106,6 +106,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
       setTimeout(() => {
         if(selectedActivity) {
         selectedActivity.id="notimportant"
+        console.log(block)
         const activity = {id: uuid.v4() as string, button: selectedActivity as ButtonState, timeBlock: block};
         addActivity(activity);
         Toast.show({ type: 'success', text1: 'Added Activity To Journal!'})

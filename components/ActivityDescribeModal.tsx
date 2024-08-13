@@ -1,28 +1,11 @@
 import {ModalProps, Modal, View, StyleSheet, Dimensions, Text, TouchableWithoutFeedback, FlatList, TouchableOpacity} from 'react-native'
 import {ThemedText} from './ThemedText'
 import {Button} from '@rneui/themed'
-
+import {Activity} from '@/Types/ActivityTypes'
 
 const {width, height} = Dimensions.get("window");
 const buttonWidth = width/6.25
-interface TimeBlock {
-  startTime: number; // Unix timestamp
-  duration: number;  // Duration in seconds
-  endTime: number;   // Unix timestamp
-  }
-  type ButtonState = {
-    text: string;
-    iconLibrary: string;
-    icon: string;
-    pressed: boolean;
-    id?: string;
-  };
-  interface Activity {
-    id: string;
-    button: ButtonState;
-    timeBlock: TimeBlock;
-    Multi?: Activity[];
-  }
+
   
   interface MultitaskModalProps extends ModalProps {
     ActivityDescribeVisible: boolean;
