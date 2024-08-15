@@ -1,5 +1,5 @@
 // ActivitySearch.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, FlatList, Text, StyleSheet, Pressable, Modal, Dimensions, TouchableWithoutFeedback , TouchableOpacity} from 'react-native';
 import { SearchBar } from '@rneui/themed';
 import {ButtonState} from '@/Types/ActivityTypes'
@@ -13,17 +13,31 @@ interface SearchProps  {
   onClick: (text: string) => void;
 }
 const ActivitySearchModal: React.FC<SearchProps> = ({visible, onClose, onClick}) => {
-  const {shuffledActButtons} = useAppContext();
+  const {shuffledActButtons, fetchActivities} = useAppContext();
+  console.log('Shuffled Act Buttons being received: ', shuffledActButtons)
   // console.log('Did activity search find it ', shuffledActButtons.filter((button: ButtonState) => button.text==="Runnana"))
   const [query, setQuery] = useState<string>('');
   const [results, setResults] = useState<ButtonState[]>(shuffledActButtons);
+
+
+  useEffect(() => {
+    const fetchAndSetActivities = async () => {
+      await fetchActivities(); // Fetch and update context state
+    };
+
+    fetchAndSetActivities();
+  }, [fetchActivities]); // Ensure it runs on mount or if fetchActivities changes
+
+  useEffect(() => {
+    setResults(shuffledActButtons); // Update local state when context changes
+  }, [shuffledActButtons]);
 
   const handleSearch = (text: string) => {
     setQuery(text);
     if (text.trim() === '') {
       setResults(shuffledActButtons);
     } else {
-      const filteredResults = shuffledActButtons.filter((activity: ButtonState) =>
+      const filteredResults = results.filter((activity: ButtonState) =>
         activity.text.toLowerCase().includes(text.toLowerCase()) ||
         activity.keywords.some(keyword => keyword.toLowerCase().includes(text.toLowerCase()))
       );

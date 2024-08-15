@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { setDoc, doc, getDoc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { firestore } from '@/firebase/firebase';
 import { useAuth } from './AuthContext'; // Assume you have a context for auth
@@ -12,6 +12,7 @@ interface AppContextProps {
   setDateIncrement: React.Dispatch<React.SetStateAction<number>>;
   updateActivity: (activity: Activity, updates: Partial<Activity>) => void;
   shuffledActButtons: ButtonState[];
+  fetchActivities: () => Promise<void>
   moveActivity: (activity: Activity, updates: Partial<Activity>) => void;
   addActivity: (activity: Activity) => void;
   addCustomActivity: (button: ButtonState) => void;
@@ -29,8 +30,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [dateIncrement, setDateIncrement] = useState(0);
   const { user } = useAuth(); // Get the authenticated user from your auth context
-  const [shuffledActButtons, setShuffledActButtons] = useState<ButtonState[]>([]);
-  const [newCustomActivity, setNewCustomActivity] = useState<number>(0)
 
 // Function to update an activity
 const updateActivity = async (activity: Activity, updates: Partial<Activity>) => {
@@ -135,18 +134,26 @@ const addCustomActivity = async (button: ButtonState) => {
     console.log("No user logged in");
   }
 };
+  // Fetch and update buttons
+  const [shuffledActButtons, setShuffledActButtons] = useState<ButtonState[]>([]);
 
-const fetchActivities = async () => {
-  try {
-    if (!user) return;
-
-    await fetchCustomActivities(user, (updatedButtons: ButtonState[]) => {
-      setShuffledActButtons(updatedButtons);
-    });
-  } catch (error) {
-    console.error('Error fetching activities:', error);
-  }
-};
+  const fetchActivities = useCallback(async (): Promise<void> => {
+    try {
+      if (user) {
+        const updatedButtons = await new Promise<ButtonState[]>((resolve, reject) => {
+          fetchCustomActivities(user, (buttons: ButtonState[]) => {
+            resolve(buttons);
+          });
+        });
+        setShuffledActButtons(updatedButtons); // Update context state
+      } else {
+        setShuffledActButtons([]); // Clear buttons if no user
+      }
+    } catch (error) {
+      console.error('Error fetching activities:', error);
+      setShuffledActButtons([]); // Handle error by clearing buttons
+    }
+  }, [user]); // Depend on user to refetch if it changes
 
 useEffect(() => {
   fetchActivities();
@@ -217,9 +224,8 @@ useEffect(() => {
     console.error('Error adding activity to Firestore:', error);
     }
   };
-
   return (
-    <AppContext.Provider value={{ activities, dateIncrement, shuffledActButtons, setDateIncrement, addActivity, addCustomActivity, updateActivity, moveActivity, removeActivity }}>
+    <AppContext.Provider value={{ activities, dateIncrement, shuffledActButtons, fetchActivities, setDateIncrement, addActivity, addCustomActivity, updateActivity, moveActivity, removeActivity }}>
       {children}
     </AppContext.Provider>
   );

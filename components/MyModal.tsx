@@ -79,6 +79,7 @@ const MultiButton: ButtonState = {text: 'Multi-Activity', iconLibrary: "fontAwes
 
 const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) => {
   const { addActivity, shuffledActButtons } = useAppContext();
+
   const {finalArray} = useCustomSet(shuffledActButtons);
 
   const [searchModalVisible, setSearchModalVisible] = useState<boolean>(false);
