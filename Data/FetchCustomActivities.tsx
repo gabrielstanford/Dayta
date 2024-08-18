@@ -48,6 +48,7 @@ export const ActivityButtons: ButtonState[] = [
   { text: 'Woke Up', iconLibrary: "ionicons", icon: "alarm", keywords: ['Awoke', 'Good Morning', 'Woken Up', 'Wake Up', 'Alarm Rang', 'Started Day'], pressed: false, tags: ['Relax'] },
   { text: 'Meditating', iconLibrary: "materialCommunityIcons", icon: "meditation", keywords: ['Relaxing', 'Mindfulness', 'Yoga Nidra', 'NSDR'], pressed: false, tags: ['Relax'] },
   { text: 'Taking a Nap', iconLibrary: "materialIcons", icon: "bed", keywords: ['Rest', 'Sleep'], pressed: false, tags: ['Relax'] },
+  {text: 'Laying In Bed', iconLibrary: "materialIcons", icon: "bed", keywords: ['Lying In Bed', 'Laying Down', 'Relaxing'], pressed: false, tags: ['Relax']},
   { text: 'Other Relaxing Activity', iconLibrary: "materialIcons", icon: "more-horiz", keywords: ['Miscellaneous'], pressed: false, tags: ['Relax'] },
 
   // Music

@@ -17,7 +17,7 @@ interface AppContextProps {
   moveActivity: (activity: Activity, updates: Partial<Activity>) => void;
   addActivity: (activity: Activity) => void;
   addCustomActivity: (button: ButtonState) => void;
-  removeActivity: (id: string | null, activ: Activity | null) => void;
+  removeActivity: (activ: Activity) => void;
 }
 
 interface AppProviderProps {
@@ -147,7 +147,7 @@ useEffect(() => {
           console.log('Found storage immediately')
           if(justActivities.length==0) {
             console.log('justActivities length=0')
-          const justActivitiesTemp = JSON.parse(storage.getString('ShuffledActivities') as string)
+          const justActivitiesTemp = JSON.parse(storage.getString('JustActivities') as string)
           console.log('setting activities')
           setJustActivities(justActivitiesTemp as Activity[])
           }
@@ -181,11 +181,11 @@ useEffect(() => {
   }
   };
 
-  const initializeButtonData = async () => {
+  const initializeCustomActivities = async () => {
     if(user) {
-      if(storage.getString('ShuffledActivities')) {
+      if(storage.getString('CustomActivities')) {
         if(customActivities.length==0) {
-        const customActivitiesTemp = JSON.parse(storage.getString('ShuffledActivities') as string)
+        const customActivitiesTemp = JSON.parse(storage.getString('CustomActivities') as string)
         setCustomActivities(customActivitiesTemp as ButtonState[])
         }
       }
@@ -193,26 +193,31 @@ useEffect(() => {
         const activitiesRef = collection(firestore, `users/${user.uid}/customActivities`);
         const snapshot = await getDocs(activitiesRef);
   
-        const customActivities: ButtonState[] = snapshot.docs.map(doc => doc.data() as ButtonState);
+        const databaseCustom: ButtonState[] = snapshot.docs.map(doc => doc.data() as ButtonState);
         let activityButtons: ButtonState[] = ActivityButtons
-        if(customActivities.length>0) {
-        activityButtons = [...activityButtons, ...customActivities]
+        if(databaseCustom.length>0) {
+        activityButtons = [...activityButtons, ...databaseCustom]
         activityButtons = shuffle(activityButtons)
         }
-        storage.set('ShuffledActivities', JSON.stringify(activityButtons))
         setCustomActivities(activityButtons)
+        storage.set('CustomActivities', JSON.stringify(activityButtons))
       }
     }
   }
-
+ 
   initializeActivityData();
-  initializeButtonData();
+  initializeCustomActivities();
 }, [user]);
 
   const addActivity = async (activity: Activity) => {
     try {
+      setJustActivities(prevActivities =>
+        prevActivities.some(act => act.id === activity.id)
+          ? prevActivities // Avoid adding duplicates
+          : [...prevActivities, activity] // Add new activity
+      );
+      storage.set('JustActivities', JSON.stringify([...justActivities, activity]))
       if (user) {
-
         const startDate = new Date(activity.timeBlock.startTime * 1000).toISOString().split('T')[0];
         const dateRef = doc(firestore, 'users', user.uid, 'dates', startDate);
         const activityRef = doc(dateRef, 'activities', activity.id);
@@ -226,17 +231,7 @@ useEffect(() => {
           createdAt: serverTimestamp(), // Optional: add timestamp to the activity
         });
       }
-  
-        setTimeout(() => {
-        setJustActivities(prevActivities =>
-          prevActivities.some(act => act.id === activity.id)
-            ? prevActivities // Avoid adding duplicates
-            : [...prevActivities, activity] // Add new activity
-        );
-        storage.set('ShuffledActivities', JSON.stringify([...justActivities, activity]))
-        // setCustomActivities(prevButtons => [...prevButtons,   { text: 'A Wonderful World!', iconLibrary: "fontAwesome5", icon: "utensils", keywords: ['Restaurant', 'Cafe'], pressed: false, tags: ['Food/Drink'] }]) ;// Add new activity
-        console.log('completed setting just activities')
-      }, 0); // Delay the state update to avoid updating during rendering
+
     } catch (error) {
       console.error('Error adding activity to Firestore:', error);
     }
@@ -244,6 +239,10 @@ useEffect(() => {
 
   const addCustomActivity = async (button: ButtonState) => {
     try {
+      setCustomActivities(prevButtons => [...prevButtons, button] // Add new activity
+      );
+      storage.set('CustomActivities', JSON.stringify([...customActivities, button]))
+      console.log('completed setting custom activities')
         if (user) {
         // storage.set('ShuffledActivities', JSON.stringify(newActivities))
         // storage.set('CustomActivities', JSON.stringify([...customActivities, button]))
@@ -258,47 +257,19 @@ useEffect(() => {
         // await fetchActivities();
         // console.log('Activities Fetched')
       }
-        setTimeout(() => {
-        setCustomActivities(prevButtons => [...prevButtons, button] // Add new activity
-        );
-        storage.set('CustomActivities', JSON.stringify([...customActivities, button]))
-        console.log('completed setting custom activities')
-      }, 0); // Delay the state update to avoid updating during rendering
+
       } catch (error) {
       console.error("Error adding custom activity: ", error);
       }
   };
 
-  const removeActivity = async (id: string | null, activ: Activity | null) => {
+  const removeActivity = async (activ: Activity) => {
     try {
+      setJustActivities(prevActivities => prevActivities.filter(act => act.id !== activ.id));
+      storage.set('JustActivities', JSON.stringify(justActivities.filter(act => act.id !== activ.id)))
       if(user) {
-        if(id) {
-        const activity = justActivities.find(act => act.id===id)
-        if(activity) {
-        const startDate = new Date(activity.timeBlock.startTime * 1000).toISOString().split('T')[0];
-        await deleteDoc(doc(firestore, 'users', user.uid, 'dates', startDate, 'activities', id));
-        }
-        setTimeout(() => {
-          setJustActivities(prevActivities => 
-            prevActivities.filter(act => act.id !== id)
-          );
-          storage.set('ShuffledActivities', JSON.stringify(customActivities.filter(act => act.id !== id)))
-          }, 0); // Delay the state update to avoid updating during rendering
-      }
-      else if(activ ){
         const startDate = new Date(activ.timeBlock.startTime * 1000).toISOString().split('T')[0];
         await deleteDoc(doc(firestore, 'users', user.uid, 'dates', startDate, 'activities', activ.id));
-
-        setTimeout(() => {
-        // Update state with a filler
-        setJustActivities(prevActivities => {
-          const filteredActivities = prevActivities.filter(act => act.id !== activ.id);
-          // Add a filler entry to force a re-render
-          return [...filteredActivities, { button: {icon: "car", iconLibrary: "antDesign", id: 'filler-', keywords: ["stroll"], pressed: false, text: "Driving"}, id: "filler2", timeBlock: {duration: 0, endTime: 2, startTime: 3} }];
-        });
-
-          }, 0); // Delay the state update to avoid updating during rendering
-      }
 
     }
     } catch (error) {

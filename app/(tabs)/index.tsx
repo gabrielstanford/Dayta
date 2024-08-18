@@ -132,7 +132,7 @@ const ActivityItem = ({ activity, onRemove, timeState, dateIncrement, updateActi
 );}
 
 function Journal() {
-  
+
   const { user } = useAuth();
   const [dbActivities, setDbActivities] = useState<Activity[]>([]);
   const filteredWithEnd: ActivityWithEnd[] = dbActivities.filter(
@@ -152,7 +152,7 @@ function Journal() {
   const [isTimeTapped, setTimedTapped] = useState<(boolean | string)[]>([false, ""]);
   const [localTime, setLocalTime] = useState<DateTime>(DateTime.local().plus({ days: dateIncrement }))
   const remove = (act: Activity) => {
-    removeActivity(null, act);
+    removeActivity(act);
     setVersion(prevVersion => prevVersion + 1)
   }
   const [activityDescribeVisible, setActivityDescribeVisible] = useState<boolean>(false);

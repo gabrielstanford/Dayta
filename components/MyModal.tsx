@@ -88,6 +88,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
   const [multiActivity, setMultiActivity] = useState<ButtonState[] | null>(null);
   //const [multiTaskButton, setMultiTaskButton]
 
+  console.log('Final Array: ', finalArray)
   const handlePress = (text: string) => {
 
       const activity = customActivities.find((item: ButtonState) => item.text===text)

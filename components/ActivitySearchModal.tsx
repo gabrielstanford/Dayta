@@ -15,10 +15,14 @@ interface SearchProps  {
 const ActivitySearchModal: React.FC<SearchProps> = ({visible, onClose, onClick}) => {
   // console.log('Did activity search find it ', customActivities.filter((button: ButtonState) => button.text==="Runnana"))
   const {customActivities} = useAppContext();
+  console.log(customActivities)
   console.log('Activity Search re-rendered');
   const [query, setQuery] = useState<string>('');
   const [results, setResults] = useState<ButtonState[]>(customActivities);
 
+  useEffect(() => {
+    setResults(customActivities);
+  }, [customActivities])
   const handleSearch = (text: string) => {
     setQuery(text);
     if (text.trim() === '') {
