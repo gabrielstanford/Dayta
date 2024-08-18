@@ -20,7 +20,7 @@ export default function Recommendations() {
   return (
     <View style={styles.layoutContainer}>
       <View style={styles.titleContainer}>
-        <ThemedText type="titleText">Recommendations</ThemedText>
+        <ThemedText type="titleText" style={{fontSize: width/12}}>Recommendations</ThemedText>
       </View>
       <View style={styles.stepContainer}>
         <ThemedText type="journalText">Rec 1: Wake Up 1 Hour Later</ThemedText>

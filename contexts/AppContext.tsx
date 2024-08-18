@@ -123,18 +123,18 @@ const moveActivity = async (
 //   console.log('customActivities in AppProvider: ', customActivities);
 // }, [customActivities]);
   const addActivityToDate = (date: string, activity: Activity) => {
-    setAllActivities(prevDates => {
-      const existingDate = prevDates.find(d => d.date === date);
-      if (existingDate) {
-        return prevDates.map(d => 
-          d.date === date
-            ? { ...d, activities: [...d.activities, activity] }
-            : d
-        );
-      } else {
-        return [...prevDates, { date, activities: [activity] }];
-      }
-    });
+    // setAllActivities(prevDates => {
+    //   const existingDate = prevDates.find(d => d.date === date);
+    //   if (existingDate) {
+    //     return prevDates.map(d => 
+    //       d.date === date
+    //         ? { ...d, activities: [...d.activities, activity] }
+    //         : d
+    //     );
+    //   } else {
+    //     return [...prevDates, { date, activities: [activity] }];
+    //   }
+    // });
   };
 
 useEffect(() => {
@@ -143,7 +143,7 @@ useEffect(() => {
     
     if(user) {
         console.log('Initializing Activities; currently justActivities = ', justActivities)
-        if(storage.getString('AllActivities')) {
+        if(storage.getString('JustActivities')) {
           console.log('Found storage immediately')
           if(justActivities.length==0) {
             console.log('justActivities length=0')
@@ -164,19 +164,20 @@ useEffect(() => {
         for (const date of dates) {
           const activitiesRef = collection(firestore, 'users', user.uid, 'dates', date, 'activities');
           const activitiesSnapshot = await getDocs(activitiesRef);
-          const activities: Activity[] = activitiesSnapshot.docs.map(doc => doc.data() as Activity);
+          // const activities: Activity[] = activitiesSnapshot.docs.map(doc => doc.data() as Activity);
+          
           activitiesSnapshot.docs.forEach(doc => {
             // Adjust the type casting if your activity has a different structure
             activityTemp.push(doc.data() as Activity);
           });
           // Add each activity to the context, grouped by date
-          activities.forEach(activity => {
-            addActivityToDate(date, activity);
-          });
+          // activities.forEach(activity => {
+          //   addActivityToDate(date, activity);
+          // });
         }
-        storage.set('AllActivities', JSON.stringify(activityTemp))
 
         setJustActivities(activityTemp)
+        storage.set('JustActivities', JSON.stringify(activityTemp))
         }
   }
   };

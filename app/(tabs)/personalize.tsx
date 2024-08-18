@@ -51,14 +51,18 @@ function Personalize() {
     return (
         <>
         <View style={styles.modalOverlay}>
-          <View style={styles.headerSection}>
+          
             <View style={styles.titleContainer}>
-              <ThemedText type="titleText">Create Custom Activities</ThemedText>
+              <ThemedText type="titleText" style={{fontSize: width/12}}>Personalization</ThemedText>
             </View>
-            </View>
-          <View style={styles.textContainer}>
+          {/* <View style={styles.headerSection}>
+          </View> */}
+          <View style={styles.createActivityContainer}>
+          <View style={styles.textSection}>
+            <Text style={{fontSize: width/16, color: 'white', fontStyle: 'italic'}}>Create Custom Activity</Text>
+            <View style={styles.textContainer}>
             <ThemedText type="subtitle">Activity Name: </ThemedText>
-            <View style={styles.textSection}>
+            <View style={styles.inputText}>
             <TextInput value={inputText} 
                 onChangeText={handleInputChange}
                 maxLength={30}
@@ -68,17 +72,19 @@ function Personalize() {
                 style={styles.textInputContainer}
             />
             </View>
+            </View>
           </View>
           <View style={styles.tagSection}>
             <ThemedText type="subtitle">Add Tags: </ThemedText>
             <TagDropdown setTagValue={setTag1Value}/>
             <TagDropdown setTagValue={setTag2Value}/>
-            </View>
-            <View style={styles.createContainer}>
+          </View>
+          <View style={styles.createContainer}>
               <TouchableOpacity onPress={() => handleSubmit()} style={styles.closeButton}>
                 <Text style={styles.buttonText}>Create Activity</Text>
               </TouchableOpacity>
             </View>
+          </View>
         </View>
         </>
     )
@@ -129,43 +135,40 @@ interface TagDropdownProps {
       paddingTop: height/18,
       position: 'relative'
     },
-      headerSection: {
-        flex: 1.5,
-        flexDirection: 'row',
-        position: 'relative'
-      },
      titleContainer: {
       flex: 1,
-      padding: 10,
-      width: titleWidth,
-      position: 'absolute',
       alignItems: 'center',
-      left: (width / 2) - (titleWidth / 2), // Center horizontally more precisely
+      padding: 15
+    },
+    createActivityContainer: {
+      flex: 10,
     },
     buttonTextContainer: {
       flex: 1,
       alignItems: 'flex-start'
     },
     textContainer: {
-      flex: 2,
+
       flexDirection: 'row',
+    },
+    inputText: {
+        // flex: 1,
+        // flexDirection: 'row'
+    },
+    textSection: {
       padding: 30,
       rowGap: 20,
     },
-    textSection: {
-        flex: 1,
-        flexDirection: 'row'
-    },
     tagSection: {
-        flex: 7,
+        padding: 30,
+        rowGap: 20,
         flexDirection: 'row',
         justifyContent: 'space-around'
 
     },
 
     createContainer: {
-      flex: 1,
-      justifyContent: 'center',
+ 
       alignItems: 'center',
     },
     closeButton: {
@@ -182,6 +185,7 @@ interface TagDropdownProps {
      backgroundColor: 'white',
      width: width/2,
      height: 50,
-     padding: 20
+    paddingLeft: 15,
+    paddingRight: 15,
     },
   });

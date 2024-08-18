@@ -63,7 +63,7 @@ function Page() {
   return (
     <View style={styles.layoutContainer}>
       <View style={styles.titleContainer}>
-        <ThemedText type="titleText">Statistics</ThemedText>
+        <ThemedText type="titleText" style={{fontSize: width/12}}>Statistics</ThemedText>
       </View>
       {enoughDataForCommonChart && (
         <View style={styles.chartsContainer}>
@@ -89,7 +89,7 @@ function Page() {
       )}
       {!enoughDataForCommonChart && (
         <View style={styles.noDataContainer}>
-          <ThemedText type="titleText">We Need More Data! Come Back Later :)</ThemedText>
+          <ThemedText type="titleText" style={{fontSize: width/12}}>We Need More Data! Come Back Later :)</ThemedText>
         </View>
       )}
     </View>

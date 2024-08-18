@@ -29,7 +29,7 @@ const Settings = () => {
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
-        <ThemedText type="titleText">Settings</ThemedText>
+        <ThemedText type="titleText" style={{fontSize: width/12}}>Settings</ThemedText>
       </View>
       <View style={styles.settingItem}>
         <ThemedText type="journalText" style={styles.settingLabel}>Dark Mode</ThemedText>

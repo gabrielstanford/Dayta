@@ -1,4 +1,4 @@
-import {ModalProps, Modal, View, StyleSheet, Dimensions, Text, TouchableWithoutFeedback, Platform} from 'react-native'
+import {ModalProps, Modal, View, StyleSheet, Dimensions, Text, TouchableWithoutFeedback, Platform, TouchableOpacity} from 'react-native'
 import {ThemedText} from './ThemedText'
 import {Button} from '@rneui/themed'
 import TimeDropdown from './TimeDropdown'
@@ -10,6 +10,7 @@ import FetchDayActivities from '@/Data/FetchDayActivities'
 import {RadioButton} from 'react-native-paper'
 import TimeInput from './HourPicker'
 import {ButtonState, Activity, TimeBlock, ActivityWithEnd} from '@/Types/ActivityTypes'
+import CustomRadioButton from './CustomRadioButton'
 
 const {width, height} = Dimensions.get("window");
   
@@ -136,15 +137,15 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
     }
     else {
       // Convert the local Date object to UTC time
-      const utcDate = new Date(Date.UTC(
-        date.getUTCFullYear(),
-        date.getUTCMonth(),
-        date.getUTCDate(),
-        3,
-        25,
-        31
-      ));
-      return utcDate.getTime() / 1000;
+      const localDate = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate(),
+        12,  // Hours
+        10, // Minutes
+        31  // Seconds
+      );
+      return localDate.getTime() / 1000;
     }
     };
     
@@ -206,15 +207,25 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
             <TouchableWithoutFeedback>
                 <View style={styles.durationModalContent}>
                 <RadioButton.Group onValueChange={value => setValue(value)} value={value}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-around', margin: 20 }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-around', margin: 5}}>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <TouchableOpacity
+                        style={styles.radioButtonContainer}
+                        onPress={() => setValue('With Start Time')}
+                    >
                       <RadioButton color="darkcyan" value="With Start Time" />
                       <Text>With Start Time</Text>
+                    </TouchableOpacity>
                     </View>
 
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <TouchableOpacity
+                      style={styles.radioButtonContainer}
+                      onPress={() => setValue('Without Start Time')}
+                    >
                       <RadioButton color="darkcyan" value="Without start Time" />
                       <Text>No Start Time</Text>
+                    </TouchableOpacity>
                     </View>
                   </View>
                 </RadioButton.Group>
@@ -279,20 +290,25 @@ const styles = StyleSheet.create({
         alignItems: 'center',
       },
       durationModalContent: {
-        flex: 0.55,
+        flex: 0.65,
         width: width/1.1,
-        height: height/2,
+        height: height/1,
         padding: 10,
         backgroundColor: 'white',
         borderRadius: 10,
       },
+
       titleContainer: {
         flex: 1,
         backgroundColor: 'darkgreen',
-        marginTop: 10,
         marginBottom: 5,
         alignItems: 'center',
         justifyContent: 'center',
+      },
+      radioButtonContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginVertical: 8,
       },
       timeDropdown: {
         flex: 7
@@ -305,12 +321,12 @@ const styles = StyleSheet.create({
         padding: 10, // Optional padding
       },
       durationContainer: {
-        flex: 3,
+        flex: 4,
         alignItems: 'center'
       },
       hourContainer: {
         flexDirection: 'row',
-        marginTop: 8,
+        marginTop: 15,
         alignItems: 'center',
         borderColor: 'grey',
         borderWidth: 2,
@@ -321,16 +337,18 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         padding: 5
       },
+      slider: {
+        flex: 1,
+        flexDirection: 'row',
+        paddingTop: 10,
+        paddingBottom: 10,
+        alignItems: 'center'
+        //height: 40,
+    },
       submitContainer: {
         flex: 1.5,
         alignItems: 'center',
 
-      },
-      slider: {
-          flex: 1,
-          flexDirection: 'row',
-          width: '100%',
-          //height: 40,
       },
       submitButton: {
         width: '30%'

@@ -85,8 +85,9 @@ const styles = StyleSheet.create({
     lineHeight: 18, // Line height to control spacing between lines
   },
   titleText: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: 'mintcream'
+      
+      fontWeight: 'bold',
+      color: 'mintcream'
+    
   },
 });

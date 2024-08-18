@@ -203,11 +203,13 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
         <View style={styles.headerSection}>
             <TouchableOpacity onPress={() => closeModal()} style={styles.closeButton}>
             <View style={styles.buttonContainer}>
-              <Text style={{fontSize: 21, color: 'white'}}>Close</Text>
+              <Text style={{fontSize: buttonWidth/4, color: 'white'}}>Close</Text>
           </View>
           </TouchableOpacity>
           <View style={styles.titleContainer}>
-            <ThemedText type="titleText">Quick Add</ThemedText>
+            <ThemedText type="titleText" style={{
+            fontSize: titleWidth/7,
+            }}>Quick Add</ThemedText>
           </View>
           </View>
         <View style={styles.quickAddContainer}>
@@ -239,7 +241,10 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
       headerSection: {
         flex: 1.5,
         flexDirection: 'row',
-        position: 'relative'
+        position: 'relative',
+        alignItems: 'flex-start',
+        marginRight: 20,
+        paddingLeft: 5,
       },
         //close button
     buttonContainer: {
@@ -254,7 +259,6 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
     },
      titleContainer: {
       flex: 1,
-      padding: 10,
       width: titleWidth,
       position: 'absolute',
       alignItems: 'center',
@@ -283,7 +287,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
       width: buttonWidth,
     },
     durationModal: {
-      flex: 1
+      height: height
     },
     searchContainer: {
       flex: 1.5

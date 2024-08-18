@@ -212,7 +212,7 @@ function Journal() {
         <ActivityDescribeModal style={styles.durationModal} ActivityDescribeVisible={activityDescribeVisible} Info={activityInfo} onClose={() => setActivityDescribeVisible(false)} onTapOut={() => setActivityDescribeVisible(false)}/>
         <View style={styles.contentContainer}>
               <View style={{alignItems: 'center'}}>
-                <ThemedText type="titleText">My Journal</ThemedText>
+                <ThemedText type="titleText" style={{fontSize: width/12}}>My Journal</ThemedText>
               </View>
         <View style={styles.headerContainer}>
         <TouchableOpacity onPress={() => setDateIncrement(dateIncrement-1)}>
