@@ -19,32 +19,34 @@ interface Activity {
 
 const getAllActivitiesForUser = async (user: any): Promise<Activity[]> => {
 
-    try {
-      // Step 1: Get all dates
-      if(user) {
-      const datesRef = collection(firestore, 'users', user.uid, 'dates');
-      const datesSnapshot = await getDocs(datesRef);
-      const dates = datesSnapshot.docs.map(doc => doc.id);
+    // try {
+    //   // Step 1: Get all dates
+    //   if(user) {
+    //   const datesRef = collection(firestore, 'users', user.uid, 'dates');
+    //   const datesSnapshot = await getDocs(datesRef);
+    //   const dates = datesSnapshot.docs.map(doc => doc.id);
   
-      // Step 2: Get activities for each date
-      const activities: Activity[] = [];
-      for (const date of dates) {
-        const activitiesRef = collection(firestore, 'users', user.uid, 'dates', date, 'activities');
-        const activitiesSnapshot = await getDocs(activitiesRef);
-        activitiesSnapshot.docs.forEach(doc => {
-          // Adjust the type casting if your activity has a different structure
-          activities.push(doc.data() as Activity);
-        });
-      }
-      return activities;
-      }
-      else {
-        return []
-      }
-    } catch (error) {
-      console.error("Error fetching activities:", error);
-      throw error;
-    }
+    //   // Step 2: Get activities for each date
+    //   const activities: Activity[] = [];
+    //   for (const date of dates) {
+    //     const activitiesRef = collection(firestore, 'users', user.uid, 'dates', date, 'activities');
+    //     const activitiesSnapshot = await getDocs(activitiesRef);
+    //     activitiesSnapshot.docs.forEach(doc => {
+    //       // Adjust the type casting if your activity has a different structure
+    //       activities.push(doc.data() as Activity);
+    //     });
+    //   }
+    //   return activities;
+    //   }
+    //   else {
+    //     return []
+    //   }
+    // } catch (error) {
+    //   console.error("Error fetching activities:", error);
+    //   throw error;
+    // }
+    console.log('tried to reference database in getAllActivitiesForUser')
+    return []
   }
 
   export default getAllActivitiesForUser

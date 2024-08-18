@@ -39,6 +39,7 @@
 import React from 'react';
 import { Stack } from 'expo-router';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import {AppProvider, useAppContext} from '@/contexts/AppContext'
 import SplashScreen from './splash_screen';
 import { useRouter } from 'expo-router';
 
@@ -67,6 +68,7 @@ const RootLayout: React.FC = () => {
   return (
     <AuthProvider>
       <AuthCheck />
+      <AppProvider>
       <Stack>
         {/* Define your routes here */}
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -75,6 +77,7 @@ const RootLayout: React.FC = () => {
         <Stack.Screen name="signupscreen" />
         {/* Add other screens as necessary */}
       </Stack>
+      </AppProvider>
     </AuthProvider>
   );
 };

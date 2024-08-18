@@ -199,13 +199,13 @@ function Journal() {
     const { user } = useAuth();
     const [dbActivities, setDbActivities] = useState<any>(null);
     const [activityInfo, setActivityInfo] = useState<Activity[]>([])
-    const { dateIncrement } = useAppContext();
+    const { justActivities, dateIncrement } = useAppContext();
     const [activityDescribeVisible, setActivityDescribeVisible] = useState<boolean>(false);
 
   useEffect(() => {
-    FetchDayActivities(user, dateIncrement, setDbActivities)
+    FetchDayActivities(user, dateIncrement, justActivities, setDbActivities)
 
-  }, [user, dateIncrement]);
+  }, [user, justActivities, dateIncrement]);
 const getActivityTimeDiffPairs = (range: TimeRange) => {
   const arrayActs: Activity[] = dbActivities.filter((activity: Activity) => activity.timeBlock.startTime >= range.minTime && activity.timeBlock.startTime <= range.maxTime)
 //   let indices = []

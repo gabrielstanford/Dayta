@@ -13,10 +13,9 @@ import DurationModal from './DurationModal'
 import MultitaskModal from './MultitaskModal'
 import ActivitySearchModal from './ActivitySearchModal'
 import { useCustomSet} from '@/Data/ActivityButtons'
-import FetchActivityButtons from '@/Data/FetchCustomActivities'
 import Toast from 'react-native-toast-message'
 import {ButtonState, Activity, TimeBlock} from '@/Types/ActivityTypes'
-
+import { storage } from '@/utils/mmkvStorage';
 
 //next: add search
 //after: add functionality to change what shows up on quick add based on an array of 9 quick add options that we can pass in
@@ -78,9 +77,9 @@ interface MyModalProps extends ModalProps {
 const MultiButton: ButtonState = {text: 'Multi-Activity', iconLibrary: "fontAwesome5", keywords: [], icon: "tasks", pressed: false}
 
 const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) => {
-  const { addActivity, shuffledActButtons } = useAppContext();
-
-  const {finalArray} = useCustomSet(shuffledActButtons);
+  const { addActivity, customActivities, addCustomActivity } = useAppContext();
+  
+  const {finalArray} = useCustomSet();
 
   const [searchModalVisible, setSearchModalVisible] = useState<boolean>(false);
   const [MultitaskModalVisible, setMultitaskModalVisible] = useState<boolean>(false);
@@ -91,7 +90,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
 
   const handlePress = (text: string) => {
 
-      const activity = shuffledActButtons.find((item: ButtonState) => item.text===text)
+      const activity = customActivities.find((item: ButtonState) => item.text===text)
       
       if(activity) {
       setSelectedActivity(activity);
@@ -110,6 +109,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
         console.log(block)
         const activity = {id: uuid.v4() as string, button: selectedActivity as ButtonState, timeBlock: block};
         addActivity(activity);
+        // addCustomActivity(  { text: 'Eating BOUT', iconLibrary: "fontAwesome5", icon: "utensils", keywords: ['Restaurant', 'Cafe'], pressed: false, tags: ['Food/Drink'] },) 
         Toast.show({ type: 'success', text1: 'Added Activity To Journal!'})
         }
         else if(multiActivity) {
@@ -139,7 +139,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
       // }
       // setDurationModalVisible(true);
       
-      const activities = shuffledActButtons.filter((item: ButtonState) => texts.includes(item.text))
+      const activities = customActivities.filter((item: ButtonState) => texts.includes(item.text))
       if(activities) {
       setMultiActivity(activities)
       setSelectedActivity(null)
@@ -192,7 +192,6 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
     }
     return (
       <Modal
-      key={shuffledActButtons.length}
       transparent={false}
       animationType="slide"
       visible={visible}
@@ -215,6 +214,8 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
         </View>
         <View style={styles.searchContainer}>
           <Button onPress={() => setSearchModalVisible(true)}>Other</Button>
+          {/* <Button onPress={() => {setTimeout(() => {addCustomActivity(  { text: 'Eating CLOUT', iconLibrary: "fontAwesome5", icon: "utensils", keywords: ['Restaurant', 'Cafe'], pressed: false, tags: ['Food/Drink'] },) 
+            }, 0); setDurationModalVisible(!durationModalVisible)}}>Custom Act Test</Button> */}
             <ActivitySearchModal visible={searchModalVisible} onClick={handlePress} onClose={() => setSearchModalVisible(false)} />
             <DurationModal style={styles.durationModal} durationModalVisible={durationModalVisible} onSubmit={handleDurationSubmit} onTapOut={() => setDurationModalVisible(false)} activity={selectedActivity as ButtonState}/>
           <Button color="secondary" onPress={() => setMultitaskModalVisible(true)}>Multi-Activity Block</Button>

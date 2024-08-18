@@ -12,7 +12,7 @@ const buttonHeight = height/19;
 const titleWidth = width/1.5;
 
 
-function Logic() {
+function Personalize() {
     const {addCustomActivity} = useAppContext();
     const {user} = useAuth();
     const [inputText, setInputText] = useState<string>("")
@@ -39,7 +39,9 @@ function Logic() {
           tags=[tag2Value]
         }
         const newButton = {text: inputText,  iconLibrary: "materialIcons", icon: "more-horiz", keywords: ['Miscellaneous'], pressed: false, tags: tags}
-        addCustomActivity(newButton);
+        setTimeout(() => {
+          addCustomActivity(newButton);
+        }, 0)
         alert("successfully added custom activity. feel free to use it now as often as you'd like!")
         }
         else {
@@ -110,13 +112,13 @@ interface TagDropdownProps {
     );
   };
 
-const Personalize: React.FC = () => {
-    return (
-      <AppProvider>
-        <Logic />
-      </AppProvider>
-    );
-  };
+// const Personalize: React.FC = () => {
+//     return (
+//       <AppProvider>
+//         <Logic />
+//       </AppProvider>
+//     );
+//   };
   
   export default Personalize;
 

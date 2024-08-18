@@ -20,6 +20,11 @@ export type ButtonState = {
     Multi?: Activity[]
   }
 
+  export interface DatedActivities {
+    date: string;
+    activities: Activity[];
+  }
+
   export interface WithEndTime {
     startTime: number,   // Unix timestamp for the start time (or the date of the activity)
     duration: number,    // Duration in seconds

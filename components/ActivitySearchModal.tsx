@@ -13,29 +13,16 @@ interface SearchProps  {
   onClick: (text: string) => void;
 }
 const ActivitySearchModal: React.FC<SearchProps> = ({visible, onClose, onClick}) => {
-  const {shuffledActButtons, fetchActivities} = useAppContext();
-  console.log('Shuffled Act Buttons being received: ', shuffledActButtons)
-  // console.log('Did activity search find it ', shuffledActButtons.filter((button: ButtonState) => button.text==="Runnana"))
+  // console.log('Did activity search find it ', customActivities.filter((button: ButtonState) => button.text==="Runnana"))
+  const {customActivities} = useAppContext();
+  console.log('Activity Search re-rendered');
   const [query, setQuery] = useState<string>('');
-  const [results, setResults] = useState<ButtonState[]>(shuffledActButtons);
-
-
-  useEffect(() => {
-    const fetchAndSetActivities = async () => {
-      await fetchActivities(); // Fetch and update context state
-    };
-
-    fetchAndSetActivities();
-  }, [fetchActivities]); // Ensure it runs on mount or if fetchActivities changes
-
-  useEffect(() => {
-    setResults(shuffledActButtons); // Update local state when context changes
-  }, [shuffledActButtons]);
+  const [results, setResults] = useState<ButtonState[]>(customActivities);
 
   const handleSearch = (text: string) => {
     setQuery(text);
     if (text.trim() === '') {
-      setResults(shuffledActButtons);
+      setResults(customActivities);
     } else {
       const filteredResults = results.filter((activity: ButtonState) =>
         activity.text.toLowerCase().includes(text.toLowerCase()) ||
@@ -47,7 +34,7 @@ const ActivitySearchModal: React.FC<SearchProps> = ({visible, onClose, onClick})
 
   const clearSearch = () => {
     setQuery('');
-    setResults(shuffledActButtons);
+    setResults(customActivities);
   };
 
   return (

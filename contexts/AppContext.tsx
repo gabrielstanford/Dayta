@@ -1,18 +1,19 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
-import { setDoc, doc, getDoc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { setDoc, doc, getDoc, updateDoc, deleteDoc, serverTimestamp, collection, getDocs } from 'firebase/firestore';
 import { firestore } from '@/firebase/firebase';
 import { useAuth } from './AuthContext'; // Assume you have a context for auth
 import { DateTime } from 'luxon';
-import {Activity, ButtonState} from '@/Types/ActivityTypes'
-import fetchCustomActivities from '@/Data/FetchCustomActivities';
+import {Activity, ButtonState, DatedActivities} from '@/Types/ActivityTypes'
+import {ActivityButtons, shuffle} from '@/Data/FetchCustomActivities';
+import { storage } from '@/utils/mmkvStorage';
 
 interface AppContextProps {
-  activities: Activity[];
+  justActivities: Activity[];
+  allActivities: DatedActivities[];
   dateIncrement: number;
   setDateIncrement: React.Dispatch<React.SetStateAction<number>>;
   updateActivity: (activity: Activity, updates: Partial<Activity>) => void;
-  shuffledActButtons: ButtonState[];
-  fetchActivities: () => Promise<void>
+  customActivities: ButtonState[];
   moveActivity: (activity: Activity, updates: Partial<Activity>) => void;
   addActivity: (activity: Activity) => void;
   addCustomActivity: (button: ButtonState) => void;
@@ -25,9 +26,11 @@ interface AppProviderProps {
 
 
 const AppContext = createContext<AppContextProps | undefined>(undefined);
-
+console.log('running context')
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
-  const [activities, setActivities] = useState<Activity[]>([]);
+  const [justActivities, setJustActivities] = useState<Activity[]>([]);
+  const [allActivities, setAllActivities] = useState<DatedActivities[]>([]);
+  const [customActivities, setCustomActivities] = useState<ButtonState[]>([]);
   const [dateIncrement, setDateIncrement] = useState(0);
   const { user } = useAuth(); // Get the authenticated user from your auth context
 
@@ -115,48 +118,95 @@ const moveActivity = async (
     console.error('Error moving activity: ', error);
   }
 };
-const addCustomActivity = async (button: ButtonState) => {
-  if (user) {
-    try {
-      const activityRef = doc(firestore, 'users', user.uid, 'customActivities', button.text); // Using activity name as ID, or you can generate a random ID
-      const newActivity = {
-        ...button,
-      };
 
-      await setDoc(activityRef, newActivity);
-      console.log("Custom activity added successfully");
-      await fetchActivities();
-      console.log('Activities Fetched')
-    } catch (error) {
-      console.error("Error adding custom activity: ", error);
-    }
-  } else {
-    console.log("No user logged in");
-  }
-};
-  // Fetch and update buttons
-  const [shuffledActButtons, setShuffledActButtons] = useState<ButtonState[]>([]);
-
-  const fetchActivities = useCallback(async (): Promise<void> => {
-    try {
-      if (user) {
-        const updatedButtons = await new Promise<ButtonState[]>((resolve, reject) => {
-          fetchCustomActivities(user, (buttons: ButtonState[]) => {
-            resolve(buttons);
-          });
-        });
-        setShuffledActButtons(updatedButtons); // Update context state
+// useEffect(() => {
+//   console.log('customActivities in AppProvider: ', customActivities);
+// }, [customActivities]);
+  const addActivityToDate = (date: string, activity: Activity) => {
+    setAllActivities(prevDates => {
+      const existingDate = prevDates.find(d => d.date === date);
+      if (existingDate) {
+        return prevDates.map(d => 
+          d.date === date
+            ? { ...d, activities: [...d.activities, activity] }
+            : d
+        );
       } else {
-        setShuffledActButtons([]); // Clear buttons if no user
+        return [...prevDates, { date, activities: [activity] }];
       }
-    } catch (error) {
-      console.error('Error fetching activities:', error);
-      setShuffledActButtons([]); // Handle error by clearing buttons
-    }
-  }, [user]); // Depend on user to refetch if it changes
+    });
+  };
 
 useEffect(() => {
-  fetchActivities();
+
+  const initializeActivityData = async () => {
+    
+    if(user) {
+        console.log('Initializing Activities; currently justActivities = ', justActivities)
+        if(storage.getString('AllActivities')) {
+          console.log('Found storage immediately')
+          if(justActivities.length==0) {
+            console.log('justActivities length=0')
+          const justActivitiesTemp = JSON.parse(storage.getString('ShuffledActivities') as string)
+          console.log('setting activities')
+          setJustActivities(justActivitiesTemp as Activity[])
+          }
+          console.log('justActivities length>0')
+        }
+        else {
+
+        // Step 1: Get all dates
+        const datesRef = collection(firestore, 'users', user.uid, 'dates');
+        const datesSnapshot = await getDocs(datesRef);
+        const dates = datesSnapshot.docs.map(doc => doc.id);
+        const activityTemp: Activity[] = [];
+        // Step 2: Get activities for each date and group them
+        for (const date of dates) {
+          const activitiesRef = collection(firestore, 'users', user.uid, 'dates', date, 'activities');
+          const activitiesSnapshot = await getDocs(activitiesRef);
+          const activities: Activity[] = activitiesSnapshot.docs.map(doc => doc.data() as Activity);
+          activitiesSnapshot.docs.forEach(doc => {
+            // Adjust the type casting if your activity has a different structure
+            activityTemp.push(doc.data() as Activity);
+          });
+          // Add each activity to the context, grouped by date
+          activities.forEach(activity => {
+            addActivityToDate(date, activity);
+          });
+        }
+        storage.set('AllActivities', JSON.stringify(activityTemp))
+
+        setJustActivities(activityTemp)
+        }
+  }
+  };
+
+  const initializeButtonData = async () => {
+    if(user) {
+      if(storage.getString('ShuffledActivities')) {
+        if(customActivities.length==0) {
+        const customActivitiesTemp = JSON.parse(storage.getString('ShuffledActivities') as string)
+        setCustomActivities(customActivitiesTemp as ButtonState[])
+        }
+      }
+      else {
+        const activitiesRef = collection(firestore, `users/${user.uid}/customActivities`);
+        const snapshot = await getDocs(activitiesRef);
+  
+        const customActivities: ButtonState[] = snapshot.docs.map(doc => doc.data() as ButtonState);
+        let activityButtons: ButtonState[] = ActivityButtons
+        if(customActivities.length>0) {
+        activityButtons = [...activityButtons, ...customActivities]
+        activityButtons = shuffle(activityButtons)
+        }
+        storage.set('ShuffledActivities', JSON.stringify(activityButtons))
+        setCustomActivities(activityButtons)
+      }
+    }
+  }
+
+  initializeActivityData();
+  initializeButtonData();
 }, [user]);
 
   const addActivity = async (activity: Activity) => {
@@ -177,31 +227,62 @@ useEffect(() => {
         });
       }
   
-      setTimeout(() => {
-        setActivities(prevActivities =>
+        setTimeout(() => {
+        setJustActivities(prevActivities =>
           prevActivities.some(act => act.id === activity.id)
             ? prevActivities // Avoid adding duplicates
             : [...prevActivities, activity] // Add new activity
         );
+        storage.set('ShuffledActivities', JSON.stringify([...justActivities, activity]))
+        // setCustomActivities(prevButtons => [...prevButtons,   { text: 'A Wonderful World!', iconLibrary: "fontAwesome5", icon: "utensils", keywords: ['Restaurant', 'Cafe'], pressed: false, tags: ['Food/Drink'] }]) ;// Add new activity
+        console.log('completed setting just activities')
       }, 0); // Delay the state update to avoid updating during rendering
     } catch (error) {
       console.error('Error adding activity to Firestore:', error);
     }
   };  
 
+  const addCustomActivity = async (button: ButtonState) => {
+    try {
+        if (user) {
+        // storage.set('ShuffledActivities', JSON.stringify(newActivities))
+        // storage.set('CustomActivities', JSON.stringify([...customActivities, button]))
+        //first add to context, in background add to local storage/database
+        const activityRef = doc(firestore, 'users', user.uid, 'customActivities', button.text); // Using activity name as ID, or you can generate a random ID
+        const newActivity = {
+          ...button,
+        };
+  
+        await setDoc(activityRef, newActivity);
+        
+        // await fetchActivities();
+        // console.log('Activities Fetched')
+      }
+        setTimeout(() => {
+        setCustomActivities(prevButtons => [...prevButtons, button] // Add new activity
+        );
+        storage.set('CustomActivities', JSON.stringify([...customActivities, button]))
+        console.log('completed setting custom activities')
+      }, 0); // Delay the state update to avoid updating during rendering
+      } catch (error) {
+      console.error("Error adding custom activity: ", error);
+      }
+  };
+
   const removeActivity = async (id: string | null, activ: Activity | null) => {
     try {
       if(user) {
         if(id) {
-        const activity = activities.find(act => act.id===id)
+        const activity = justActivities.find(act => act.id===id)
         if(activity) {
         const startDate = new Date(activity.timeBlock.startTime * 1000).toISOString().split('T')[0];
         await deleteDoc(doc(firestore, 'users', user.uid, 'dates', startDate, 'activities', id));
         }
         setTimeout(() => {
-          setActivities(prevActivities => 
+          setJustActivities(prevActivities => 
             prevActivities.filter(act => act.id !== id)
           );
+          storage.set('ShuffledActivities', JSON.stringify(customActivities.filter(act => act.id !== id)))
           }, 0); // Delay the state update to avoid updating during rendering
       }
       else if(activ ){
@@ -210,7 +291,7 @@ useEffect(() => {
 
         setTimeout(() => {
         // Update state with a filler
-        setActivities(prevActivities => {
+        setJustActivities(prevActivities => {
           const filteredActivities = prevActivities.filter(act => act.id !== activ.id);
           // Add a filler entry to force a re-render
           return [...filteredActivities, { button: {icon: "car", iconLibrary: "antDesign", id: 'filler-', keywords: ["stroll"], pressed: false, text: "Driving"}, id: "filler2", timeBlock: {duration: 0, endTime: 2, startTime: 3} }];
@@ -225,7 +306,7 @@ useEffect(() => {
     }
   };
   return (
-    <AppContext.Provider value={{ activities, dateIncrement, shuffledActButtons, fetchActivities, setDateIncrement, addActivity, addCustomActivity, updateActivity, moveActivity, removeActivity }}>
+    <AppContext.Provider value={{ justActivities, allActivities, dateIncrement, customActivities, setDateIncrement, addActivity, addCustomActivity, updateActivity, moveActivity, removeActivity }}>
       {children}
     </AppContext.Provider>
   );

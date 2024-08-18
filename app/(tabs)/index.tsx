@@ -3,7 +3,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { useState, useEffect, useRef } from 'react';
 import {AntDesign, MaterialIcons, Ionicons} from '@expo/vector-icons';
 import MyModal from '@/components/MyModal'
-import { AppProvider, useAppContext } from '@/contexts/AppContext';
+import { useAppContext } from '@/contexts/AppContext';
 import { collection, onSnapshot, getDocs } from 'firebase/firestore';
 import {firestore} from '@/firebase/firebase'
 import {useAuth} from '@/contexts/AuthContext'
@@ -13,6 +13,7 @@ import ActivityDescribeModal from '@/components/ActivityDescribeModal'
 import {DateTime} from 'luxon'
 import {Activity, ActivityWithEnd} from '@/Types/ActivityTypes';
 import HandleSubmitEditing from '@/Data/HandleSubmitEditing';
+import { storage } from '@/utils/mmkvStorage';
 
 // Get screen width. This is for more responsive layouts
 const { width, height } = Dimensions.get('window');
@@ -139,7 +140,15 @@ function Journal() {
   );
   const [version, setVersion] = useState(0)
   const [activityInfo, setActivityInfo] = useState<Activity[]>([])
-  const { removeActivity, updateActivity, moveActivity, dateIncrement, setDateIncrement } = useAppContext();
+  const { customActivities, justActivities, removeActivity, updateActivity, moveActivity, dateIncrement, setDateIncrement } = useAppContext();
+  console.log('Index Re-Render')
+  useEffect(() => {
+    console.log('Just Activities Updated')
+  }, [justActivities]);
+  useEffect(() => {
+    console.log('CustomActivities Updated')
+  }, [customActivities]);
+
   const [isTimeTapped, setTimedTapped] = useState<(boolean | string)[]>([false, ""]);
   const [localTime, setLocalTime] = useState<DateTime>(DateTime.local().plus({ days: dateIncrement }))
   const remove = (act: Activity) => {
@@ -148,11 +157,20 @@ function Journal() {
   }
   const [activityDescribeVisible, setActivityDescribeVisible] = useState<boolean>(false);
   useEffect(() => {
-    FetchDayActivities(user, dateIncrement, setDbActivities)
+    //this is terrible architecture; I should absolutely not be reading from the database on every date increment and every little update. 
+        //I should instead read from local storage more.
+        if(justActivities.length>0) {
+          console.log('Fetching Activities With Context; should have full activities')
+          FetchDayActivities(user, dateIncrement, justActivities, setDbActivities)
+        }
+        else {
+          console.log('Using Database')
+          FetchDayActivities(user, dateIncrement, [], setDbActivities)
+        }
     setLocalTime(DateTime.local().plus({ days: dateIncrement }))
     setTimedTapped([false, ""])
-  }, [user, version, dateIncrement]);
-  
+  }, [user, dateIncrement, justActivities, version]);
+
   //toggle the state of the modal
     const [modalVisible, setModalVisible] = useState(false);
     const toggleModal = () => {setModalVisible(!modalVisible); setTimedTapped([false, ""]);}
@@ -186,6 +204,7 @@ function Journal() {
       }
       setActivityDescribeVisible(true);
     }
+    // console.log('DbActivities for index: ', dbActivities)
   return (
     
       <View style={styles.layoutContainer}>
@@ -345,12 +364,38 @@ const styles2 = StyleSheet.create({
   },
 })
 
-const Index: React.FC = () => {
-  return (
-    <AppProvider>
-      <Journal />
-    </AppProvider>
-  );
-};
+// const Index: React.FC = () => {
+//   return (
+//     <AppProvider>
+//       <Journal />
+//     </AppProvider>
+//   );
+// };
 
-export default Index;
+export default Journal;
+// import React, { createContext, useContext, useState, useEffect } from 'react';
+// import {useAppContext, AppProvider} from '@/contexts/TestProvider'
+// import { View, Text, Button } from 'react-native';
+
+// const Journal = () => {
+//   const { one, addOne } = useAppContext();
+
+//   useEffect(() => {
+//     console.log('Index re-rendering. Custom Activities:', addOne);
+//   }, [addOne]);
+
+//   return (
+//     <View>
+//       <Button title="Add Activity" onPress={addOne} />
+//     </View>
+//   );
+// };
+
+// // App Component
+// export const Index = () => {
+//   return (
+//     <AppProvider>
+//       <Journal />
+//     </AppProvider>
+//   );
+// };

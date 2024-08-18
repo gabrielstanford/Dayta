@@ -42,8 +42,8 @@ const getTop9WithOther = (activities: ActivitySummary[]): ActivitySummary[] => {
 
 function Page() {
   
-  const {shuffledActButtons} = useAppContext()
-  const {entries, durationSummary} = useCustomSet(shuffledActButtons);
+  const {customActivities} = useAppContext()
+  const {entries, durationSummary} = useCustomSet();
 
   const [entryState, setEntryState] = useState<[string, number][]>([]);
   const [durationSumState, setDurationSumState] = useState<ActivitySummary[]>([]);

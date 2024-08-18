@@ -1,9 +1,6 @@
-import { collection, onSnapshot, getDocs } from 'firebase/firestore';
-import {firestore} from '@/firebase/firebase'
 import { ButtonState } from '@/Types/ActivityTypes';
-import {useState} from 'react'
 
-const ActivityButtons: ButtonState[] = [
+export const ActivityButtons: ButtonState[] = [
   // Food/Drink Related
   { text: 'Breakfast', iconLibrary: "materialCommunityIcons", icon: "food-variant", keywords: ['Eating', 'Meal'], pressed: false, tags: ['Food/Drink'] },
   { text: 'Snacking', iconLibrary: "fontAwesome5", icon: "apple-alt", keywords: ['Eating', 'Meal', 'Snack', 'Quick Snack'], pressed: false, tags: ['Food/Drink'] },
@@ -127,7 +124,7 @@ const ActivityButtons: ButtonState[] = [
   { text: 'Getting Ready', iconLibrary: "materialIcons", icon: "cleaning-services", keywords: ['Dressing', 'Getting Dressed', 'Clothes', 'Putting On Clothes'], pressed: false, tags: ['Other'] },
   { text: 'Other', iconLibrary: "materialIcons", icon: "more-horiz", keywords: ['Miscellaneous'], pressed: false, tags: ['Other'] },
 ];
-const shuffle = (array: ButtonState[]) => {
+export const shuffle = (array: ButtonState[]) => {
   for (var i = array.length - 1; i > 0; i--) {
     var j = Math.floor(Math.random() * (i + 1));
     var temp = array[i];
@@ -136,27 +133,4 @@ const shuffle = (array: ButtonState[]) => {
   }
   return array
 }
-const fetchCustomActivities = async (user: any, setActivityButtons: any) => {
-
-    if (user) {
-      try {
-        const activitiesRef = collection(firestore, `users/${user.uid}/customActivities`);
-        const snapshot = await getDocs(activitiesRef);
   
-        const customActivities: ButtonState[] = snapshot.docs.map(doc => doc.data() as ButtonState);
-        let activityButtons: ButtonState[] = ActivityButtons
-        if(customActivities.length>0) {
-        activityButtons = [...activityButtons, ...customActivities]
-        }
-        
-        setActivityButtons(shuffle(activityButtons))
-      } catch (error) {
-        console.error("Error fetching custom activities: ", error);
-      }
-    } else {
-      console.log("No user logged in");
-    }
-
-  };
-  
-  export default fetchCustomActivities

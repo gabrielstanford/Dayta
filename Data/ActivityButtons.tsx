@@ -1,8 +1,8 @@
 import getAllActivitiesForUser from '@/Data/GetAllActivities'
 import {useEffect, useState} from 'react'
 import {useAuth} from '@/contexts/AuthContext'
+import { useAppContext } from '@/contexts/AppContext'
 import {ButtonState} from '@/Types/ActivityTypes'
-import fetchCustomActivities from './FetchCustomActivities'
   
 
 interface ValueCounts {
@@ -21,20 +21,21 @@ const countValues = (array: string[]): ValueCounts => {
   }, {});
 };
 
-const useCustomSet = (shuffledActButtons: ButtonState[]): any => {
+const useCustomSet = (): any => {
   const { user } = useAuth();
+  const {customActivities, justActivities} = useAppContext()
   const [finalArray, setFinalArray] = useState<ButtonState[]>([]);
   const [entries, setEntries] = useState<[string, number][]>([]);
   const [durationSummary, setDurationSummary] = useState<ActivitySummary[]>([]);
 
   useEffect(() => {
     const fetchActivities = async () => {
+      console.log('preparing to get users activities from activitybutton')
       try {
-        const activities = await getAllActivitiesForUser(user);
-        const activityText = activities.map((activity) => activity.button.text);
+        const activityText = justActivities.map((activity) => activity.button.text);
 
         // Step 1: Group activities by name and sum durations
-        const totalTimePerActivity = activities.reduce<Record<string, number>>((acc, activity) => {
+        const totalTimePerActivity = justActivities.reduce<Record<string, number>>((acc, activity) => {
           if (acc[activity.button.text]) {
             acc[activity.button.text] += activity.timeBlock.duration / 3600;
           } else {
@@ -58,7 +59,7 @@ const useCustomSet = (shuffledActButtons: ButtonState[]): any => {
         const sortedDictTop = Object.fromEntries(topEntries);
         const textKeys = Object.keys(sortedDictTop);
 
-        const correspondingButtons = shuffledActButtons.filter((button) =>
+        const correspondingButtons = customActivities.filter((button) =>
           textKeys.includes(button.text)
         );
 
@@ -66,7 +67,7 @@ const useCustomSet = (shuffledActButtons: ButtonState[]): any => {
 
         if (updatedArray.length < 9) {
           const remainingSlots = 9 - updatedArray.length;
-          const additionalButtons = shuffledActButtons.filter(
+          const additionalButtons = customActivities.filter(
             (button) => !textKeys.includes(button.text)
           ).slice(0, remainingSlots);
           updatedArray = [...updatedArray, ...additionalButtons];
@@ -79,7 +80,7 @@ const useCustomSet = (shuffledActButtons: ButtonState[]): any => {
     };
 
     fetchActivities();
-  }, [user, shuffledActButtons]);
+  }, [user, customActivities]);
 
   return { finalArray, entries, durationSummary };
 };
