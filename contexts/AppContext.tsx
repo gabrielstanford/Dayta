@@ -24,6 +24,12 @@ interface AppContextProps {
   setDurationSummary: React.Dispatch<React.SetStateAction<ActivitySummary[]>>;
   finalArray: ButtonState[];
   setFinalArray: React.Dispatch<React.SetStateAction<ButtonState[]>>;
+  weekDurationSummary: ActivitySummary[];
+  avgSleepTime: number;
+  setAvgSleepTime: React.Dispatch<React.SetStateAction<number>>;
+  avgWakeTime: number;
+  setAvgWakeTime: React.Dispatch<React.SetStateAction<number>>
+  setWeekDurationSummary: React.Dispatch<React.SetStateAction<ActivitySummary[]>>;
 }
 
 interface AppProviderProps {
@@ -40,7 +46,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [dateIncrement, setDateIncrement] = useState(0);
   const [updateLocalStorage, setUpdateLocalStorage] = useState(false);
   const [finalArray, setFinalArray] = useState<ButtonState[]>([])
-  const [durationSummary, setDurationSummary] = useState<ActivitySummary[]>([])
+  const [durationSummary, setDurationSummary] = useState<ActivitySummary[]>([]);
+  const [avgSleepTime, setAvgSleepTime] = useState<number>(0.111)
+  const [avgWakeTime, setAvgWakeTime] = useState<number>(0.111)
+  const [weekDurationSummary, setWeekDurationSummary] = useState<ActivitySummary[]>([])
   const { user } = useAuth(); // Get the authenticated user from your auth context
 
 // Function to update an activity
@@ -305,7 +314,7 @@ useEffect(() => {
     }
   };
   return (
-    <AppContext.Provider value={{ justActivities, allActivities, dateIncrement, customActivities, setDateIncrement, setUpdateLocalStorage, addActivity, addCustomActivity, updateActivity, moveActivity, removeActivity, durationSummary, setDurationSummary, finalArray, setFinalArray }}>
+    <AppContext.Provider value={{ justActivities, allActivities, dateIncrement, customActivities, setDateIncrement, setUpdateLocalStorage, addActivity, addCustomActivity, updateActivity, moveActivity, removeActivity, durationSummary, setDurationSummary, weekDurationSummary, setWeekDurationSummary, avgSleepTime, setAvgSleepTime, avgWakeTime, setAvgWakeTime, finalArray, setFinalArray }}>
       {children}
     </AppContext.Provider>
   );

@@ -35,8 +35,8 @@ function getFilteredActivityRefs(adjustment: number): any[] {
     // Safely handle possible null values from toISO
       const startUtcISO: string = startUtc.toISO() || '';
       const endUtcISO: string = endUtc.toISO() || '';
-      const startUtcTimestamp: number = startUtc ? Math.floor(startUtc.toMillis() / 1000) : 0;
-      const endUtcTimestamp: number = endUtc ? Math.floor(endUtc.toMillis() / 1000) : 0;
+      const startUtcTimestamp: number = startUtc ? (Math.floor(startUtc.toMillis() / 1000) + 14400) : 0;
+      const endUtcTimestamp: number = endUtc ? (Math.floor(endUtc.toMillis() / 1000) + 14400) : 0;
 
       // Create array of date references
       const dateRefs = [

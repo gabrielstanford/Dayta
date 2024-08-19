@@ -175,7 +175,11 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
       const localDate = new Date(startTimeUnix * 1000); 
       const offset = localDate.getTimezoneOffset(); // Time zone offset in minutes
       const utcZonedTime = dateIncrement==0 ? new Date(localDate.getTime() + offset * 60000) : adjustDateByDays(new Date(localDate.getTime() + offset * 60000), dateIncrement);
-      const unixTimestamp = Math.floor(utcZonedTime.getTime() / 1000);
+      let unixTimestamp = Math.floor(utcZonedTime.getTime() / 1000);
+      if(localDate.getUTCHours()<4) {
+        console.log('24 hours later')
+        unixTimestamp = unixTimestamp+86400
+      }
       let endTimeUnix = null
       if(startTimeUnix % 60 !== 31) {
         endTimeUnix = unixTimestamp + durationSeconds; // Calculate end time

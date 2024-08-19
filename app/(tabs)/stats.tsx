@@ -1,4 +1,4 @@
-import { StyleSheet, View, Dimensions, SafeAreaView } from 'react-native';
+import { StyleSheet, View, Dimensions, SafeAreaView, ScrollView, Text } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import DashboardChart from '@/components/DashboardChart'
 import {useEffect, useState} from 'react'
@@ -8,7 +8,8 @@ import {useAuth} from '@/contexts/AuthContext'
 import {AppProvider, useAppContext} from '@/contexts/AppContext'
 import {useCustomSet} from '@/Data/CustomSet'
 import PieChart from '@/components/PieChart'
-import Index from '@/components/BlockedTime'
+import BlockedTime from '@/components/BlockedTime'
+import { Activity } from '@/Types/ActivityTypes';
 
 // Define a type for the counts object
 interface ValueCounts {
@@ -42,10 +43,11 @@ const getTop9WithOther = (activities: ActivitySummary[]): ActivitySummary[] => {
 
 function Stats() {
   
-  const {durationSummary} = useCustomSet();
+  const {durationSummary, weekDurationSummary, avgSleepTime, avgWakeTime} = useCustomSet();
   const {justActivities} = useAppContext();
   const [durationSumState, setDurationSumState] = useState<ActivitySummary[]>([]);
-  const [enoughDataForCommonChart, setEnoughDataForCommonChart] = useState<boolean>(false)
+  const [weekDurationSumState, setWeekDurationSumState] = useState<ActivitySummary[]>([]);
+  const [enoughDataForCommonChart, setEnoughDataForCommonChart] = useState<boolean>(false);
 
   useEffect(() => {
     console.log('Updating Statistics')
@@ -55,10 +57,17 @@ function Stats() {
     const top9WithOther = getTop9WithOther(sortedDescending)
     setDurationSumState(top9WithOther)
     setEnoughDataForCommonChart(true)
+
+    const sortedDescendingWeek = weekDurationSummary.sort(
+      (a: ActivitySummary, b: ActivitySummary) => b.totalDuration - a.totalDuration
+    );    
+    const top9WithOtherWeek = getTop9WithOther(sortedDescendingWeek)
+    setWeekDurationSumState(top9WithOtherWeek)
     
   }, [justActivities]);
  
   return (
+    <ScrollView style={{backgroundColor: 'darkcyan'}}>
     <View style={styles.layoutContainer}>
       <View style={styles.titleContainer}>
         <ThemedText type="titleText" style={{fontSize: width/12}}>Statistics</ThemedText>
@@ -70,9 +79,15 @@ function Stats() {
             labels={durationSumState.map(activity => activity.text)}
             values={durationSumState.map(activity => activity.totalDuration)}
           />
+          <PieChart
+            labels={weekDurationSumState.map(activity => activity.text)}
+            values={weekDurationSumState.map(activity => activity.totalDuration)}
+          />
          </SafeAreaView>
          <View style={styles.timeBlocksContainer}>
-          <Index />
+          {/* <BlockedTime /> */}
+          <Text style={{fontSize: 25, color: 'white'}}>Average Wake Time: {avgWakeTime}</Text>
+          <Text style={{fontSize: 25, color: 'white'}}>Average Sleep Time: {avgSleepTime}</Text>
          </View>
           {/* <View style={styles.barChartContainer}>
             <ThemedText type="subtitle">
@@ -91,7 +106,7 @@ function Stats() {
         </View>
       )}
     </View>
-    
+    </ScrollView>
   );
 }
 

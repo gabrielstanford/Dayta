@@ -194,7 +194,7 @@ const setMinutesToZero = (unixTimestamp: number) => {
     // Convert the Date object back to a Unix timestamp (in seconds)
     return Math.floor(date.getTime() / 1000); // Convert milliseconds to seconds
 }
-function Journal() {
+function BlockedTime() {
 
     const { user } = useAuth();
     const [dbActivities, setDbActivities] = useState<any>(null);
@@ -407,12 +407,4 @@ const styles = StyleSheet.create({
    },
  })
 
-const Index: React.FC = () => {
-  return (
-    <AppProvider>
-      <Journal />
-    </AppProvider>
-  );
-};
-
-export default Index;
+export default BlockedTime;

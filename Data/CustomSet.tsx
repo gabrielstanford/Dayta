@@ -4,6 +4,7 @@ import {useAuth} from '@/contexts/AuthContext'
 import { useAppContext } from '@/contexts/AppContext'
 import {ButtonState, ActivitySummary} from '@/Types/ActivityTypes'
 
+
 interface ValueCounts {
   [key: string]: number;
 }
@@ -16,7 +17,7 @@ const countValues = (array: string[]): ValueCounts => {
 };
 
 function useCustomSet() {
-  const {customActivities, justActivities, setDurationSummary, setFinalArray} = useAppContext();
+  const {customActivities, justActivities, setDurationSummary, setWeekDurationSummary, setAvgSleepTime, setAvgWakeTime, setFinalArray} = useAppContext();
   const [textKeys, setTextKeys] = useState<string[]>([])
   //this function performs two main things: 
   //1. It creates an array containing just the text and tags of all the activities
@@ -75,7 +76,12 @@ function useCustomSet() {
   }
 
   const createWeekDurationStats = () => {
-    const relevantActivities = justActivities.filter(act => act.timeBlock.startTime>1722988800)
+    const getUnixTimestampMinusOneWeek = (): number => {
+      const currentTimestamp = Math.floor(Date.now() / 1000); // Current Unix timestamp in seconds
+      const oneWeekInSeconds = 7 * 24 * 60 * 60; // One week in seconds
+      return currentTimestamp - oneWeekInSeconds;
+    };
+    const relevantActivities = justActivities.filter(act => act.timeBlock.startTime>getUnixTimestampMinusOneWeek())
     const activityText = relevantActivities.map((activity) => activity.button.text);
 
     // Step 1: Group activities by name and sum durations
@@ -93,7 +99,7 @@ function useCustomSet() {
       text,
       totalDuration,
     }));
-    setDurationSummary(result);
+    setWeekDurationSummary(result);
   }
 
   const createDayDurationStats = () => {
@@ -101,16 +107,55 @@ function useCustomSet() {
   }
 
   const createSleepStats = () => {
+    const allSleepSlots = justActivities.filter(act => act.button.text=="Went To Bed" )
+    const allWakeSlots = justActivities.filter(act => act.button.text=="Woke Up")
 
+
+    const sleepInfo = allSleepSlots.map(sleepSlot => sleepSlot.timeBlock.startTime)
+    const wakeInfo = allWakeSlots.map(wakeSlot => wakeSlot.timeBlock.startTime)
+
+    const sleepHours = sleepInfo.map(slot => (new Date(slot * 1000)).getHours())
+    const wakeHours = wakeInfo.map(slot => (new Date(slot * 1000)).getHours())
+    console.log(sleepHours)
+    // const allSlots = justActivities.filter(act => act.button.text=="Went To Bed" || act.button.text=="Woke Up")
+    // allSlots.sort((a, b) => b.timeBlock.startTime-a.timeBlock.startTime)
+    // console.log(allSlots)
+// Function to calculate the average of numbers
+  function avg(arr: number[]) {
+    let sum = 0;
+
+    // Iterate the elements of the array
+    arr.forEach(function (item, idx) {
+      if(item<4) {
+        item = item+24
+      }
+        sum += item;
+    });
+    let average = sum/arr.length
+    if(average>24) {
+      average = average-24
+    }
+    // Returning the average of the numbers
+    return average;
+  }
+    const averageSleepTime = avg(sleepHours)
+    const averageWakeTime = avg(wakeHours)
+    console.log(averageSleepTime, averageWakeTime)
+    setAvgSleepTime(averageSleepTime)
+    setAvgWakeTime(averageWakeTime)
   }
   useEffect(() => {
     console.log('Use Effect hook triggered; custom activities changed from CustomSet')
     createDurationSummary();
+    createWeekDurationStats();
   }, [justActivities]);
   useEffect(() => {
     createFinalArray();
   }, [justActivities])
-  return {finalArray: useAppContext().finalArray, durationSummary: useAppContext().durationSummary}
+  useEffect(() => {
+    createSleepStats();
+  }, [])
+  return {finalArray: useAppContext().finalArray, durationSummary: useAppContext().durationSummary, weekDurationSummary: useAppContext().weekDurationSummary, avgSleepTime: useAppContext().avgSleepTime, avgWakeTime: useAppContext().avgWakeTime}
 };
 
 
