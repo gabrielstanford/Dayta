@@ -8,11 +8,11 @@ export default function HandleSubmitEditing(inputValue: string, input2Value: str
 
     if (inputValue.length === maxLength) {
        if((inputValue[0]=='0' && validTimeNumsOthers.includes(inputValue[1]) && inputValue[1]!=='0') || (inputValue[0]=='1' && validTimeNumsSec.includes(inputValue[1]))) {
-          if(inputValue[2]==':' && validTimeNumsOthers.includes(inputValue[3]) && validTimeNumsOthers.includes(inputValue[4]) && (inputValue[5]=='A' || inputValue[5]=='P') && inputValue[6]=='M') {
+          if(inputValue[2]==':' && validTimeNumsOthers.includes(inputValue[3]) && validTimeNumsOthers.includes(inputValue[4]) && ((inputValue[5]=='A' || inputValue[5]=='a') || (inputValue[5]=='P' || inputValue[5]=='p')) && (inputValue[6]=='M' || inputValue[6]=='m')) {
             //valid start time
             if (input2Value.length === maxLength) {
               if((input2Value[0]=='0' && validTimeNumsOthers.includes(input2Value[1]) && input2Value[1]!=='0') || (input2Value[0]=='1' && validTimeNumsSec.includes(input2Value[1]))) {
-                 if(input2Value[2]==':' && validTimeNumsOthers.includes(input2Value[3]) && validTimeNumsOthers.includes(input2Value[4]) && (input2Value[5]=='A' || input2Value[5]=='P') && input2Value[6]=='M') {
+                 if(input2Value[2]==':' && validTimeNumsOthers.includes(input2Value[3]) && validTimeNumsOthers.includes(input2Value[4]) && ((input2Value[5]=='A' || input2Value[5]=='a') || (input2Value[5]=='P' || input2Value[5]=='p')) && (input2Value[6]=='M' || input2Value[6]=='m')) {
                    //valid full time
                    function getUserTimeZone(): string {
 

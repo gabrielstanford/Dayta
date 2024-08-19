@@ -37,3 +37,8 @@ export type ButtonState = {
     timeBlock: WithEndTime;
     Multi?: Activity[]
   }
+
+  export interface ActivitySummary {
+    text: string;
+    totalDuration: number;
+  }

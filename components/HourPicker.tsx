@@ -9,7 +9,6 @@ const HourPicker: React.FC<HourPickerProps> = ({ onHourChange }) => {
   const [hour, setHour] = useState<number>(0);
 
   const incrementHour = () => {
-    console.log('increment; current hour: ', hour)
     let newHour = hour + 1;
     if (newHour > 12) newHour = 0;
     setHour(newHour);

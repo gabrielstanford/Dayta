@@ -4,12 +4,14 @@ import {useLogout} from '@/utils/useLogout'
 import {useRouter} from 'expo-router'
 import {ThemedText} from '@/components/ThemedText'
 import {Button} from '@rneui/themed'
+import { useAppContext } from '@/contexts/AppContext';
 
 const { width, height } = Dimensions.get('window');
 
 const Settings = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const {setUpdateLocalStorage} = useAppContext();
 
   const handleDarkModeToggle = () => {
     setIsDarkMode((prev) => !prev);
@@ -28,6 +30,7 @@ const Settings = () => {
   const router = useRouter();
   return (
     <View style={styles.container}>
+      <View>
       <View style={styles.titleContainer}>
         <ThemedText type="titleText" style={{fontSize: width/12}}>Settings</ThemedText>
       </View>
@@ -52,6 +55,8 @@ const Settings = () => {
         <Button color="secondary" title="Log Out" onPress={logout} />
       </View>
       <Button color="success" title="Save" onPress={handleSave} />
+      </View>
+      <Button color="warning" title="Update" onPress={() => setUpdateLocalStorage(true)} />
     </View>
   );
 };

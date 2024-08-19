@@ -102,7 +102,7 @@ export const ActivityButtons: ButtonState[] = [
   { text: 'Knitting', iconLibrary: "materialCommunityIcons", icon: "scissors-cutting", keywords: ['Crafts'], pressed: false, tags: ['Hobbies'] },
   { text: 'Woodworking', iconLibrary: "materialIcons", icon: "handyman", keywords: ['Crafts'], pressed: false, tags: ['Hobbies'] },
   { text: 'Playing Chess', iconLibrary: "fontAwesome5", icon: "chess", keywords: ['Game', 'Board Game'], pressed: false, tags: ['Hobbies'] },
-  { text: 'Playing Board Games', iconLibrary: "materialCommunityIcons", icon: "game-board", keywords: ['Games', 'Board Games'], pressed: false, tags: ['Hobbies'] },
+  { text: 'Playing Board Games', iconLibrary: "materialCommunityIcons", icon: "chess-board", keywords: ['Games', 'Board Games'], pressed: false, tags: ['Hobbies'] },
   { text: 'Collecting', iconLibrary: "materialIcons", icon: "collections", keywords: ['Stamps', 'Coins', 'Antiques'], pressed: false, tags: ['Hobbies'] },
   //add icon, edit keywords
   { text: 'Journaling', iconLibrary: "materialIcons", icon: "book", keywords: ['Journal', 'Logging'], pressed: false, tags: ['Self-Improvement', 'Hobbies'] },

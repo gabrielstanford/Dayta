@@ -6,7 +6,7 @@ const { width, height } = Dimensions.get('window');
 const buttonWidth = width/6.25
 import {useAuth} from '@/contexts/AuthContext'
 import {AppProvider, useAppContext} from '@/contexts/AppContext'
-import {useCustomSet} from '@/Data/ActivityButtons'
+import {useCustomSet} from '@/Data/CustomSet'
 import PieChart from '@/components/PieChart'
 import Index from '@/components/BlockedTime'
 
@@ -40,17 +40,15 @@ const getTop9WithOther = (activities: ActivitySummary[]): ActivitySummary[] => {
   return result;
 };
 
-function Page() {
+function Stats() {
   
-  const {customActivities} = useAppContext()
-  const {entries, durationSummary} = useCustomSet();
-
-  const [entryState, setEntryState] = useState<[string, number][]>([]);
+  const {durationSummary} = useCustomSet();
+  const {justActivities} = useAppContext();
   const [durationSumState, setDurationSumState] = useState<ActivitySummary[]>([]);
   const [enoughDataForCommonChart, setEnoughDataForCommonChart] = useState<boolean>(false)
+
   useEffect(() => {
-    setEntryState(entries);
-    
+    console.log('Updating Statistics')
     const sortedDescending = durationSummary.sort(
       (a: ActivitySummary, b: ActivitySummary) => b.totalDuration - a.totalDuration
     );    
@@ -58,7 +56,7 @@ function Page() {
     setDurationSumState(top9WithOther)
     setEnoughDataForCommonChart(true)
     
-  }, [entries, durationSummary]);
+  }, [justActivities]);
  
   return (
     <View style={styles.layoutContainer}>
@@ -128,13 +126,5 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start'
   },
 });
-
-const Stats: React.FC = () => {
-  return (
-    <AppProvider>
-      <Page />
-    </AppProvider>
-  );
-};
 
 export default Stats;

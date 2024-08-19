@@ -49,7 +49,7 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
 
   useEffect(() => {
     //consider adding functionality for setting this for past days but not necessary now
-    FetchDayActivities(user, 0, justActivities, setDbActivities)
+    FetchDayActivities(user, dateIncrement, justActivities, setDbActivities)
     setDurationHours(0);
     setDurationMinutes(15);
   }, [durationModalVisible, hasInitialized, user]);

@@ -3,9 +3,10 @@ import { setDoc, doc, getDoc, updateDoc, deleteDoc, serverTimestamp, collection,
 import { firestore } from '@/firebase/firebase';
 import { useAuth } from './AuthContext'; // Assume you have a context for auth
 import { DateTime } from 'luxon';
-import {Activity, ButtonState, DatedActivities} from '@/Types/ActivityTypes'
+import {Activity, ButtonState, DatedActivities, ActivitySummary} from '@/Types/ActivityTypes'
 import {ActivityButtons, shuffle} from '@/Data/FetchCustomActivities';
 import { storage } from '@/utils/mmkvStorage';
+import {useCustomSet} from '@/Data/CustomSet'
 
 interface AppContextProps {
   justActivities: Activity[];
@@ -14,10 +15,15 @@ interface AppContextProps {
   setDateIncrement: React.Dispatch<React.SetStateAction<number>>;
   updateActivity: (activity: Activity, updates: Partial<Activity>) => void;
   customActivities: ButtonState[];
+  setUpdateLocalStorage: React.Dispatch<React.SetStateAction<boolean>>;
   moveActivity: (activity: Activity, updates: Partial<Activity>) => void;
   addActivity: (activity: Activity) => void;
   addCustomActivity: (button: ButtonState) => void;
   removeActivity: (activ: Activity) => void;
+  durationSummary: ActivitySummary[];
+  setDurationSummary: React.Dispatch<React.SetStateAction<ActivitySummary[]>>;
+  finalArray: ButtonState[];
+  setFinalArray: React.Dispatch<React.SetStateAction<ButtonState[]>>;
 }
 
 interface AppProviderProps {
@@ -32,6 +38,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [allActivities, setAllActivities] = useState<DatedActivities[]>([]);
   const [customActivities, setCustomActivities] = useState<ButtonState[]>([]);
   const [dateIncrement, setDateIncrement] = useState(0);
+  const [updateLocalStorage, setUpdateLocalStorage] = useState(false);
+  const [finalArray, setFinalArray] = useState<ButtonState[]>([])
+  const [durationSummary, setDurationSummary] = useState<ActivitySummary[]>([])
   const { user } = useAuth(); // Get the authenticated user from your auth context
 
 // Function to update an activity
@@ -39,6 +48,19 @@ const updateActivity = async (activity: Activity, updates: Partial<Activity>) =>
   //if start time's date is different, then after updating the times, call a diff function, moveactivity and pass in the updated one to change date ref.
   try {
     if(user) {
+    // Update the timeBlock of the relevant activity
+      const updatedActivities = justActivities.map((act) => {
+        if (act.id === activity.id) {
+          return {
+            ...act,
+            ...updates, // Spread the input properties to update the matching activity
+          };
+        }
+        return act;
+      });
+      // Set the updated array
+      setJustActivities(updatedActivities);
+      storage.set('JustActivities', JSON.stringify(updatedActivities))
     // Convert the start time to the date format used in Firestore
     const startDate = new Date(activity.timeBlock.startTime * 1000).toISOString().split('T')[0];
     const dateRef = doc(firestore, 'users', user.uid, 'dates', startDate);
@@ -111,6 +133,8 @@ const moveActivity = async (
       // Update or create the new date document with a timestamp
       await setDoc(newDateRef, { createdAt: serverTimestamp() }, { merge: true });
       console.log('New date document updated successfully!');
+      if(updateLocalStorage) {
+        setUpdateLocalStorage(false)}
     } else {
       console.log('No valid timeBlock update provided!');
     }
@@ -142,8 +166,8 @@ useEffect(() => {
   const initializeActivityData = async () => {
     
     if(user) {
-        console.log('Initializing Activities; currently justActivities = ', justActivities)
-        if(storage.getString('JustActivities')) {
+        console.log('Initializing Activities')
+        if(storage.getString('JustActivities') && !updateLocalStorage) {
           console.log('Found storage immediately')
           if(justActivities.length==0) {
             console.log('justActivities length=0')
@@ -154,7 +178,7 @@ useEffect(() => {
           console.log('justActivities length>0')
         }
         else {
-
+          console.log('Didnt find local storage')
         // Step 1: Get all dates
         const datesRef = collection(firestore, 'users', user.uid, 'dates');
         const datesSnapshot = await getDocs(datesRef);
@@ -178,19 +202,22 @@ useEffect(() => {
 
         setJustActivities(activityTemp)
         storage.set('JustActivities', JSON.stringify(activityTemp))
+        if(updateLocalStorage) {
+        setUpdateLocalStorage(false)}
         }
   }
   };
 
   const initializeCustomActivities = async () => {
     if(user) {
-      if(storage.getString('CustomActivities')) {
+      if(storage.getString('CustomActivities') && !updateLocalStorage) {
         if(customActivities.length==0) {
         const customActivitiesTemp = JSON.parse(storage.getString('CustomActivities') as string)
         setCustomActivities(customActivitiesTemp as ButtonState[])
         }
       }
       else {
+        console.log('Local Storage Not Found')
         const activitiesRef = collection(firestore, `users/${user.uid}/customActivities`);
         const snapshot = await getDocs(activitiesRef);
   
@@ -208,7 +235,7 @@ useEffect(() => {
  
   initializeActivityData();
   initializeCustomActivities();
-}, [user]);
+}, [user, updateLocalStorage]);
 
   const addActivity = async (activity: Activity) => {
     try {
@@ -278,7 +305,7 @@ useEffect(() => {
     }
   };
   return (
-    <AppContext.Provider value={{ justActivities, allActivities, dateIncrement, customActivities, setDateIncrement, addActivity, addCustomActivity, updateActivity, moveActivity, removeActivity }}>
+    <AppContext.Provider value={{ justActivities, allActivities, dateIncrement, customActivities, setDateIncrement, setUpdateLocalStorage, addActivity, addCustomActivity, updateActivity, moveActivity, removeActivity, durationSummary, setDurationSummary, finalArray, setFinalArray }}>
       {children}
     </AppContext.Provider>
   );

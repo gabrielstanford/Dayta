@@ -12,7 +12,7 @@ import uuid from 'react-native-uuid';
 import DurationModal from './DurationModal'
 import MultitaskModal from './MultitaskModal'
 import ActivitySearchModal from './ActivitySearchModal'
-import { useCustomSet} from '@/Data/ActivityButtons'
+import { useCustomSet} from '@/Data/CustomSet'
 import Toast from 'react-native-toast-message'
 import {ButtonState, Activity, TimeBlock} from '@/Types/ActivityTypes'
 import { storage } from '@/utils/mmkvStorage';
@@ -77,10 +77,8 @@ interface MyModalProps extends ModalProps {
 const MultiButton: ButtonState = {text: 'Multi-Activity', iconLibrary: "fontAwesome5", keywords: [], icon: "tasks", pressed: false}
 
 const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) => {
-  const { addActivity, customActivities, addCustomActivity } = useAppContext();
-  
+  const { addActivity, customActivities} = useAppContext();
   const {finalArray} = useCustomSet();
-
   const [searchModalVisible, setSearchModalVisible] = useState<boolean>(false);
   const [MultitaskModalVisible, setMultitaskModalVisible] = useState<boolean>(false);
   const [durationModalVisible, setDurationModalVisible] = useState(false);
@@ -88,7 +86,6 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
   const [multiActivity, setMultiActivity] = useState<ButtonState[] | null>(null);
   //const [multiTaskButton, setMultiTaskButton]
 
-  console.log('Final Array: ', finalArray)
   const handlePress = (text: string) => {
 
       const activity = customActivities.find((item: ButtonState) => item.text===text)
@@ -107,7 +104,6 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
       setTimeout(() => {
         if(selectedActivity) {
         selectedActivity.id="notimportant"
-        console.log(block)
         const activity = {id: uuid.v4() as string, button: selectedActivity as ButtonState, timeBlock: block};
         addActivity(activity);
         // addCustomActivity(  { text: 'Eating BOUT', iconLibrary: "fontAwesome5", icon: "utensils", keywords: ['Restaurant', 'Cafe'], pressed: false, tags: ['Food/Drink'] },) 

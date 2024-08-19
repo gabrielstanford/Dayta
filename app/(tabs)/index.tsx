@@ -140,14 +140,7 @@ function Journal() {
   );
   const [version, setVersion] = useState(0)
   const [activityInfo, setActivityInfo] = useState<Activity[]>([])
-  const { customActivities, justActivities, removeActivity, updateActivity, moveActivity, dateIncrement, setDateIncrement } = useAppContext();
-  console.log('Index Re-Render')
-  useEffect(() => {
-    console.log('Just Activities Updated')
-  }, [justActivities]);
-  useEffect(() => {
-    console.log('CustomActivities Updated')
-  }, [customActivities]);
+  const { justActivities, removeActivity, updateActivity, moveActivity, dateIncrement, setDateIncrement } = useAppContext();
 
   const [isTimeTapped, setTimedTapped] = useState<(boolean | string)[]>([false, ""]);
   const [localTime, setLocalTime] = useState<DateTime>(DateTime.local().plus({ days: dateIncrement }))
