@@ -3,7 +3,8 @@ export type ButtonState = {
   iconLibrary: string;
   icon: string;
   keywords: string[];
-  tags?: string[];
+  tags: string[];
+  category?: string[]
   pressed: boolean;
   id?: string;
 };
@@ -41,4 +42,13 @@ export type ButtonState = {
   export interface ActivitySummary {
     text: string;
     totalDuration: number;
+  }
+
+  export interface StatisticsState {
+    durationSummary: ActivitySummary[];
+    avgSleepTime: number;
+    avgWakeTime: number;
+    weekDurationSummary: ActivitySummary[];
+    sleepSum: any[];
+    tagDurationSum: ActivitySummary[];
   }

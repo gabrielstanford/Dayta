@@ -3,11 +3,12 @@ import { setDoc, doc, getDoc, updateDoc, deleteDoc, serverTimestamp, collection,
 import { firestore } from '@/firebase/firebase';
 import { useAuth } from './AuthContext'; // Assume you have a context for auth
 import { DateTime } from 'luxon';
-import {Activity, ButtonState, DatedActivities, ActivitySummary} from '@/Types/ActivityTypes'
+import {Activity, ButtonState, DatedActivities, ActivitySummary, StatisticsState} from '@/Types/ActivityTypes'
 import {ActivityButtons, shuffle} from '@/Data/FetchCustomActivities';
 import { storage } from '@/utils/mmkvStorage';
 import {useCustomSet} from '@/Data/CustomSet'
 
+type UpdateState = (newState: Partial<StatisticsState>) => void;
 interface AppContextProps {
   justActivities: Activity[];
   allActivities: DatedActivities[];
@@ -20,16 +21,21 @@ interface AppContextProps {
   addActivity: (activity: Activity) => void;
   addCustomActivity: (button: ButtonState) => void;
   removeActivity: (activ: Activity) => void;
-  durationSummary: ActivitySummary[];
-  setDurationSummary: React.Dispatch<React.SetStateAction<ActivitySummary[]>>;
+  // durationSummary: ActivitySummary[];
+  // setDurationSummary: React.Dispatch<React.SetStateAction<ActivitySummary[]>>;
   finalArray: ButtonState[];
   setFinalArray: React.Dispatch<React.SetStateAction<ButtonState[]>>;
-  weekDurationSummary: ActivitySummary[];
-  avgSleepTime: number;
-  setAvgSleepTime: React.Dispatch<React.SetStateAction<number>>;
-  avgWakeTime: number;
-  setAvgWakeTime: React.Dispatch<React.SetStateAction<number>>
-  setWeekDurationSummary: React.Dispatch<React.SetStateAction<ActivitySummary[]>>;
+  state: StatisticsState;
+  updateState: UpdateState;
+
+  // weekDurationSummary: ActivitySummary[];
+  // avgSleepTime: number;
+  // setAvgSleepTime: React.Dispatch<React.SetStateAction<number>>;
+  // avgWakeTime: number;
+  // setAvgWakeTime: React.Dispatch<React.SetStateAction<number>>
+  // setWeekDurationSummary: React.Dispatch<React.SetStateAction<ActivitySummary[]>>;
+  // sleepSum: any[];
+  // setSleepSum:  React.Dispatch<React.SetStateAction<any[]>>
 }
 
 interface AppProviderProps {
@@ -46,10 +52,24 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [dateIncrement, setDateIncrement] = useState(0);
   const [updateLocalStorage, setUpdateLocalStorage] = useState(false);
   const [finalArray, setFinalArray] = useState<ButtonState[]>([])
-  const [durationSummary, setDurationSummary] = useState<ActivitySummary[]>([]);
-  const [avgSleepTime, setAvgSleepTime] = useState<number>(0.111)
-  const [avgWakeTime, setAvgWakeTime] = useState<number>(0.111)
-  const [weekDurationSummary, setWeekDurationSummary] = useState<ActivitySummary[]>([])
+  const initialState = {
+    durationSummary: [] as ActivitySummary[],
+    avgSleepTime: 0.111,
+    avgWakeTime: 0.111,
+    weekDurationSummary: [] as ActivitySummary[],
+    sleepSum: [] as any[],
+    tagDurationSum: [] as ActivitySummary[]
+  };
+  const [state, setState] = useState(initialState);
+  const updateState = (newState: Partial<typeof initialState>) => {
+    setState(prevState => ({ ...prevState, ...newState }));
+  };
+  
+  // const [durationSummary, setDurationSummary] = useState<ActivitySummary[]>([]);
+  // const [avgSleepTime, setAvgSleepTime] = useState<number>(0.111)
+  // const [avgWakeTime, setAvgWakeTime] = useState<number>(0.111)
+  // const [weekDurationSummary, setWeekDurationSummary] = useState<ActivitySummary[]>([]);
+  // const [sleepSum, setSleepSum] = useState<any[]>([])
   const { user } = useAuth(); // Get the authenticated user from your auth context
 
 // Function to update an activity
@@ -314,7 +334,7 @@ useEffect(() => {
     }
   };
   return (
-    <AppContext.Provider value={{ justActivities, allActivities, dateIncrement, customActivities, setDateIncrement, setUpdateLocalStorage, addActivity, addCustomActivity, updateActivity, moveActivity, removeActivity, durationSummary, setDurationSummary, weekDurationSummary, setWeekDurationSummary, avgSleepTime, setAvgSleepTime, avgWakeTime, setAvgWakeTime, finalArray, setFinalArray }}>
+    <AppContext.Provider value={{ justActivities, allActivities, dateIncrement, customActivities, setDateIncrement, setUpdateLocalStorage, addActivity, addCustomActivity, updateActivity, moveActivity, removeActivity, state, updateState, finalArray, setFinalArray }}>
       {children}
     </AppContext.Provider>
   );

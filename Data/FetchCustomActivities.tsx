@@ -18,10 +18,10 @@ export const ActivityButtons: ButtonState[] = [
   { text: 'Other Food/Drink', iconLibrary: "materialIcons", icon: "more-horiz", keywords: ['Miscellaneous'], pressed: false, tags: ['Food/Drink'] },
 
   // Physical
-  { text: 'Walking', iconLibrary: "fontAwesome5", icon: "walking", keywords: ['Stroll'], pressed: false, tags: ['Physical'] },
-  { text: 'Running', iconLibrary: "materialCommunityIcons", icon: "run-fast", keywords: ['Jogging'], pressed: false, tags: ['Physical'] },
-  { text: 'Jogging', iconLibrary: "materialCommunityIcons", icon: "run", keywords: ['Jogging'], pressed: false, tags: ['Physical'] },
-  { text: 'Cycling', iconLibrary: "fontAwesome5", icon: "bicycle", keywords: ['Biking'], pressed: false, tags: ['Physical'] },
+  { text: 'Walking', iconLibrary: "fontAwesome5", icon: "walking", keywords: ['Stroll'], pressed: false, tags: ['Physical'], category: ["Sunlight", "Light Activity"] },
+  { text: 'Running', iconLibrary: "materialCommunityIcons", icon: "run-fast", keywords: ['Jogging'], pressed: false, tags: ['Physical'], category: ["Intense Activity", "Sunlight"] },
+  { text: 'Jogging', iconLibrary: "materialCommunityIcons", icon: "run", keywords: ['Jogging'], pressed: false, tags: ['Physical'], category: ["Intense Activity", "Sunlight"] },
+  { text: 'Cycling', iconLibrary: "fontAwesome5", icon: "bicycle", keywords: ['Biking'], pressed: false, tags: ['Physical'], category: ["Intense Activity", "Sunlight"] },
   { text: 'Swimming', iconLibrary: "materialCommunityIcons", icon: "swim", keywords: ['Pool', 'Laps'], pressed: false, tags: ['Physical'] },
   { text: 'Gym', iconLibrary: "materialCommunityIcons", icon: "weight-lifter", keywords: ['Exercise', 'Workout'], pressed: false, tags: ['Physical'] },
   { text: 'Home Workout', iconLibrary: "materialCommunityIcons", icon: "jump-rope", keywords: ['Working Out', 'Exercise', 'Gym'], pressed: false, tags: ['Physical'] },

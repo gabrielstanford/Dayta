@@ -2,8 +2,9 @@ import getAllActivitiesForUser from '@/Data/GetAllActivities'
 import {useEffect, useState} from 'react'
 import {useAuth} from '@/contexts/AuthContext'
 import { useAppContext } from '@/contexts/AppContext'
-import {ButtonState, ActivitySummary} from '@/Types/ActivityTypes'
-
+import {ButtonState, ActivitySummary, Activity} from '@/Types/ActivityTypes'
+import getFiltered from './HandleTime'
+import { act } from 'react-test-renderer'
 
 interface ValueCounts {
   [key: string]: number;
@@ -17,15 +18,13 @@ const countValues = (array: string[]): ValueCounts => {
 };
 
 function useCustomSet() {
-  const {customActivities, justActivities, setDurationSummary, setWeekDurationSummary, setAvgSleepTime, setAvgWakeTime, setFinalArray} = useAppContext();
+  const {customActivities, justActivities, updateState, setFinalArray} = useAppContext();
   const [textKeys, setTextKeys] = useState<string[]>([])
   //this function performs two main things: 
   //1. It creates an array containing just the text and tags of all the activities
   //3. It calculates statistics based on this
   //2. it fetches the 9 buttons to display based on this as well
-  const createDurationSummary = () => {
-    console.log('Fetching Activities in CustomSet')
-    
+  const createDurationSummary = () => {    
       const relevantActivities = justActivities.filter(act => act.timeBlock.startTime>1722988800)
       const activityText = relevantActivities.map((activity) => activity.button.text);
 
@@ -44,7 +43,7 @@ function useCustomSet() {
         text,
         totalDuration,
       }));
-      setDurationSummary(result);
+      updateState({durationSummary: result});
 
       const activityCounts = countValues(activityText);
       const entries = Object.entries(activityCounts);
@@ -56,8 +55,34 @@ function useCustomSet() {
 
   };
 
+  const createTagDurationSum = () => {
+    const relevantActivities = justActivities.filter(act => act.timeBlock.startTime>1722988800 && act.button.tags!==undefined)
+      const activityTags = relevantActivities.map((activity) => activity.button.tags);
+      // console.log(activityTags)
+        // Step 1: Group activities by name and sum durations
+
+          const totalDurationPerTag = relevantActivities.reduce<Record<string, number>>((acc, activity) => {
+            // Iterate over each tag in the current activity
+            activity.button.tags.forEach(tag => {
+              if (acc[tag]) {
+                // If the tag already exists, add the duration to the existing value
+                acc[tag] += activity.timeBlock.duration / 3600; // Convert seconds to hours
+              } else {
+                // If the tag does not exist, initialize it with the duration
+                acc[tag] = activity.timeBlock.duration / 3600; // Convert seconds to hours
+              }
+            });
+            return acc;
+          }, {});
+        const result: ActivitySummary[] = Object.entries(totalDurationPerTag).map(([text, totalDuration]) => ({
+          text,
+          totalDuration,
+        }));
+        updateState({tagDurationSum: result});
+
+  }
+
   const createFinalArray = () => {
-    console.log('Creating Final Array')
     const correspondingButtons = customActivities.filter((button) =>
       textKeys.includes(button.text)
     );
@@ -99,7 +124,7 @@ function useCustomSet() {
       text,
       totalDuration,
     }));
-    setWeekDurationSummary(result);
+    updateState({weekDurationSummary: result});
   }
 
   const createDayDurationStats = () => {
@@ -116,7 +141,6 @@ function useCustomSet() {
 
     const sleepHours = sleepInfo.map(slot => (new Date(slot * 1000)).getHours())
     const wakeHours = wakeInfo.map(slot => (new Date(slot * 1000)).getHours())
-    console.log(sleepHours)
     // const allSlots = justActivities.filter(act => act.button.text=="Went To Bed" || act.button.text=="Woke Up")
     // allSlots.sort((a, b) => b.timeBlock.startTime-a.timeBlock.startTime)
     // console.log(allSlots)
@@ -138,16 +162,35 @@ function useCustomSet() {
     // Returning the average of the numbers
     return average;
   }
+
+  const generateDateArray = () => {
+    //get earliest date in sleep, turn that into a date increment
+    // let startDate = -12
+    let elements: any[] = [];
+    let summaryStats: any[] = []
+    for (let startDate = -12 ; startDate <= 0; startDate++) {
+      let element = getFiltered(startDate);
+      const filteredSleep = sleepInfo.filter(num => (num>element[2] && num<element[3]))
+      const filteredWake = wakeInfo.filter(num => (num>element[2] && num<element[3]))
+      element = [...element, filteredWake, filteredSleep]
+      elements = [...elements, element]
+      summaryStats = [...summaryStats, [element[0], element[4], element[5]]]
+    }
+    
+    return summaryStats
+    }
+    const sumStats = generateDateArray();
+    updateState({sleepSum: sumStats})
+
     const averageSleepTime = avg(sleepHours)
     const averageWakeTime = avg(wakeHours)
-    console.log(averageSleepTime, averageWakeTime)
-    setAvgSleepTime(averageSleepTime)
-    setAvgWakeTime(averageWakeTime)
+    updateState({avgSleepTime: averageSleepTime})
+    updateState({avgWakeTime: averageWakeTime})
   }
   useEffect(() => {
-    console.log('Use Effect hook triggered; custom activities changed from CustomSet')
     createDurationSummary();
     createWeekDurationStats();
+    createTagDurationSum();
   }, [justActivities]);
   useEffect(() => {
     createFinalArray();
@@ -155,7 +198,7 @@ function useCustomSet() {
   useEffect(() => {
     createSleepStats();
   }, [])
-  return {finalArray: useAppContext().finalArray, durationSummary: useAppContext().durationSummary, weekDurationSummary: useAppContext().weekDurationSummary, avgSleepTime: useAppContext().avgSleepTime, avgWakeTime: useAppContext().avgWakeTime}
+  return {finalArray: useAppContext().finalArray, state: useAppContext().state}
 };
 
 

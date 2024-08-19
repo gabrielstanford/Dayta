@@ -10,6 +10,7 @@ import {useCustomSet} from '@/Data/CustomSet'
 import PieChart from '@/components/PieChart'
 import BlockedTime from '@/components/BlockedTime'
 import { Activity } from '@/Types/ActivityTypes';
+import SleepLineChart from '@/components/SleepLineChart';
 
 // Define a type for the counts object
 interface ValueCounts {
@@ -20,7 +21,21 @@ interface ActivitySummary {
   text: string;
   totalDuration: number;
 }
+const decimalToTime = (decimal: number): string => {
+  // Extract hours and minutes from the decimal number
+  const hours = Math.floor(decimal);
+  const minutes = Math.round((decimal - hours) * 60);
 
+  // Format minutes to always be two digits
+  const formattedMinutes = minutes.toString().padStart(2, '0');
+
+  // Return time in 'H:MM' format
+  return `${hours}:${formattedMinutes}`;
+};
+
+// Example usage
+// console.log(decimalToTime(8.5)); // Output: '8:30'
+// console.log(decimalToTime(14.75)); // Output: '14:45'
 // Utility function to count value occurrences
 const countValues = (array: string[]): ValueCounts => {
   return array.reduce((acc: ValueCounts, value: string) => {
@@ -43,14 +58,28 @@ const getTop9WithOther = (activities: ActivitySummary[]): ActivitySummary[] => {
 
 function Stats() {
   
-  const {durationSummary, weekDurationSummary, avgSleepTime, avgWakeTime} = useCustomSet();
+  const {state} = useCustomSet();
+  const { durationSummary, avgSleepTime, avgWakeTime, weekDurationSummary, sleepSum, tagDurationSum } = state;
   const {justActivities} = useAppContext();
   const [durationSumState, setDurationSumState] = useState<ActivitySummary[]>([]);
   const [weekDurationSumState, setWeekDurationSumState] = useState<ActivitySummary[]>([]);
+  const [tagDurationSumState, setTagDurationSumState] = useState<ActivitySummary[]>([]);
   const [enoughDataForCommonChart, setEnoughDataForCommonChart] = useState<boolean>(false);
-
+  
+  const extractTime = (timeStamp: number) => {
+    if(timeStamp<500) {
+      return 50
+    }
+    else {
+    const utcDate = new Date(timeStamp * 1000)
+    let hours = utcDate.getHours();
+    if(hours<4) {
+      hours = hours+24;
+    }
+    return hours
+    }
+  }
   useEffect(() => {
-    console.log('Updating Statistics')
     const sortedDescending = durationSummary.sort(
       (a: ActivitySummary, b: ActivitySummary) => b.totalDuration - a.totalDuration
     );    
@@ -63,9 +92,27 @@ function Stats() {
     );    
     const top9WithOtherWeek = getTop9WithOther(sortedDescendingWeek)
     setWeekDurationSumState(top9WithOtherWeek)
+
+    const sortedDescendingTags = tagDurationSum.sort(
+      (a: ActivitySummary, b: ActivitySummary) => b.totalDuration - a.totalDuration
+    );    
+    const top9WithOtherTags = getTop9WithOther(sortedDescendingTags)
+    setTagDurationSumState(top9WithOtherTags)
     
   }, [justActivities]);
  
+  const [sleepLabels, setSleepLabels] = useState<string[]>([]);
+  const [sleepValues, setSleepValues] = useState<[number, number][]>([]);
+  useEffect(() => {
+    let tempLabels: string[] = [];
+    let tempValues: [number, number][] = []
+    for (let index = 0; index < sleepSum.length; index++) {
+      tempLabels[index] = (sleepSum[index][0].slice(8, 10));
+      tempValues[index] = [extractTime(sleepSum[index][1]), extractTime(sleepSum[index][2])]
+    }
+    setSleepLabels(tempLabels);
+    setSleepValues(tempValues);
+  }, [sleepSum])
   return (
     <ScrollView style={{backgroundColor: 'darkcyan'}}>
     <View style={styles.layoutContainer}>
@@ -75,19 +122,31 @@ function Stats() {
       {enoughDataForCommonChart && (
         <View style={styles.chartsContainer}>
         <SafeAreaView style={styles.pieChartContainer}>
+          <Text style={styles.chartTitle}>All Time</Text>
           <PieChart
             labels={durationSumState.map(activity => activity.text)}
             values={durationSumState.map(activity => activity.totalDuration)}
           />
+          <Text style={styles.chartTitle}>This Week</Text>
           <PieChart
             labels={weekDurationSumState.map(activity => activity.text)}
             values={weekDurationSumState.map(activity => activity.totalDuration)}
           />
+          <Text style={styles.chartTitle}>All Time Tags</Text>
+          <PieChart
+            labels={tagDurationSumState.map(activity => activity.text)}
+            values={tagDurationSumState.map(activity => activity.totalDuration)}
+          />
          </SafeAreaView>
          <View style={styles.timeBlocksContainer}>
           {/* <BlockedTime /> */}
-          <Text style={{fontSize: 25, color: 'white'}}>Average Wake Time: {avgWakeTime}</Text>
-          <Text style={{fontSize: 25, color: 'white'}}>Average Sleep Time: {avgSleepTime}</Text>
+          <Text style={{fontSize: 12, color: 'white'}}>Average Wake Time: {decimalToTime(avgWakeTime)}</Text>
+          <Text style={{fontSize: 12, color: 'white'}}>Average Sleep Time: {decimalToTime(avgSleepTime-12)}</Text>
+          <SleepLineChart 
+          labels={sleepLabels}
+          values={sleepValues}
+          /> 
+
          </View>
           {/* <View style={styles.barChartContainer}>
             <ThemedText type="subtitle">
@@ -139,6 +198,11 @@ const styles = StyleSheet.create({
     flex: 0.35,
     width: width,
     alignItems: 'flex-start'
+  },
+  chartTitle: {
+    fontSize: 15,
+    color: 'bisque',
+    paddingLeft: 15,
   },
 });
 

@@ -30,14 +30,14 @@ const PieChartComponent: React.FC<PieChartProps> = ({ labels, values }) => {
     population: values[index],
     color: colors[index % colors.length], // Use colors from the palette
     legendFontColor: '#E0FFFF', // Light color for legend text
-    legendFontSize: 14,
+    legendFontSize: 12,
   }));
 
   return (
     <View>
       <PieChart
         data={data}
-        width={Dimensions.get('window').width} // Adjust width as needed
+        width={Dimensions.get('window').width/1.1} // Adjust width as needed
         height={220}
         chartConfig={{
           color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`, // White for the chart
