@@ -58,7 +58,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     avgWakeTime: 0.111,
     weekDurationSummary: [] as ActivitySummary[],
     sleepSum: [] as any[],
-    tagDurationSum: [] as ActivitySummary[]
+    tagDurationSum: [] as ActivitySummary[],
+    avgTimeByTag: [] as ActivitySummary[]
   };
   const [state, setState] = useState(initialState);
   const updateState = (newState: Partial<typeof initialState>) => {
@@ -212,9 +213,11 @@ useEffect(() => {
         const datesRef = collection(firestore, 'users', user.uid, 'dates');
         const datesSnapshot = await getDocs(datesRef);
         const dates = datesSnapshot.docs.map(doc => doc.id);
+        const filteredDates = dates.filter(date => date > '2024-08-06');
+        console.log(filteredDates)
         const activityTemp: Activity[] = [];
         // Step 2: Get activities for each date and group them
-        for (const date of dates) {
+        for (const date of filteredDates) {
           const activitiesRef = collection(firestore, 'users', user.uid, 'dates', date, 'activities');
           const activitiesSnapshot = await getDocs(activitiesRef);
           // const activities: Activity[] = activitiesSnapshot.docs.map(doc => doc.data() as Activity);

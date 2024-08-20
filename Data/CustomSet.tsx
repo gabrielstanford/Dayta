@@ -5,6 +5,7 @@ import { useAppContext } from '@/contexts/AppContext'
 import {ButtonState, ActivitySummary, Activity} from '@/Types/ActivityTypes'
 import getFiltered from './HandleTime'
 import { act } from 'react-test-renderer'
+import { DateTime } from 'luxon'
 
 interface ValueCounts {
   [key: string]: number;
@@ -18,7 +19,8 @@ const countValues = (array: string[]): ValueCounts => {
 };
 
 function useCustomSet() {
-  const {customActivities, justActivities, updateState, setFinalArray} = useAppContext();
+  const {customActivities, justActivities, updateState, setFinalArray, state} = useAppContext();
+  const {tagDurationSum} = state
   const [textKeys, setTextKeys] = useState<string[]>([])
   //this function performs two main things: 
   //1. It creates an array containing just the text and tags of all the activities
@@ -56,12 +58,11 @@ function useCustomSet() {
   };
 
   const createTagDurationSum = () => {
-    const relevantActivities = justActivities.filter(act => act.timeBlock.startTime>1722988800 && act.button.tags!==undefined)
-      const activityTags = relevantActivities.map((activity) => activity.button.tags);
+      const activityTags = justActivities.map((activity) => activity.button.tags);
       // console.log(activityTags)
         // Step 1: Group activities by name and sum durations
 
-          const totalDurationPerTag = relevantActivities.reduce<Record<string, number>>((acc, activity) => {
+          const totalDurationPerTag = justActivities.reduce<Record<string, number>>((acc, activity) => {
             // Iterate over each tag in the current activity
             activity.button.tags.forEach(tag => {
               if (acc[tag]) {
@@ -128,7 +129,19 @@ function useCustomSet() {
   }
 
   const createDayDurationStats = () => {
+    const startTimes = justActivities.map(act => act.timeBlock.startTime)
+    const minStart = Math.min(...startTimes)
+    const maxStart = Math.max(...startTimes)
+    const minStartDate = DateTime.fromSeconds(minStart);
+    const maxStartDate = DateTime.fromSeconds(maxStart);
+    const diffInDays = maxStartDate.startOf('day').diff(minStartDate.startOf('day'), 'days').days;
 
+    const avgTimeByTag = tagDurationSum.map(item => ({
+      text: item.text,
+      totalDuration: item.totalDuration / diffInDays,
+    }));
+
+    updateState({avgTimeByTag: avgTimeByTag})
   }
 
   const createSleepStats = () => {
@@ -191,6 +204,7 @@ function useCustomSet() {
     createDurationSummary();
     createWeekDurationStats();
     createTagDurationSum();
+    createDayDurationStats();
   }, [justActivities]);
   useEffect(() => {
     createFinalArray();

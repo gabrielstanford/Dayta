@@ -51,4 +51,5 @@ export type ButtonState = {
     weekDurationSummary: ActivitySummary[];
     sleepSum: any[];
     tagDurationSum: ActivitySummary[];
+    avgTimeByTag: ActivitySummary[];
   }

@@ -10,32 +10,10 @@ import {useAuth} from '@/contexts/AuthContext'
 import getFilteredActivityRefs from '@/Data/HandleTime'
 import FetchDayActivities from '@/Data/FetchDayActivities'
 import ActivityDescribeModal from '@/components/ActivityDescribeModal'
-
-
+import { Activity } from '@/Types/ActivityTypes';
 // Get screen width. This is for more responsive layouts
 const { width, height } = Dimensions.get('window');
 const buttonWidth = width/6.25
-
-type ButtonState = {
-  text: string;
-  iconLibrary: string;
-  icon: string;
-  pressed: boolean;
-  keywords: string[];
-  tags?: string[];
-  id?: string;
-};
-interface TimeBlock {
-  startTime: number,   // Unix timestamp for the start time
-  duration: number,    // Duration in seconds
-  endTime: number      // Unix timestamp for the end time (startTime + duration)
-}
-interface Activity {
-  id: string;
-  button: ButtonState;
-  timeBlock: TimeBlock;
-  Multi?: Activity[]
-}
 
 const convertUnixToTimeString = (startTime: number, endTime: number): string => {
   // Create a Date object from the Unix timestamp
