@@ -5,6 +5,8 @@ import {Dispatch, SetStateAction, useState} from 'react'
 import {View, Text, TouchableOpacity, StyleSheet, Dimensions, TextInput} from 'react-native'
 import { ThemedText } from '@/components/ThemedText'
 import RNPickerSelect from 'react-native-picker-select'
+import { Routine, Activity } from '@/Types/ActivityTypes'
+import CreateRoutineModal from '@/components/MultitaskModal'
 
 const {width, height} = Dimensions.get("window");
 const buttonWidth = width/5;
@@ -13,12 +15,15 @@ const titleWidth = width/1.5;
 
 
 function Personalize() {
-    const {addCustomActivity} = useAppContext();
+    const {addCustomActivity, addCustomRoutine} = useAppContext();
     const {user} = useAuth();
+    const [MultitaskModalVisible, setMultitaskModalVisible] = useState<boolean>(false);
+
     const [inputText, setInputText] = useState<string>("")
     const [tag1Value, setTag1Value] = useState<string>("")
     const [tag2Value, setTag2Value] = useState<string>("")
-
+    const [routineName, setRoutineName] = useState<string>("");
+    const [routineActivities, setRoutineActivities] = useState<Activity[]>([])
 
     const [newButton, setNewButton] = useState<ButtonState>()
    
@@ -26,6 +31,20 @@ function Personalize() {
         setInputText(text); 
        };
 
+    const handleRoutineInputChange = (name: string) => {
+      setRoutineName(name);
+    }
+    const handleMultitaskNext = (texts: string[]) => {
+      console.log('Next')
+      // const activities = customActivities.filter((item: ButtonState) => texts.includes(item.text))
+      // if(activities) {
+      // setMultiActivity(activities)
+      // setSelectedActivity(null)
+      // }
+      setMultitaskModalVisible(false)
+      // setDurationModalVisible(true)
+
+    }
     const handleSubmit = () => {
         if(inputText.length>3 && tag1Value.length>0) {
         let tags=[""];
@@ -48,11 +67,19 @@ function Personalize() {
         alert("invalid input")
         }
     }
+    const handleRoutineSubmit = () => {
+
+        const newRoutine: Routine = {name: routineName, activities: routineActivities}
+        setTimeout(() => {
+          addCustomRoutine(newRoutine);
+        }, 0)
+    }
+
     return (
         <>
         <View style={styles.modalOverlay}>
-          
-            <View style={styles.titleContainer}>
+        <CreateRoutineModal style={{}} MultitaskModalVisible={MultitaskModalVisible} onNext={handleMultitaskNext} onTapOut={() => setMultitaskModalVisible(false)}/>
+        <View style={styles.titleContainer}>
               <ThemedText type="titleText" style={{fontSize: width/12}}>Personalization</ThemedText>
             </View>
           {/* <View style={styles.headerSection}>
@@ -82,6 +109,36 @@ function Personalize() {
           <View style={styles.createContainer}>
               <TouchableOpacity onPress={() => handleSubmit()} style={styles.closeButton}>
                 <Text style={styles.buttonText}>Create Activity</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          {/* Create Custom Routine Interface */}
+          <View style={styles.createActivityContainer}>
+          <View style={styles.textSection}>
+            <Text style={{fontSize: width/16, color: 'white', fontStyle: 'italic'}}>Create Custom Routine</Text>
+            <View style={styles.textContainer}>
+            <ThemedText type="subtitle">Routine Name: </ThemedText>
+            <View style={styles.inputText}>
+            <TextInput value={inputText} 
+                onChangeText={handleRoutineInputChange}
+                maxLength={30}
+                keyboardType="default" 
+                // onSubmitEditing={() => handleSubmit(newButton)}
+                returnKeyType="done"
+                style={styles.textInputContainer}
+            />
+            </View>
+            </View>
+          </View>
+          <View style={styles.tagSection}>
+            <ThemedText type="subtitle">Set Up Routine: </ThemedText>
+            <TouchableOpacity onPress={() => setMultitaskModalVisible(true)}>
+              <Text>Go</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.createContainer}>
+              <TouchableOpacity onPress={() => handleRoutineSubmit()} style={styles.closeButton}>
+                <Text style={styles.buttonText}>Create Routine</Text>
               </TouchableOpacity>
             </View>
           </View>

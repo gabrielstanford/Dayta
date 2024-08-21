@@ -3,7 +3,7 @@ import { setDoc, doc, getDoc, updateDoc, deleteDoc, serverTimestamp, collection,
 import { firestore } from '@/firebase/firebase';
 import { useAuth } from './AuthContext'; // Assume you have a context for auth
 import { DateTime } from 'luxon';
-import {Activity, ButtonState, DatedActivities, ActivitySummary, StatisticsState} from '@/Types/ActivityTypes'
+import {Activity, ButtonState, DatedActivities, ActivitySummary, StatisticsState, Routine} from '@/Types/ActivityTypes'
 import {ActivityButtons, shuffle} from '@/Data/FetchCustomActivities';
 import { storage } from '@/utils/mmkvStorage';
 import {useCustomSet} from '@/Data/CustomSet'
@@ -20,6 +20,8 @@ interface AppContextProps {
   moveActivity: (activity: Activity, updates: Partial<Activity>) => void;
   addActivity: (activity: Activity) => void;
   addCustomActivity: (button: ButtonState) => void;
+  addCustomRoutine: (routine: Routine) => void;
+  customRoutines: Routine[];
   removeActivity: (activ: Activity) => void;
   // durationSummary: ActivitySummary[];
   // setDurationSummary: React.Dispatch<React.SetStateAction<ActivitySummary[]>>;
@@ -49,6 +51,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [justActivities, setJustActivities] = useState<Activity[]>([]);
   const [allActivities, setAllActivities] = useState<DatedActivities[]>([]);
   const [customActivities, setCustomActivities] = useState<ButtonState[]>([]);
+  const [customRoutines, setCustomRoutines] = useState<Routine[]>([]);
   const [dateIncrement, setDateIncrement] = useState(0);
   const [updateLocalStorage, setUpdateLocalStorage] = useState(false);
   const [finalArray, setFinalArray] = useState<ButtonState[]>([])
@@ -323,6 +326,30 @@ useEffect(() => {
       }
   };
 
+  const addCustomRoutine = async (routine: Routine) => {
+    try {
+      setCustomRoutines((prevActs: Routine[]) => [...prevActs, routine] // Add new activity
+      );
+      storage.set('CustomRoutines', JSON.stringify([...customRoutines, routine]))
+      console.log('completed setting custom activities')
+        if (user) {
+        //first add to context, in background add to local storage/database
+        const routineRef = doc(firestore, 'users', user.uid, 'customRoutines', routine.name); // Using routine name as ID
+        const newRoutine = {
+          ...routine,
+        };
+  
+        await setDoc(routineRef, newRoutine);
+        
+        // await fetchActivities();
+        // console.log('Activities Fetched')
+      }
+
+      } catch (error) {
+      console.error("Error adding custom activity: ", error);
+      }
+  };
+
   const removeActivity = async (activ: Activity) => {
     try {
       setJustActivities(prevActivities => prevActivities.filter(act => act.id !== activ.id));
@@ -337,7 +364,7 @@ useEffect(() => {
     }
   };
   return (
-    <AppContext.Provider value={{ justActivities, allActivities, dateIncrement, customActivities, setDateIncrement, setUpdateLocalStorage, addActivity, addCustomActivity, updateActivity, moveActivity, removeActivity, state, updateState, finalArray, setFinalArray }}>
+    <AppContext.Provider value={{ justActivities, allActivities, dateIncrement, customActivities, setDateIncrement, setUpdateLocalStorage, addActivity, addCustomActivity, addCustomRoutine, customRoutines, updateActivity, moveActivity, removeActivity, state, updateState, finalArray, setFinalArray }}>
       {children}
     </AppContext.Provider>
   );

@@ -64,6 +64,8 @@ function useCustomSet() {
 
           const totalDurationPerTag = justActivities.reduce<Record<string, number>>((acc, activity) => {
             // Iterate over each tag in the current activity
+            if(activity.button.tags) {
+            console.log(activity)
             activity.button.tags.forEach(tag => {
               if (acc[tag]) {
                 // If the tag already exists, add the duration to the existing value
@@ -74,6 +76,11 @@ function useCustomSet() {
               }
             });
             return acc;
+            }
+            else {
+              console.log("No Tags: ", activity)
+              return acc
+            }
           }, {});
         const result: ActivitySummary[] = Object.entries(totalDurationPerTag).map(([text, totalDuration]) => ({
           text,
@@ -201,16 +208,19 @@ function useCustomSet() {
     updateState({avgWakeTime: averageWakeTime})
   }
   useEffect(() => {
+    if(justActivities.length>0) {
+      console.log(justActivities)
+      createFinalArray();
     createDurationSummary();
     createWeekDurationStats();
     createTagDurationSum();
     createDayDurationStats();
+    }
   }, [justActivities]);
   useEffect(() => {
-    createFinalArray();
-  }, [justActivities])
-  useEffect(() => {
+    if(justActivities.length>0) {
     createSleepStats();
+    }
   }, [])
   return {finalArray: useAppContext().finalArray, state: useAppContext().state}
 };

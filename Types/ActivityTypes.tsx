@@ -44,6 +44,11 @@ export type ButtonState = {
     totalDuration: number;
   }
 
+  export interface Routine {
+    name: string;
+    activities: Activity[];
+  }
+
   export interface StatisticsState {
     durationSummary: ActivitySummary[];
     avgSleepTime: number;

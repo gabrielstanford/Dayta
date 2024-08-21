@@ -19,7 +19,7 @@ const buttonWidth = width/6.25
     onTapOut: () => void;
   }
 
-const MultitaskModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible, onNext, onTapOut, ...modalProps }) => {
+const CreateRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible, onNext, onTapOut, ...modalProps }) => {
 
   const [multiSearchVisible, setMultiSearchVisible] = useState(false);
   const [buttonTexts, setButtonTexts] = useState<string[]>([]);
@@ -169,4 +169,4 @@ const androidCustom = StyleSheet.create({
     padding: 10, // Optional padding
   },
 })
-export default MultitaskModal;
+export default CreateRoutineModal;
