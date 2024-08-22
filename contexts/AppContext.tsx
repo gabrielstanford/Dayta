@@ -217,7 +217,7 @@ useEffect(() => {
         const datesSnapshot = await getDocs(datesRef);
         const dates = datesSnapshot.docs.map(doc => doc.id);
         const filteredDates = dates.filter(date => date > '2024-08-06');
-        console.log(filteredDates)
+        // console.log(filteredDates)
         const activityTemp: Activity[] = [];
         // Step 2: Get activities for each date and group them
         for (const date of filteredDates) {
@@ -331,14 +331,13 @@ useEffect(() => {
       setCustomRoutines((prevActs: Routine[]) => [...prevActs, routine] // Add new activity
       );
       storage.set('CustomRoutines', JSON.stringify([...customRoutines, routine]))
-      console.log('completed setting custom activities')
         if (user) {
         //first add to context, in background add to local storage/database
         const routineRef = doc(firestore, 'users', user.uid, 'customRoutines', routine.name); // Using routine name as ID
         const newRoutine = {
           ...routine,
         };
-  
+        console.log('ROUTINE ATTEMPTING BEING ADDED: ', newRoutine)
         await setDoc(routineRef, newRoutine);
         
         // await fetchActivities();
@@ -346,7 +345,7 @@ useEffect(() => {
       }
 
       } catch (error) {
-      console.error("Error adding custom activity: ", error);
+      console.error("Error adding custom routine: ", error);
       }
   };
 

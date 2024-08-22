@@ -15,7 +15,7 @@ import ActivitySearchModal from './ActivitySearchModal'
 import { useCustomSet} from '@/Data/CustomSet'
 import Toast from 'react-native-toast-message'
 import {ButtonState, Activity, TimeBlock} from '@/Types/ActivityTypes'
-import { storage } from '@/utils/mmkvStorage';
+import AddRoutineModal from './AddRoutineModal';
 
 //next: add search
 //after: add functionality to change what shows up on quick add based on an array of 9 quick add options that we can pass in
@@ -77,10 +77,11 @@ interface MyModalProps extends ModalProps {
 const MultiButton: ButtonState = {text: 'Multi-Activity', iconLibrary: "fontAwesome5", keywords: [], tags: [], icon: "tasks", pressed: false}
 
 const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) => {
-  const { addActivity, customActivities} = useAppContext();
+  const { addActivity, customActivities, customRoutines} = useAppContext();
   const {finalArray} = useCustomSet();
   const [searchModalVisible, setSearchModalVisible] = useState<boolean>(false);
   const [MultitaskModalVisible, setMultitaskModalVisible] = useState<boolean>(false);
+  const [addRoutineModal, setAddRoutineModal] = useState<boolean>(false);
   const [durationModalVisible, setDurationModalVisible] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<ButtonState | null>(null);
   const [multiActivity, setMultiActivity] = useState<ButtonState[] | null>(null);
@@ -99,6 +100,15 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
       setDurationModalVisible(true);
       
   };
+
+  const handleRoutineSubmit = (routineName: string, startTime: number) => {
+    setAddRoutineModal(false);
+    alert(`Name: ${routineName} Start: ${startTime}`)
+    const routine = customRoutines.find(routine => routine.name==routineName)
+    
+    Toast.show({ type: 'success', text1: 'Added Activity To Journal!'})
+  }
+
     const handleDurationSubmit = (block: TimeBlock) => {
 
       setTimeout(() => {
@@ -124,7 +134,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
           console.log("no selected activity")
         }
       }, 0);
-      setDurationModalVisible(!durationModalVisible);
+      setDurationModalVisible(false);
     }
 
     const handleMultitaskNext = (texts: string[]) => {
@@ -211,7 +221,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
         <View style={styles.quickAddContainer}>
           {renderButtons()}
         </View>
-        <View style={styles.searchContainer}>
+          <View style={styles.endButtons}>
           <Button onPress={() => setSearchModalVisible(true)}>Other</Button>
           {/* <Button onPress={() => {setTimeout(() => {addCustomActivity(  { text: 'Eating CLOUT', iconLibrary: "fontAwesome5", icon: "utensils", keywords: ['Restaurant', 'Cafe'], pressed: false, tags: ['Food/Drink'] },) 
             }, 0); setDurationModalVisible(!durationModalVisible)}}>Custom Act Test</Button> */}
@@ -219,9 +229,10 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
             <DurationModal style={styles.durationModal} durationModalVisible={durationModalVisible} onSubmit={handleDurationSubmit} onTapOut={() => setDurationModalVisible(false)} activity={selectedActivity as ButtonState}/>
           <Button color="secondary" onPress={() => setMultitaskModalVisible(true)}>Multi-Activity Block</Button>
           <MultitaskModal style={styles.durationModal} MultitaskModalVisible={MultitaskModalVisible} onNext={handleMultitaskNext} onTapOut={() => setMultitaskModalVisible(false)}/>
-
-        </View>
-      </View>
+          <Button color="success" onPress={() => (setAddRoutineModal(true))}>Add Routine</Button>
+          <AddRoutineModal style={styles.durationModal} MultitaskModalVisible={addRoutineModal} onNext={handleRoutineSubmit} onTapOut={() => setAddRoutineModal(false)} />
+          </View>
+       </View>
       <Toast />
     </Modal>
     );
@@ -260,6 +271,9 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
       alignItems: 'center',
       left: (width / 2) - (titleWidth / 2), // Center horizontally more precisely
     },
+    endButtons: {
+      marginBottom: 20
+    },
     buttonTextContainer: {
       flex: 1,
       alignItems: 'flex-start'
@@ -284,9 +298,6 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
     },
     durationModal: {
       height: height
-    },
-    searchContainer: {
-      flex: 1.5
     },
   });
 

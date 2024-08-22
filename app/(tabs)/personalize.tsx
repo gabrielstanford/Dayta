@@ -6,26 +6,23 @@ import {View, Text, TouchableOpacity, StyleSheet, Dimensions, TextInput} from 'r
 import { ThemedText } from '@/components/ThemedText'
 import RNPickerSelect from 'react-native-picker-select'
 import { Routine, Activity } from '@/Types/ActivityTypes'
-import CreateRoutineModal from '@/components/MultitaskModal'
+import CreateRoutineModal from '@/components/CreateRoutineModal'
+import uuid from 'react-native-uuid'
 
 const {width, height} = Dimensions.get("window");
 const buttonWidth = width/5;
 const buttonHeight = height/19;
 const titleWidth = width/1.5;
 
-
 function Personalize() {
-    const {addCustomActivity, addCustomRoutine} = useAppContext();
+    const {addCustomActivity, addCustomRoutine, customActivities} = useAppContext();
     const {user} = useAuth();
     const [MultitaskModalVisible, setMultitaskModalVisible] = useState<boolean>(false);
-
     const [inputText, setInputText] = useState<string>("")
     const [tag1Value, setTag1Value] = useState<string>("")
     const [tag2Value, setTag2Value] = useState<string>("")
     const [routineName, setRoutineName] = useState<string>("");
     const [routineActivities, setRoutineActivities] = useState<Activity[]>([])
-
-    const [newButton, setNewButton] = useState<ButtonState>()
    
     const handleInputChange = (text: string) => {
         setInputText(text); 
@@ -34,15 +31,36 @@ function Personalize() {
     const handleRoutineInputChange = (name: string) => {
       setRoutineName(name);
     }
-    const handleMultitaskNext = (texts: string[]) => {
-      console.log('Next')
+
+    const handleMultitaskNext = (texts: (string | number)[][]) => {
       // const activities = customActivities.filter((item: ButtonState) => texts.includes(item.text))
       // if(activities) {
       // setMultiActivity(activities)
       // setSelectedActivity(null)
       // }
       setMultitaskModalVisible(false)
-      // setDurationModalVisible(true)
+      const button1 = customActivities.find(act => act.text==texts[0][0])
+      const button2 = customActivities.find(act => act.text==texts[1][0])
+      const button3 = customActivities.find(act => act.text==texts[2][0])
+      const button4 = customActivities.find(act => act.text==texts[3][0])
+    
+      if(button1) {
+      const act1: Activity = {id: uuid.v4() as string, button: button1, timeBlock: {startTime: 0, duration: texts[0][1] as number, endTime: 0}}
+      setRoutineActivities([act1])
+      }
+      if(button2) {
+        const act2: Activity = {id: uuid.v4() as string, button: button2, timeBlock: {startTime: 0, duration: texts[1][1] as number, endTime: 0}}
+        setRoutineActivities((prevActs: Activity[]) => {return [...prevActs, act2]})
+      }
+      if(button3) {
+      const act3 = {id: uuid.v4() as string, button: button3, timeBlock: {startTime: 0, duration: texts[2][1] as number, endTime: 0}}
+      setRoutineActivities((prevActs: Activity[]) => {return [...prevActs, act3]})
+
+      }
+      if(button4) {
+        const act4 = {id: uuid.v4() as string, button: button4, timeBlock: {startTime: 0, duration: texts[3][1] as number, endTime: 0}}
+        setRoutineActivities((prevActs: Activity[]) => {return [...prevActs, act4]})
+      }
 
     }
     const handleSubmit = () => {
@@ -68,13 +86,28 @@ function Personalize() {
         }
     }
     const handleRoutineSubmit = () => {
-
-        const newRoutine: Routine = {name: routineName, activities: routineActivities}
-        setTimeout(() => {
-          addCustomRoutine(newRoutine);
-        }, 0)
+        if(routineName.length>0) {
+          if(routineActivities.length>1) {
+            alert("success")
+            const newRoutine: Routine = {name: routineName, activities: routineActivities}
+              setTimeout(() => {
+                console.log(newRoutine.activities)
+              addCustomRoutine(newRoutine);
+            }, 0)
+          }
+          else {
+            alert("Problem with activities. Try again.")
+          }
+        }
+        else {
+          alert("Add a Routine Name")
+        }
+        // const newRoutine: Routine = {name: routineName, activities: routineActivities}
+        // setTimeout(() => {
+        //   addCustomRoutine(newRoutine);
+        // }, 0)
     }
-
+    
     return (
         <>
         <View style={styles.modalOverlay}>
@@ -119,7 +152,7 @@ function Personalize() {
             <View style={styles.textContainer}>
             <ThemedText type="subtitle">Routine Name: </ThemedText>
             <View style={styles.inputText}>
-            <TextInput value={inputText} 
+            <TextInput value={routineName} 
                 onChangeText={handleRoutineInputChange}
                 maxLength={30}
                 keyboardType="default" 
@@ -130,10 +163,10 @@ function Personalize() {
             </View>
             </View>
           </View>
-          <View style={styles.tagSection}>
+          <View style={styles.setUp}>
             <ThemedText type="subtitle">Set Up Routine: </ThemedText>
-            <TouchableOpacity onPress={() => setMultitaskModalVisible(true)}>
-              <Text>Go</Text>
+            <TouchableOpacity style={styles.addRoutineButton} onPress={() => setMultitaskModalVisible(true)}>
+              <Text>Add Activities</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.createContainer}>
@@ -197,6 +230,10 @@ interface TagDropdownProps {
       alignItems: 'center',
       padding: 15
     },
+    addRoutineButton: {
+      padding: 10,
+      backgroundColor: 'yellow'
+    },
     createActivityContainer: {
       flex: 10,
     },
@@ -215,6 +252,10 @@ interface TagDropdownProps {
     textSection: {
       padding: 30,
       rowGap: 20,
+    },
+    setUp: {
+    padding: 30,
+    flexDirection: 'row'
     },
     tagSection: {
         padding: 30,

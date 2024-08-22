@@ -11,6 +11,7 @@ import {RadioButton} from 'react-native-paper'
 import TimeInput from './HourPicker'
 import {ButtonState, Activity, TimeBlock, ActivityWithEnd} from '@/Types/ActivityTypes'
 import CustomRadioButton from './CustomRadioButton'
+import { convertTimeToUnix,  adjustDateByDays} from '@/utils/DateTimeUtils'
 
 const {width, height} = Dimensions.get("window");
   
@@ -115,58 +116,7 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
     function convertDurationToSeconds(minutes: number): number {
       return (minutes * 60);
     }
-    const convertTimeToUnix = (timeString: string, date: Date = new Date()): number => {
-      // Parse the time string
-      if(timeString!=="888") {
-      const [time, period] = timeString.split(' ');
-      const [hours, minutes] = time.split(':').map(Number);
     
-      // Convert 12-hour format to 24-hour format
-      let hours24 = hours;
-      if (period === 'PM' && hours !== 12) {
-        hours24 += 12;
-      } else if (period === 'AM' && hours === 12) {
-        hours24 = 0;
-      }
-    
-      // Set the UTC time based on the input
-      const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), hours24, minutes));
-    
-      // Convert to Unix timestamp and return
-      return Math.floor(utcDate.getTime() / 1000);
-    }
-    else {
-      // Convert the local Date object to UTC time
-      const localDate = new Date(
-        date.getFullYear(),
-        date.getMonth(),
-        date.getDate(),
-        12,  // Hours
-        10, // Minutes
-        31  // Seconds
-      );
-      return localDate.getTime() / 1000;
-    }
-    };
-    
-    function adjustDateByDays(date: Date, days: number): Date {
-      // Create a copy of the original date to avoid mutating it
-      const adjustedDate = new Date(date);
-    
-      // Get the current date components
-      const currentDate = adjustedDate.getDate();
-    
-      // Set the new date
-      adjustedDate.setDate(currentDate + days);
-    
-      // Preserve time components (hours, minutes, seconds, milliseconds)
-      adjustedDate.setHours(date.getHours());
-      adjustedDate.setMinutes(date.getMinutes());
-      adjustedDate.setSeconds(date.getSeconds());
-      adjustedDate.setMilliseconds(date.getMilliseconds());
-    
-      return adjustedDate;
-    }
     // Function to create a TimeBlock based on user input
     function createTimeBlock(startTime: string, durationMinutes: number): TimeBlock {
       // am i turning time into unix and then right back? seems strange
