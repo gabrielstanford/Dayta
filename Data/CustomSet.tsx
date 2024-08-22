@@ -6,6 +6,7 @@ import {ButtonState, ActivitySummary, Activity} from '@/Types/ActivityTypes'
 import getFiltered from './HandleTime'
 import { act } from 'react-test-renderer'
 import { DateTime } from 'luxon'
+import { normalize } from '@rneui/themed'
 
 interface ValueCounts {
   [key: string]: number;
@@ -64,15 +65,20 @@ function useCustomSet() {
 
           const totalDurationPerTag = justActivities.reduce<Record<string, number>>((acc, activity) => {
             // Iterate over each tag in the current activity
+            
             if(activity.button.tags) {
-            console.log(activity)
+              
             activity.button.tags.forEach(tag => {
-              if (acc[tag]) {
+              const normalizedTag = tag.trim().toLowerCase();
+              if(normalizedTag=='Other') {
+                console.log('Normalized tag: ', normalizedTag)
+              }
+              if (acc[normalizedTag]) {
                 // If the tag already exists, add the duration to the existing value
-                acc[tag] += activity.timeBlock.duration / 3600; // Convert seconds to hours
+                acc[normalizedTag] += activity.timeBlock.duration / 3600; // Convert seconds to hours
               } else {
                 // If the tag does not exist, initialize it with the duration
-                acc[tag] = activity.timeBlock.duration / 3600; // Convert seconds to hours
+                acc[normalizedTag] = activity.timeBlock.duration / 3600; // Convert seconds to hours
               }
             });
             return acc;
@@ -209,7 +215,6 @@ function useCustomSet() {
   }
   useEffect(() => {
     if(justActivities.length>0) {
-      console.log(justActivities)
       createFinalArray();
     createDurationSummary();
     createWeekDurationStats();

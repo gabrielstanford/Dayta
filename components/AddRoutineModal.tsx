@@ -13,6 +13,7 @@ import { create } from 'react-test-renderer'
 import RNPickerSelect from 'react-native-picker-select'
 import TimeDropdown from './TimeDropdown'
 import { convertTimeToUnix, adjustDateByDays } from '@/utils/DateTimeUtils';
+import { Routine } from '@/Types/ActivityTypes';
 
 const {width, height} = Dimensions.get("window");
 const buttonWidth = width/6.25
@@ -36,7 +37,7 @@ const AddRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible,
   const [selectedHour, setSelectedHour] = useState("10");
   const [selectedMinute, setSelectedMinute] = useState("30");
   const [selectedPeriod, setSelectedPeriod] = useState("AM");
-  const {dateIncrement} = useAppContext();
+  const {dateIncrement, customRoutines} = useAppContext();
   const handleHourChange = (hour: string) => {
     setSelectedHour(hour);
   };
@@ -82,7 +83,7 @@ const AddRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible,
                     <ThemedText type="title"> Add A Routine</ThemedText>
                   </View>
                 <View style={styles.stepContainer}>
-                  <TagDropdown setTagValue={setTagValue} />
+                  <TagDropdown customRoutines={customRoutines} setTagValue={setTagValue} />
                 </View>
                 <Text style={{paddingLeft: 20, fontWeight: "bold", fontSize: 20, color: "black"}}>Starting At: </Text>
                 <View style={styles.stepContainer}>
@@ -111,11 +112,13 @@ const AddRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible,
 
 interface TagDropdownProps {
     setTagValue: React.Dispatch<React.SetStateAction<string>>;
+    customRoutines: Routine[]; 
   }
-  const TagDropdown: React.FC<TagDropdownProps> = ({ setTagValue }) => {
-    const tags = [
-      { label: 'Morning Routine', value: 'Morning Routine'},
-    ]
+  const TagDropdown: React.FC<TagDropdownProps> = ({ setTagValue, customRoutines}) => {
+    const tags = customRoutines.map(routine => ({
+      label: routine.name,
+      value: routine.name,
+    }));
     return (
       <RNPickerSelect
         onValueChange={(value) => setTagValue(value)}

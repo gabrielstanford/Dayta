@@ -85,7 +85,6 @@ function Stats() {
     );    
     const top9WithOther = getTop9WithOther(sortedDescending)
     setDurationSumState(top9WithOther)
-    setEnoughDataForCommonChart(true)
 
     const sortedDescendingWeek = weekDurationSummary.sort(
       (a: ActivitySummary, b: ActivitySummary) => b.totalDuration - a.totalDuration
@@ -98,9 +97,18 @@ function Stats() {
     );    
     const top9WithOtherTags = getTop9WithOther(sortedDescendingTags)
     setTagDurationSumState(top9WithOtherTags)
-    
+
   }, [justActivities]);
- 
+
+  useEffect(() => {
+    if(durationSumState.length>0 && weekDurationSumState.length>0 && tagDurationSumState.length>0 && avgSleepTime && avgWakeTime) {
+      setEnoughDataForCommonChart(true)
+    }
+  }, [tagDurationSumState])
+//   console.log('Pie Chart 1 Data: (duration)', durationSumState);
+// console.log('Pie Chart 2 Data (week duration):', weekDurationSumState);
+console.log('Pie Chart 3 Data:', tagDurationSumState);
+// console.log('Line Chart Data:', avgWakeTime, 'avg sleep: ', avgSleepTime);
   const [sleepLabels, setSleepLabels] = useState<string[]>([]);
   const [sleepValues, setSleepValues] = useState<[number, number][]>([]);
   useEffect(() => {

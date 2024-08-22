@@ -55,8 +55,10 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
     setDurationMinutes(15);
   }, [durationModalVisible, hasInitialized, user]);
 
-  if(dbActivities) {
-// Filter out activities without an endTime
+  useEffect(() => {
+    // Filter out activities without an endTime
+    if(dbActivities) {
+
   const filteredWithEnd: ActivityWithEnd[] = dbActivities.filter(
     (act): act is Activity & { timeBlock: { endTime: number } } => act.timeBlock.endTime !== null
   );
@@ -65,7 +67,6 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
   const sortedActivities = filteredWithEnd.sort(
     (a, b) => (a.timeBlock.endTime || 0) - (b.timeBlock.endTime || 0)
   );
-  useEffect(() => {
     if (durationModalVisible) {
       if (!hasInitialized && sortedActivities.length > 0) {
         const mostRecentEndTime = unixEndTimeToHMS(
@@ -79,8 +80,9 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
       // Reset the initialization state when the modal is closed
       setHasInitialized(false);
     }
-  }, [durationModalVisible, hasInitialized, sortedActivities]);
   }
+  }, [durationModalVisible, hasInitialized, justActivities]);
+  
   //could implement logic here for making this most likely based on the activity
   const [durationMinutes, setDurationMinutes] = useState(15)
 
@@ -127,7 +129,6 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
       const utcZonedTime = dateIncrement==0 ? new Date(localDate.getTime() + offset * 60000) : adjustDateByDays(new Date(localDate.getTime() + offset * 60000), dateIncrement);
       let unixTimestamp = Math.floor(utcZonedTime.getTime() / 1000);
       if(localDate.getUTCHours()<4) {
-        console.log('24 hours later')
         unixTimestamp = unixTimestamp+86400
       }
       let endTimeUnix = null

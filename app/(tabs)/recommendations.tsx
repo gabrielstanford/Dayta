@@ -42,8 +42,8 @@ export default function Recommendations() {
   }, [justActivities])
 
   useEffect(() => {
-    const entertainment = avgTimeByTag.find(tag => tag.text=="Entertainment")
-    const work = avgTimeByTag.find(tag => tag.text=="Work/Study")
+    const entertainment = avgTimeByTag.find(tag => tag.text=="entertainment")
+    const work = avgTimeByTag.find(tag => tag.text=="work/study")
 
     if(entertainment) {
       if(entertainment.totalDuration>1) {

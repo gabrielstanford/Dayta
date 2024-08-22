@@ -77,7 +77,7 @@ interface MyModalProps extends ModalProps {
 const MultiButton: ButtonState = {text: 'Multi-Activity', iconLibrary: "fontAwesome5", keywords: [], tags: [], icon: "tasks", pressed: false}
 
 const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) => {
-  const { addActivity, customActivities, customRoutines} = useAppContext();
+  const { addActivity, customActivities, customRoutines, addRoutineActivities} = useAppContext();
   const {finalArray} = useCustomSet();
   const [searchModalVisible, setSearchModalVisible] = useState<boolean>(false);
   const [MultitaskModalVisible, setMultitaskModalVisible] = useState<boolean>(false);
@@ -105,8 +105,40 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
     setAddRoutineModal(false);
     alert(`Name: ${routineName} Start: ${startTime}`)
     const routine = customRoutines.find(routine => routine.name==routineName)
-    
+
+    const populateTimes = (activities: Activity[]) => {
+      const firstEnd = startTime + activities[0].timeBlock.duration
+      const secondStart = firstEnd + 60
+      const secondEnd = secondStart + activities[1].timeBlock.duration
+      const thirdStart = secondEnd + 60
+      const thirdEnd = thirdStart + activities[2].timeBlock.duration
+      const fourthStart = thirdEnd + 60
+      const fourthEnd = fourthStart + activities[3].timeBlock.duration
+
+      return [startTime, firstEnd, secondStart, secondEnd, thirdStart, thirdEnd, fourthStart, fourthEnd]
+    }
+
+    if(routine) {
+    const times: number[] = populateTimes(routine.activities);
+    let act1 = routine.activities[0]
+    let act2 = routine.activities[1]
+    let act3 = routine.activities[2]
+    let act4 = routine.activities[3]
+    act1.timeBlock.startTime = times[0]
+    act1.timeBlock.endTime = times[1]
+    act2.timeBlock.startTime = times[2]
+    act2.timeBlock.endTime = times[3]
+    act3.timeBlock.startTime = times[4]
+    act3.timeBlock.endTime = times[5]
+    act4.timeBlock.startTime = times[6]
+    act4.timeBlock.endTime = times[7]
+    addRoutineActivities([act1, act2, act3, act4])
     Toast.show({ type: 'success', text1: 'Added Activity To Journal!'})
+    }
+    else {
+      alert("Please Add A Routine")
+    }
+    
   }
 
     const handleDurationSubmit = (block: TimeBlock) => {
@@ -189,7 +221,14 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
         </View>
       ));
     };
-
+    const addRoutine = () => {
+      if(customRoutines.length>0) {
+        setAddRoutineModal(true);
+      }
+      else {
+        alert("First add a routine in the personalize tab!")
+      }
+    }
     const closeModal = () => {
       onClose();
     }
@@ -229,7 +268,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
             <DurationModal style={styles.durationModal} durationModalVisible={durationModalVisible} onSubmit={handleDurationSubmit} onTapOut={() => setDurationModalVisible(false)} activity={selectedActivity as ButtonState}/>
           <Button color="secondary" onPress={() => setMultitaskModalVisible(true)}>Multi-Activity Block</Button>
           <MultitaskModal style={styles.durationModal} MultitaskModalVisible={MultitaskModalVisible} onNext={handleMultitaskNext} onTapOut={() => setMultitaskModalVisible(false)}/>
-          <Button color="success" onPress={() => (setAddRoutineModal(true))}>Add Routine</Button>
+          <Button color="success" onPress={addRoutine}>Add Routine</Button>
           <AddRoutineModal style={styles.durationModal} MultitaskModalVisible={addRoutineModal} onNext={handleRoutineSubmit} onTapOut={() => setAddRoutineModal(false)} />
           </View>
        </View>

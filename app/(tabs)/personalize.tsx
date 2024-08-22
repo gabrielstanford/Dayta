@@ -196,6 +196,7 @@ interface TagDropdownProps {
       { label: 'Hobbies', value: 'Hobbies' },
       { label: 'Chores', value: 'Chores' },
       { label: 'Self-Improvement', value: 'Self-Improvement' },
+      {label: 'Family Time', value: 'Family Time'},
       { label: 'Helping Others', value: 'Helping Others' },
 
       { label: 'Other', value: 'Other' },

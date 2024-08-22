@@ -21,6 +21,7 @@ interface AppContextProps {
   addActivity: (activity: Activity) => void;
   addCustomActivity: (button: ButtonState) => void;
   addCustomRoutine: (routine: Routine) => void;
+  addRoutineActivities: (activities: Activity[]) => void;
   customRoutines: Routine[];
   removeActivity: (activ: Activity) => void;
   // durationSummary: ActivitySummary[];
@@ -216,7 +217,7 @@ useEffect(() => {
         const datesRef = collection(firestore, 'users', user.uid, 'dates');
         const datesSnapshot = await getDocs(datesRef);
         const dates = datesSnapshot.docs.map(doc => doc.id);
-        const filteredDates = dates.filter(date => date > '2024-08-06');
+        const filteredDates = dates.filter(date => date > '2024-08-07');
         // console.log(filteredDates)
         const activityTemp: Activity[] = [];
         // Step 2: Get activities for each date and group them
@@ -267,9 +268,28 @@ useEffect(() => {
       }
     }
   }
+
+  const initializeCustomRoutines = async () => {
+    if(user) {
+      if(storage.getString('CustomRoutines') && !updateLocalStorage) {
+        if(customRoutines.length==0) {
+        const customRoutinesTemp = JSON.parse(storage.getString('CustomRoutines') as string)
+        setCustomRoutines(customRoutinesTemp as Routine[])
+        }
+      }
+      else {
+        const routinesRef = collection(firestore, `users/${user.uid}/customRoutines`);
+        const routinesSnapshot = await getDocs(routinesRef);
+        const tempCustomRoutines: Routine[] = routinesSnapshot.docs.map(doc => doc.data() as Routine);
+        setCustomRoutines(tempCustomRoutines);
+        storage.set('CustomRoutines', JSON.stringify(tempCustomRoutines))
+      }
+    }
+  }
  
   initializeActivityData();
   initializeCustomActivities();
+  initializeCustomRoutines();
 }, [user, updateLocalStorage]);
 
   const addActivity = async (activity: Activity) => {
@@ -299,6 +319,50 @@ useEffect(() => {
       console.error('Error adding activity to Firestore:', error);
     }
   };  
+  const addRoutineActivities = async (activities: Activity[]) => {
+    try {
+      for(let i=0; i< activities.length; i++) {
+      const tempAct = activities[i]
+      setJustActivities(prevActivities =>
+        prevActivities.some(act => act.id === tempAct.id)
+          ? prevActivities // Avoid adding duplicates
+          : [...prevActivities, tempAct] // Add new activity
+      );
+    }
+    storage.set('JustActivities', JSON.stringify([...justActivities, activities[0], activities[1], activities[2], activities[3]]))
+    if (user) {
+      const startDate = new Date(activities[0].timeBlock.startTime * 1000).toISOString().split('T')[0];
+      const dateRef = doc(firestore, 'users', user.uid, 'dates', startDate);
+      const activity1Ref = doc(dateRef, 'activities', activities[0].id);
+      const activity2Ref = doc(dateRef, 'activities', activities[1].id);
+      const activity3Ref = doc(dateRef, 'activities', activities[2].id);
+      const activity4Ref = doc(dateRef, 'activities', activities[3].id);
+      // Update or create the date document with a timestamp
+      await setDoc(dateRef, { createdAt: serverTimestamp() }, { merge: true });
+
+      // Save the activity to the activities subcollection
+      await setDoc(activity1Ref, {
+        ...activities[0],
+        createdAt: serverTimestamp(), // Optional: add timestamp to the activity
+      });
+      await setDoc(activity2Ref, {
+        ...activities[1],
+        createdAt: serverTimestamp(), // Optional: add timestamp to the activity
+      });
+      await setDoc(activity3Ref, {
+        ...activities[2],
+        createdAt: serverTimestamp(), // Optional: add timestamp to the activity
+      });
+      await setDoc(activity4Ref, {
+        ...activities[3],
+        createdAt: serverTimestamp(), // Optional: add timestamp to the activity
+      });
+    }
+    }
+    catch {
+
+    }
+  }
 
   const addCustomActivity = async (button: ButtonState) => {
     try {
@@ -363,7 +427,7 @@ useEffect(() => {
     }
   };
   return (
-    <AppContext.Provider value={{ justActivities, allActivities, dateIncrement, customActivities, setDateIncrement, setUpdateLocalStorage, addActivity, addCustomActivity, addCustomRoutine, customRoutines, updateActivity, moveActivity, removeActivity, state, updateState, finalArray, setFinalArray }}>
+    <AppContext.Provider value={{ justActivities, allActivities, dateIncrement, customActivities, setDateIncrement, setUpdateLocalStorage, addActivity, addCustomActivity, addCustomRoutine, customRoutines, addRoutineActivities, updateActivity, moveActivity, removeActivity, state, updateState, finalArray, setFinalArray }}>
       {children}
     </AppContext.Provider>
   );
