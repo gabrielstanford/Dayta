@@ -103,37 +103,43 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
 
   const handleRoutineSubmit = (routineName: string, startTime: number) => {
     setAddRoutineModal(false);
-    alert(`Name: ${routineName} Start: ${startTime}`)
+    
+    
     const routine = customRoutines.find(routine => routine.name==routineName)
-
-    const populateTimes = (activities: Activity[]) => {
+    const durationBetweens = routine?.durationBetween
+    const populateTimes = (activities: Activity[], betweens: number[]) => {
       const firstEnd = startTime + activities[0].timeBlock.duration
-      const secondStart = firstEnd + 60
+      const secondStart = firstEnd + betweens[0]
       const secondEnd = secondStart + activities[1].timeBlock.duration
-      const thirdStart = secondEnd + 60
+      const thirdStart = secondEnd>firstEnd ? secondEnd + betweens[1] : firstEnd + betweens[1]
       const thirdEnd = thirdStart + activities[2].timeBlock.duration
-      const fourthStart = thirdEnd + 60
+      const fourthStart = thirdEnd>secondEnd ? thirdEnd + betweens[2] : secondEnd + betweens[2]
       const fourthEnd = fourthStart + activities[3].timeBlock.duration
 
       return [startTime, firstEnd, secondStart, secondEnd, thirdStart, thirdEnd, fourthStart, fourthEnd]
     }
 
     if(routine) {
-    const times: number[] = populateTimes(routine.activities);
-    let act1 = routine.activities[0]
-    let act2 = routine.activities[1]
-    let act3 = routine.activities[2]
-    let act4 = routine.activities[3]
-    act1.timeBlock.startTime = times[0]
-    act1.timeBlock.endTime = times[1]
-    act2.timeBlock.startTime = times[2]
-    act2.timeBlock.endTime = times[3]
-    act3.timeBlock.startTime = times[4]
-    act3.timeBlock.endTime = times[5]
-    act4.timeBlock.startTime = times[6]
-    act4.timeBlock.endTime = times[7]
-    addRoutineActivities([act1, act2, act3, act4])
-    Toast.show({ type: 'success', text1: 'Added Activity To Journal!'})
+      if(durationBetweens) {
+        const times: number[] = populateTimes(routine.activities, durationBetweens);
+        let act1 = routine.activities[0]
+        let act2 = routine.activities[1]
+        let act3 = routine.activities[2]
+        let act4 = routine.activities[3]
+        act1.timeBlock.startTime = times[0]
+        act1.timeBlock.endTime = times[1]
+        act2.timeBlock.startTime = times[2]
+        act2.timeBlock.endTime = times[3]
+        act3.timeBlock.startTime = times[4]
+        act3.timeBlock.endTime = times[5]
+        act4.timeBlock.startTime = times[6]
+        act4.timeBlock.endTime = times[7]
+        addRoutineActivities([act1, act2, act3, act4])
+        Toast.show({ type: 'success', text1: 'Added Activity To Journal!'})
+      }
+      else {
+        alert("Please Add Durations Between The Activities")
+      }
     }
     else {
       alert("Please Add A Routine")

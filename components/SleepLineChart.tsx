@@ -2,6 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { Dimensions } from 'react-native';
+import {decimalToTime} from '@/utils/DateTimeUtils'
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -83,11 +84,13 @@ const SleepLineChart: React.FC<LineChartProps> = ({ labels, values }) => {
     const value2s = values.map(pair => pair[1]);
     const interpolated1 = interpolateValuesSmoothly(value1s, 50)
     const interpolated2 = interpolateValuesSmoothly(value2s, 50)
+    // const transformedLabels = labels.map(label => decimalToTime(label))
     return (
       <View>
         <LineChart
           data={{
             labels: labels,
+            
             datasets: [
               {
                 data: interpolated1,
@@ -119,6 +122,7 @@ const SleepLineChart: React.FC<LineChartProps> = ({ labels, values }) => {
               stroke: '#ffa726',
             },
           }}
+          formatYLabel={(value) => decimalToTime(Number(value))}
           bezier
           style={{
             marginVertical: 8,

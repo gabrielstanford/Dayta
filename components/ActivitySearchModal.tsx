@@ -19,6 +19,7 @@ const ActivitySearchModal: React.FC<SearchProps> = ({visible, onClose, onClick})
   const [results, setResults] = useState<ButtonState[]>(customActivities);
 
   useEffect(() => {
+    // const alphabeticalActs = 
     setResults(customActivities);
   }, [customActivities])
   const handleSearch = (text: string) => {

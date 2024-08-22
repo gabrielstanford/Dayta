@@ -8,6 +8,7 @@ import RNPickerSelect from 'react-native-picker-select'
 import { Routine, Activity } from '@/Types/ActivityTypes'
 import CreateRoutineModal from '@/components/CreateRoutineModal'
 import uuid from 'react-native-uuid'
+import {RadioButton} from 'react-native-paper'
 
 const {width, height} = Dimensions.get("window");
 const buttonWidth = width/5;
@@ -17,13 +18,15 @@ const titleWidth = width/1.5;
 function Personalize() {
     const {addCustomActivity, addCustomRoutine, customActivities} = useAppContext();
     const {user} = useAuth();
-    const [MultitaskModalVisible, setMultitaskModalVisible] = useState<boolean>(false);
+    const [createRoutineModalVisible, setCreateRoutineModalVisible] = useState<boolean>(false);
     const [inputText, setInputText] = useState<string>("")
     const [tag1Value, setTag1Value] = useState<string>("")
     const [tag2Value, setTag2Value] = useState<string>("")
     const [routineName, setRoutineName] = useState<string>("");
+    const [durationBetween, setDurationBetween] = useState<number[]>([]);
     const [routineActivities, setRoutineActivities] = useState<Activity[]>([])
-   
+    const [value, setValue] = useState<string>("Activity");
+
     const handleInputChange = (text: string) => {
         setInputText(text); 
        };
@@ -32,13 +35,13 @@ function Personalize() {
       setRoutineName(name);
     }
 
-    const handleMultitaskNext = (texts: (string | number)[][]) => {
+    const handleMultitaskNext = (texts: [string, number, number][]) => {
       // const activities = customActivities.filter((item: ButtonState) => texts.includes(item.text))
       // if(activities) {
       // setMultiActivity(activities)
       // setSelectedActivity(null)
       // }
-      setMultitaskModalVisible(false)
+      setCreateRoutineModalVisible(false)
       const button1 = customActivities.find(act => act.text==texts[0][0])
       const button2 = customActivities.find(act => act.text==texts[1][0])
       const button3 = customActivities.find(act => act.text==texts[2][0])
@@ -61,7 +64,7 @@ function Personalize() {
         const act4 = {id: uuid.v4() as string, button: button4, timeBlock: {startTime: 0, duration: texts[3][1] as number, endTime: 0}}
         setRoutineActivities((prevActs: Activity[]) => {return [...prevActs, act4]})
       }
-
+      setDurationBetween([texts[0][2], texts[1][2], texts[2][2]])
     }
     const handleSubmit = () => {
         if(inputText.length>3 && tag1Value.length>0) {
@@ -87,16 +90,22 @@ function Personalize() {
     }
     const handleRoutineSubmit = () => {
         if(routineName.length>0) {
-          if(routineActivities.length>1) {
+          if(routineActivities.length==4) {
+            if(durationBetween.length==3) {
             alert("success")
-            const newRoutine: Routine = {name: routineName, activities: routineActivities}
+            const newRoutine: Routine = {name: routineName, durationBetween: durationBetween, activities: routineActivities}
               setTimeout(() => {
                 console.log(newRoutine.activities)
               addCustomRoutine(newRoutine);
             }, 0)
+            console.log(newRoutine)
+            }
+            else {
+              alert("Please make sure the duration betweens are set correctly.")
+            }
           }
           else {
-            alert("Problem with activities. Try again.")
+            alert("Please add exactly 4 activities.")
           }
         }
         else {
@@ -111,13 +120,37 @@ function Personalize() {
     return (
         <>
         <View style={styles.modalOverlay}>
-        <CreateRoutineModal style={{}} MultitaskModalVisible={MultitaskModalVisible} onNext={handleMultitaskNext} onTapOut={() => setMultitaskModalVisible(false)}/>
+        <CreateRoutineModal style={{}} MultitaskModalVisible={createRoutineModalVisible} onNext={handleMultitaskNext} onTapOut={() => setCreateRoutineModalVisible(false)}/>
         <View style={styles.titleContainer}>
               <ThemedText type="titleText" style={{fontSize: width/12}}>Personalization</ThemedText>
             </View>
           {/* <View style={styles.headerSection}>
           </View> */}
-          <View style={styles.createActivityContainer}>
+           <RadioButton.Group onValueChange={value => setValue(value)} value={value}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-around', margin: 5}}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <TouchableOpacity
+                        style={styles.radioButtonContainer}
+                        onPress={() => setValue('Activity')}
+                    >
+                      <RadioButton color="darkcyan" value="Activity" />
+                      <Text>Activity</Text>
+                    </TouchableOpacity>
+                    </View>
+
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <TouchableOpacity
+                      style={styles.radioButtonContainer}
+                      onPress={() => setValue('Routine')}
+                    >
+                      <RadioButton color="darkcyan" value="Routine" />
+                      <Text>Routine</Text>
+                    </TouchableOpacity>
+                    </View>
+                  </View>
+                </RadioButton.Group>
+          {value=='Activity' ? (  
+            <View style={styles.createActivityContainer}>
           <View style={styles.textSection}>
             <Text style={{fontSize: width/16, color: 'white', fontStyle: 'italic'}}>Create Custom Activity</Text>
             <View style={styles.textContainer}>
@@ -144,8 +177,7 @@ function Personalize() {
                 <Text style={styles.buttonText}>Create Activity</Text>
               </TouchableOpacity>
             </View>
-          </View>
-          {/* Create Custom Routine Interface */}
+          </View>) : (
           <View style={styles.createActivityContainer}>
           <View style={styles.textSection}>
             <Text style={{fontSize: width/16, color: 'white', fontStyle: 'italic'}}>Create Custom Routine</Text>
@@ -165,7 +197,7 @@ function Personalize() {
           </View>
           <View style={styles.setUp}>
             <ThemedText type="subtitle">Set Up Routine: </ThemedText>
-            <TouchableOpacity style={styles.addRoutineButton} onPress={() => setMultitaskModalVisible(true)}>
+            <TouchableOpacity style={styles.addRoutineButton} onPress={() => setCreateRoutineModalVisible(true)}>
               <Text>Add Activities</Text>
             </TouchableOpacity>
           </View>
@@ -175,6 +207,8 @@ function Personalize() {
               </TouchableOpacity>
             </View>
           </View>
+          )}
+        
         </View>
         </>
     )
@@ -234,6 +268,11 @@ interface TagDropdownProps {
     addRoutineButton: {
       padding: 10,
       backgroundColor: 'yellow'
+    },
+    radioButtonContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginVertical: 8,
     },
     createActivityContainer: {
       flex: 10,

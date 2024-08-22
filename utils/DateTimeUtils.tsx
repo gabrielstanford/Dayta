@@ -51,4 +51,36 @@ export const convertTimeToUnix = (timeString: string, date: Date = new Date()): 
     return adjustedDate;
   }
 
+  export const decimalToTime = (decimal: number): string => {
+    // Normalize the decimal by handling values above 24 (i.e., past midnight)
+    if (decimal >= 24) {
+      decimal -= 24;
+    }
   
+    // Extract hours and minutes from the decimal number
+    const hours24 = Math.floor(decimal);
+    const minutes = Math.round((decimal - hours24) * 60);
+  
+    // Convert 24-hour time to 12-hour format
+    const period = hours24 >= 12 ? 'PM' : 'AM';
+    let hours12 = hours24 % 12;
+    if (hours12 === 0) hours12 = 12; // Handle midnight and noon cases
+  
+    // Format minutes to always be two digits
+    const formattedMinutes = minutes.toString().padStart(2, '0');
+  
+    // Return time in 'HH:MM AM/PM' format
+    return `${hours12}:${formattedMinutes} ${period}`;
+  };
+  
+  export const decimalToDurationTime = (decimal: number): string => {
+    // Extract hours and minutes from the decimal number
+    const hours = Math.floor(decimal);
+    const minutes = Math.round((decimal - hours) * 60);
+  
+    // Format minutes to always be two digits
+    const formattedMinutes = minutes.toString().padStart(2, '0');
+  
+    // Return time in 'H:MM' format
+    return `${hours}:${formattedMinutes}`;
+  };

@@ -1,4 +1,4 @@
-import { StyleSheet, View, Dimensions, FlatList, Text, TouchableOpacity, TextInput} from 'react-native';
+import { StyleSheet, View, Dimensions, FlatList, Text, TouchableOpacity, TextInput, KeyboardAvoidingView} from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { useState, useEffect, useRef } from 'react';
 import {AntDesign, MaterialIcons, Ionicons} from '@expo/vector-icons';
@@ -70,7 +70,7 @@ interface ActivityItemProps {
 
 const ActivityItem = ({ activity, onRemove, timeState, dateIncrement, updateActivity, moveActivity, onTimeTap, onTap }: ActivityItemProps) => {
   let specialButton = false
-  if(activity.button.text=='Woke Up' || activity.button.text=='Went To Bed') {
+  if(activity.button.text=='Woke Up' || activity.button.text=='Went To Bed' || activity.button.text=='Coffee') {
     specialButton=true
   }
 
@@ -203,7 +203,8 @@ function Journal() {
       <View style={styles.layoutContainer}>
         <MyModal visible={modalVisible} onClose={toggleModal} />
         <ActivityDescribeModal style={styles.durationModal} ActivityDescribeVisible={activityDescribeVisible} Info={activityInfo} onClose={() => setActivityDescribeVisible(false)} onTapOut={() => setActivityDescribeVisible(false)}/>
-        <View style={styles.contentContainer}>
+
+        <View style={styles.contentContainer} >
               <View style={{alignItems: 'center'}}>
                 <ThemedText type="titleText" style={{fontSize: width/12}}>My Journal</ThemedText>
               </View>
@@ -221,6 +222,10 @@ function Journal() {
         </TouchableOpacity>
         </View>
         {filteredWithEnd.length>0 ? 
+        <KeyboardAvoidingView 
+        behavior= {'padding'}
+        keyboardVerticalOffset={80} 
+        style={{marginBottom: 80}}>
         <FlatList 
         ref={flatListRef}
         data={filteredWithEnd}
@@ -228,6 +233,7 @@ function Journal() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
         />
+        </KeyboardAvoidingView>
           : <>
             {/* <ThemedText type="subtitle">
               Add Your First Activity For The Day!

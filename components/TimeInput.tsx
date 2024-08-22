@@ -5,12 +5,13 @@ import { TextInputMask } from 'react-native-masked-text';
 interface TimeInputProps {
   time: string;
   onTimeChange: React.Dispatch<React.SetStateAction<string>>;
+  custom: string;
 }
 
-const TimeInput: React.FC<TimeInputProps> = ({ time, onTimeChange }) => {
+const TimeInput: React.FC<TimeInputProps> = ({ custom, time, onTimeChange }) => {
 
   return (
-    <View style={styles.container}>
+    <View  style={custom!=="Type2" ? styles.container : styles.container2}>
       <TextInputMask
         type={'datetime'}
         options={{
@@ -18,7 +19,7 @@ const TimeInput: React.FC<TimeInputProps> = ({ time, onTimeChange }) => {
         }}
         value={time}
         onChangeText={(text) => onTimeChange(text)}
-        style={styles.input}
+        style={custom!=="Type2" ? styles.input : styles.input2}
         placeholder="00:00"
         keyboardType="numeric"
         maxLength={5}
@@ -30,6 +31,9 @@ const TimeInput: React.FC<TimeInputProps> = ({ time, onTimeChange }) => {
 const styles = StyleSheet.create({
   container: {
     margin: 20,
+  },
+  container2: {
+    marginLeft: 20,
   },
   label: {
     fontSize: 16,
@@ -44,6 +48,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     color: 'black',
   },
+  input2: {
+    height: 20,
+    fontSize: 14,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    color: 'black',
+  }
 });
 
 export default TimeInput;

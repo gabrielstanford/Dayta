@@ -10,7 +10,6 @@ import FetchDayActivities from '@/Data/FetchDayActivities'
 import {RadioButton} from 'react-native-paper'
 import TimeInput from './HourPicker'
 import {ButtonState, Activity, TimeBlock, ActivityWithEnd} from '@/Types/ActivityTypes'
-import CustomRadioButton from './CustomRadioButton'
 import { convertTimeToUnix,  adjustDateByDays} from '@/utils/DateTimeUtils'
 
 const {width, height} = Dimensions.get("window");

@@ -11,13 +11,14 @@ import ActivitySearchModal from './ActivitySearchModal'
 import { SearchBar } from '@rneui/themed'
 import TimeInput from './TimeInput'
 import { create } from 'react-test-renderer'
+import RNPickerSelect from 'react-native-picker-select'
 
 const {width, height} = Dimensions.get("window");
 const buttonWidth = width/6.25
   
   interface MultitaskModalProps extends ModalProps {
     MultitaskModalVisible: boolean;
-    onNext: (text: (string | number)[][]) => void;
+    onNext: (text: [string, number, number][]) => void;
     onTapOut: () => void;
   }
 
@@ -33,14 +34,21 @@ const CreateRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisib
   const [multiSearchVisible, setMultiSearchVisible] = useState(false);
   const [activityNum, setActivityNum] = useState<number>(1)
   const [activityOne, setActivityOne] = useState<string>("Activity One")
-  const [durationOne, setDurationOne] = useState<string>("01:00");
+  const [durationOne, setDurationOne] = useState<string>("00:10");
+  const [tagValue, setTagValue] = useState<string>("Consecutive")
+  const [gapBetween1, setGapBetween1] = useState<string>("00:01");
   const [activityTwo, setActivityTwo] = useState<string>("Activity Two")
-  const [durationTwo, setDurationTwo] = useState<string>("01:00");
+  const [durationTwo, setDurationTwo] = useState<string>("00:10");
+  const [tag2Value, setTag2Value] = useState<string>("Consecutive")
+  const [gapBetween2, setGapBetween2] = useState<string>("00:01");
   const [activityThree, setActivityThree] = useState<string>("Activity Three")
-  const [durationThree, setDurationThree] = useState<string>("01:00");
+  const [durationThree, setDurationThree] = useState<string>("00:10");
+  const [gapBetween3, setGapBetween3] = useState<string>("00:01");
+  const [tag3Value, setTag3Value] = useState<string>("Consecutive")
   const [activityFour, setActivityFour] = useState<string>("Activity Four")
-  const [durationFour, setDurationFour] = useState<string>("01:00");
+  const [durationFour, setDurationFour] = useState<string>("00:10");
 
+  // const [tag4Value, setTag4Value] = useState<string>("Consecutive")
 
   const multiSearchPress = (text: string) => {
 
@@ -59,9 +67,28 @@ const CreateRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisib
         setMultiSearchVisible(false);
     }
 
-    const createFull = () => {
-        
-        return [[activityOne, timeStringToSeconds(durationOne)], [activityTwo, timeStringToSeconds(durationTwo)], [activityThree, timeStringToSeconds(durationThree)], [activityFour, timeStringToSeconds(durationFour)]]
+    const createFull: () => [string, number, number][] = () => {
+      const durOne =  timeStringToSeconds(durationOne);
+      const durTwo =  timeStringToSeconds(durationTwo);
+      const durThree =  timeStringToSeconds(durationThree);
+
+      let durBetweenOne: number = timeStringToSeconds(gapBetween1);
+      let durBetweenTwo: number = timeStringToSeconds(gapBetween2);
+      let durBetweenThree: number = timeStringToSeconds(gapBetween3);
+
+        if(tagValue=="Overlapping") {
+          durBetweenOne = -durOne
+        }
+
+        if(tag2Value=="Overlapping") {
+          durBetweenTwo = -durTwo
+        }
+
+        if(tag3Value=="Overlapping") {
+          durBetweenTwo = -durThree
+        }
+
+        return [[activityOne, durOne, durBetweenOne], [activityTwo, durTwo, durBetweenTwo], [activityThree, durThree, durBetweenThree], [activityFour, timeStringToSeconds(durationFour), 0]]
     }
   
     return(
@@ -76,41 +103,54 @@ const CreateRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisib
             <TouchableWithoutFeedback>
                 <View style={styles.MultitaskModalContent}>
                   <View style={styles.titleContainer}>
-                    <ThemedText type="title"> Select The Activities You Were Doing</ThemedText>
+                    <ThemedText type="title"> Select Activities </ThemedText>
                   </View>
                 <View style={styles.stepContainer}>
                   <TouchableOpacity style={styles.actSearchButton} onPress={() => {setActivityNum(1); setMultiSearchVisible(true)}}>
                         <Text>{activityOne}</Text>
                   </TouchableOpacity>
                   <View style={{flex: 1}}>
-                    <TimeInput time={durationOne} onTimeChange={setDurationOne}/>
+                    <TimeInput custom={"Type1"} time={durationOne} onTimeChange={setDurationOne}/>
                   </View>
                 </View>
-
+                <View style={styles.intraStepContainer}>
+                  <TagDropdown tagValue={tagValue} setTagValue={setTagValue} />
+                </View>
                 <View style={styles.stepContainer}>
                   <TouchableOpacity style={styles.actSearchButton} onPress={() => {setActivityNum(2); setMultiSearchVisible(true)}}>
                         <Text>{activityTwo}</Text>
                   </TouchableOpacity>
                   <View style={{flex: 1}}>
-                    <TimeInput time={durationTwo} onTimeChange={setDurationTwo}/>
+                    <TimeInput custom={"Type1"} time={durationTwo} onTimeChange={setDurationTwo}/>
                   </View>
+                </View>
+                <View style={styles.intraStepContainer}>
+                  <TagDropdown tagValue={tag2Value} setTagValue={setTag2Value} />
+                  
                 </View>
                 <View style={styles.stepContainer}>
                   <TouchableOpacity style={styles.actSearchButton} onPress={() => {setActivityNum(3); setMultiSearchVisible(true)}}>
                         <Text>{activityThree}</Text>
                   </TouchableOpacity>
                   <View style={{flex: 1}}>
-                    <TimeInput time={durationThree} onTimeChange={setDurationThree}/>
+                    <TimeInput custom={"Type1"} time={durationThree} onTimeChange={setDurationThree}/>
                   </View>
+                </View>
+                <View style={styles.intraStepContainer}>
+                  <TagDropdown tagValue={tag3Value} setTagValue={setTag3Value} />
+                  {tag3Value=='Gap Between' ? <TimeInput custom={"Type2"} time={gapBetween3} onTimeChange={setGapBetween3}/> : <></>}
                 </View>
                 <View style={styles.stepContainer}>
                   <TouchableOpacity style={styles.actSearchButton} onPress={() => {setActivityNum(4); setMultiSearchVisible(true)}}>
                         <Text>{activityFour}</Text>
                   </TouchableOpacity>
                   <View style={{flex: 1}}>
-                    <TimeInput time={durationFour} onTimeChange={setDurationFour}/>
+                    <TimeInput custom={"Type1"} time={durationFour} onTimeChange={setDurationFour}/>
                   </View>
                 </View>
+                {/* <View style={styles.intraStepContainer}>
+                  <TagDropdown tagValue={tag4Value} setTagValue={setTag4Value} />
+                </View> */}
                 <ActivitySearchModal visible={multiSearchVisible} onClick={multiSearchPress} onClose={() => setMultiSearchVisible(false)} />
                 <View style={styles.nextContainer}>
                   <Button title="Next" style={styles.nextButton} onPress={() => onNext(createFull())} />
@@ -124,6 +164,27 @@ const CreateRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisib
     
 }
 
+interface TagDropdownProps {
+  tagValue: string;
+  setTagValue: React.Dispatch<React.SetStateAction<string>>;
+}
+const TagDropdown: React.FC<TagDropdownProps> = ({tagValue, setTagValue}) => {
+  const tags = [
+    {label: "Consecutive", value: "Consecutive"},
+    {label: "Overlapping", value: "Overlapping"},
+    {label: "Gap Between", value: "Gap Between"}
+  ];
+  return (
+    <View style={{borderColor: 'grey', borderWidth: 1, borderRadius: 20, padding: 3}}>
+    <RNPickerSelect
+      value={tagValue}
+      onValueChange={(value) => setTagValue(value)}
+      items={tags}
+    />
+    </View>
+  );
+};
+
 const styles = StyleSheet.create({
     MultitaskModalOverlay: {
         flex: 1,
@@ -133,8 +194,8 @@ const styles = StyleSheet.create({
       },
       MultitaskModalContent: {
         flex: .67,
-        // width: width/1.1,
-        // height: height,
+        width: width/1,
+        height: height,
         padding: 10,
         backgroundColor: 'white',
         borderRadius: 10,
@@ -145,46 +206,24 @@ const styles = StyleSheet.create({
         alignItems: 'center'
       },
       stepContainer: {
+        // flex: .7,
         flexDirection: 'row',
         alignItems: 'center',
+      },
+      intraStepContainer: {
+        
+        flexDirection: 'row',
+        alignItems: 'flex-start',
       },
       actSearchButton: {
         backgroundColor: '#DDDDDD',
         padding: 20,
         flex: 1
       },
-      activitiesContainer: {
-        flex: 0.5
-      },
-      searchContainer: {
-        flex: 0.5,
-      },
-      searchBarContainer: {
-        backgroundColor: 'transparent',
-        borderBottomColor: 'transparent',
-        borderTopColor: 'transparent',
-      },
-      searchBarInputContainer: {
-        backgroundColor: '#fff',
-      },
-      searchBarInput: {
-        fontSize: 16,
-      },
-      dropdownContainer: {
-        height: height/4, // Adjust this value as needed
-        width: '100%', // Or a fixed width if required
-        overflow: 'hidden', // Ensures dropdown content does not spill outside
-        padding: 10, // Optional padding
-      },
+
       nextContainer: {
         left: ((width/1.1) / 2) - (buttonWidth / 2), // Center horizontally more precisely
         marginTop: 'auto'
-      },
-      slider: {
-          flex: 1,
-          flexDirection: 'row',
-          width: '100%',
-          height: 40,
       },
       nextButton: {
         paddingTop: 10,

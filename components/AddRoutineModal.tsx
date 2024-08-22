@@ -38,6 +38,9 @@ const AddRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible,
   const [selectedMinute, setSelectedMinute] = useState("30");
   const [selectedPeriod, setSelectedPeriod] = useState("AM");
   const {dateIncrement, customRoutines} = useAppContext();
+  const [part2Visible, setPart2Visible] = useState<boolean>(false);
+
+
   const handleHourChange = (hour: string) => {
     setSelectedHour(hour);
   };
@@ -67,7 +70,13 @@ const AddRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible,
         return ""
       }
     }
-  
+    const handleNext = (start: number) => {
+      if(tagValue!=="") {
+
+        setPart2Visible(true)
+      } 
+      else {alert("Please set the routine")}
+    }
     return(
         <Modal 
         transparent={true}
@@ -75,9 +84,11 @@ const AddRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible,
         visible={MultitaskModalVisible}
 
         {...modalProps}>
-          <TouchableWithoutFeedback onPress={onTapOut}>
+          <TouchableWithoutFeedback onPress={() => {onTapOut(); setTimeout(() => {setPart2Visible(false)}, 80)}}>
             <View style={styles.MultitaskModalOverlay}>
             <TouchableWithoutFeedback>
+            {!part2Visible ? 
+            
                 <View style={styles.MultitaskModalContent}>
                   <View style={styles.titleContainer}>
                     <ThemedText type="title"> Add A Routine</ThemedText>
@@ -97,11 +108,23 @@ const AddRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible,
                       onPeriodChange={handlePeriodChange}
                       />
                 </View>
-
-                <TouchableOpacity style={styles.nextContainer} onPress={() => onNext(tagValue, createStartTime(convertTimeToUnix(generateTimeString())))}>
-                    <Text>Submit Routine</Text>
+                {/* on submit () => onNext(tagValue, createStartTime(convertTimeToUnix(generateTimeString()))) */}
+                <TouchableOpacity style={styles.nextContainer} onPress={() => handleNext(createStartTime(convertTimeToUnix(generateTimeString())))}>
+                    <Text>Next</Text>
                 </TouchableOpacity>
             </View>
+            : <View style={styles.MultitaskModalContent}>
+                  <View style={styles.titleContainer}>
+                <TouchableOpacity style={styles.nextContainer} onPress={() => setPart2Visible(false)}>
+                    <Text>Back</Text>
+                </TouchableOpacity>
+                    <ThemedText type="title">Preview</ThemedText>
+                  </View>
+                
+                  <TouchableOpacity style={styles.nextContainer} onPress={() => onNext(tagValue, createStartTime(convertTimeToUnix(generateTimeString())))}>
+                    <Text>Submit Routine</Text>
+                </TouchableOpacity>
+              </View>}
             </TouchableWithoutFeedback>
           </View>
         </TouchableWithoutFeedback>
@@ -145,7 +168,7 @@ const styles = StyleSheet.create({
       titleContainer: {
         marginTop: 10,
         marginBottom: 5,
-        alignItems: 'center'
+        justifyContent: 'center'
       },
       stepContainer: {
         flexDirection: 'row',

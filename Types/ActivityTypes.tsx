@@ -43,9 +43,12 @@ export type ButtonState = {
     text: string;
     totalDuration: number;
   }
+  interface Between {
 
+  }
   export interface Routine {
     name: string;
+    durationBetween?: number[]
     activities: Activity[];
   }
 
@@ -57,4 +60,5 @@ export type ButtonState = {
     sleepSum: any[];
     tagDurationSum: ActivitySummary[];
     avgTimeByTag: ActivitySummary[];
+    
   }

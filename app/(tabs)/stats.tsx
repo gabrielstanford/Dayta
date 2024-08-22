@@ -11,6 +11,7 @@ import PieChart from '@/components/PieChart'
 import BlockedTime from '@/components/BlockedTime'
 import { Activity } from '@/Types/ActivityTypes';
 import SleepLineChart from '@/components/SleepLineChart';
+import {decimalToTime, decimalToDurationTime} from '@/utils/DateTimeUtils'
 
 // Define a type for the counts object
 interface ValueCounts {
@@ -21,17 +22,6 @@ interface ActivitySummary {
   text: string;
   totalDuration: number;
 }
-const decimalToTime = (decimal: number): string => {
-  // Extract hours and minutes from the decimal number
-  const hours = Math.floor(decimal);
-  const minutes = Math.round((decimal - hours) * 60);
-
-  // Format minutes to always be two digits
-  const formattedMinutes = minutes.toString().padStart(2, '0');
-
-  // Return time in 'H:MM' format
-  return `${hours}:${formattedMinutes}`;
-};
 
 // Example usage
 // console.log(decimalToTime(8.5)); // Output: '8:30'
@@ -65,7 +55,6 @@ function Stats() {
   const [weekDurationSumState, setWeekDurationSumState] = useState<ActivitySummary[]>([]);
   const [tagDurationSumState, setTagDurationSumState] = useState<ActivitySummary[]>([]);
   const [enoughDataForCommonChart, setEnoughDataForCommonChart] = useState<boolean>(false);
-  
   const extractTime = (timeStamp: number) => {
     if(timeStamp<500) {
       return 50
@@ -101,25 +90,43 @@ function Stats() {
   }, [justActivities]);
 
   useEffect(() => {
-    if(durationSumState.length>0 && weekDurationSumState.length>0 && tagDurationSumState.length>0 && avgSleepTime && avgWakeTime) {
+    if(durationSumState.length>0 && weekDurationSumState.length>0 && tagDurationSumState.length>0) {
       setEnoughDataForCommonChart(true)
     }
   }, [tagDurationSumState])
-//   console.log('Pie Chart 1 Data: (duration)', durationSumState);
-// console.log('Pie Chart 2 Data (week duration):', weekDurationSumState);
-console.log('Pie Chart 3 Data:', tagDurationSumState);
-// console.log('Line Chart Data:', avgWakeTime, 'avg sleep: ', avgSleepTime);
+  
+  const mapLens = (lens: [string, number][]) => {
+    const mapped = sleepLens.map(ind => decimalToDurationTime(ind[1]))
+    const filtered = mapped.filter(dur => dur!=="0:00")
+    return filtered
+  }
+
   const [sleepLabels, setSleepLabels] = useState<string[]>([]);
   const [sleepValues, setSleepValues] = useState<[number, number][]>([]);
+  const [sleepLens, setSleepLens] = useState<[string, number][]>([])
   useEffect(() => {
+    if(sleepSum.length>0) {
     let tempLabels: string[] = [];
-    let tempValues: [number, number][] = []
+    let tempValues: [number, number][] = [];
+    let sleepLengths: [string, number][] = []
+    let tempSleep: number = 0;
+    let tempWake: number = 0;
+    let tempDiff: number = 0
     for (let index = 0; index < sleepSum.length; index++) {
       tempLabels[index] = (sleepSum[index][0].slice(8, 10));
-      tempValues[index] = [extractTime(sleepSum[index][1]), extractTime(sleepSum[index][2])]
+      tempWake = sleepSum[index][1];
+      if(tempWake!==50 && tempSleep!==50 && tempWake>tempSleep && (tempWake-tempSleep<60000)) {
+      
+      tempDiff = tempWake - tempSleep
+      }
+      sleepLengths[index] = [sleepSum[index][0], tempDiff/3600]
+      tempSleep = sleepSum[index][2];
+      tempValues[index] = [extractTime(tempWake), extractTime(tempSleep)];
     }
     setSleepLabels(tempLabels);
     setSleepValues(tempValues);
+    setSleepLens(sleepLengths)
+  }
   }, [sleepSum])
   return (
     <ScrollView style={{backgroundColor: 'darkcyan'}}>
@@ -127,8 +134,9 @@ console.log('Pie Chart 3 Data:', tagDurationSumState);
       <View style={styles.titleContainer}>
         <ThemedText type="titleText" style={{fontSize: width/12}}>Statistics</ThemedText>
       </View>
+      <View style={styles.chartsContainer}>
       {enoughDataForCommonChart && (
-        <View style={styles.chartsContainer}>
+        <View>
         <SafeAreaView style={styles.pieChartContainer}>
           <Text style={styles.chartTitle}>All Time</Text>
           <PieChart
@@ -146,16 +154,6 @@ console.log('Pie Chart 3 Data:', tagDurationSumState);
             values={tagDurationSumState.map(activity => activity.totalDuration)}
           />
          </SafeAreaView>
-         <View style={styles.timeBlocksContainer}>
-          {/* <BlockedTime /> */}
-          <Text style={{fontSize: 12, color: 'white'}}>Average Wake Time: {decimalToTime(avgWakeTime)}</Text>
-          <Text style={{fontSize: 12, color: 'white'}}>Average Sleep Time: {decimalToTime(avgSleepTime-12)}</Text>
-          <SleepLineChart 
-          labels={sleepLabels}
-          values={sleepValues}
-          /> 
-
-         </View>
           {/* <View style={styles.barChartContainer}>
             <ThemedText type="subtitle">
               Click On Bars To Get Info!
@@ -165,13 +163,27 @@ console.log('Pie Chart 3 Data:', tagDurationSumState);
               y={durationSumState.map(activity => activity.totalDuration)}
             />
           </View> */}
-        </View>
+          </View>
       )}
+      {(avgSleepTime!==0.111 && avgWakeTime!==0.111 && sleepSum.length>0 && sleepLens.length>0) && (
+          <View style={styles.timeBlocksContainer}>
+          {/* <BlockedTime /> */}
+          <Text style={{fontSize: 12, color: 'white'}}>Average Wake Time: {decimalToTime(avgWakeTime)}</Text>
+          <Text style={{fontSize: 12, color: 'white'}}>Average Sleep Time: {decimalToTime(avgSleepTime-12)}</Text>
+          <Text style={{fontSize: 12, color: 'white'}}>Sleep Lengths: {mapLens(sleepLens)}</Text>
+          <SleepLineChart 
+          labels={sleepLabels}
+          values={sleepValues}
+          /> 
+        </View>
+        )}
+      
       {!enoughDataForCommonChart && (
         <View style={styles.noDataContainer}>
           <ThemedText type="titleText" style={{fontSize: width/12}}>We Need More Data! Come Back Later :)</ThemedText>
         </View>
       )}
+    </View>
     </View>
     </ScrollView>
   );
