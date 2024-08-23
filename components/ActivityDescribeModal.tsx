@@ -21,14 +21,22 @@ const buttonWidth = width/6.25
   const ActivityItem = ({ activity, onTap }: ActivityItemProps) => {
 
     return (
-    
+    <>
       <View style={styles.activityContainer}>
         <View style={styles.detailsContainer}>
           <TouchableOpacity onPress={onTap} style={styles.touchableContent}>
-            <Text style={styles.activityName}>{activity.button.text}</Text>
+            <Text style={styles.activityName}>{activity.button.text} </Text>
           </TouchableOpacity>
         </View>
       </View>
+            <View style={styles.activityContainer}>
+            <View style={styles.detailsContainer}>
+              <TouchableOpacity onPress={onTap} style={styles.touchableContent}>
+                <Text style={styles.activityName}>{activity.button.tags} </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          </>
   );}
 const ActivityDescribeModal: React.FC<MultitaskModalProps> = ({ ActivityDescribeVisible, Info, onClose, onTapOut, ...modalProps }) => {
 
@@ -109,7 +117,7 @@ const styles = StyleSheet.create({
         flex: 1, // Allows this section to take up the remaining space
       },
       touchableContent: {
-        flexDirection: 'row',
+        // flexDirection: 'row',
         alignItems: 'center',
       },
       nextContainer: {

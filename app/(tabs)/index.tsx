@@ -42,10 +42,12 @@ const convertUnixToTimeString = (startTime: number, endTime: number, isInput: bo
 
   // Construct the formatted time string
   if (!isInput) {
-    if (endTime > 0 && periodEnd === periodStart) {
+    if (endTime > 0) {
       return `${startHours}:${formattedMinutes}`;
     } else {
+      // return `${startHours}:${formattedMinutes} ${periodStart}`;
       return `${startHours}:${formattedMinutes} ${periodStart}`;
+
     }
   } else {
     if(startHours>=10) {
@@ -303,19 +305,18 @@ detailsContainer: {
 allTouchables: {
   flex: 1,
   flexDirection: 'row',
-  justifyContent: 'space-between'
 },
 touchableActivity: {
-
+  flexShrink: 1,
+  marginHorizontal: 10,
 },
 touchableDelete: {
-
+  marginLeft: 'auto'
 },
 touchableTime: {
 
 },
 timeContainer: {
-  flex: 2.5,
   flexDirection: 'row',
   flexWrap: 'nowrap',
   // borderColor: 'yellow',

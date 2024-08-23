@@ -86,7 +86,7 @@ function Personalize() {
           console.log('tags: ', tags)
         const newButton = {text: inputText,  iconLibrary: "materialIcons", icon: "more-horiz", keywords: ['Miscellaneous'], pressed: false, tags: tags}
         setTimeout(() => {
-          // addCustomActivity(newButton);
+          addCustomActivity(newButton);
         }, 0)
         alert("successfully added custom activity. feel free to use it now as often as you'd like!")
          }
@@ -137,14 +137,16 @@ function Personalize() {
           {/* <View style={styles.headerSection}>
           </View> */}
            <RadioButton.Group onValueChange={value => setValue(value)} value={value}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-around', margin: 5}}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'center'}}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center'}}>
                     <TouchableOpacity
                         style={styles.radioButtonContainer}
                         onPress={() => setValue('Activity')}
                     >
                       <RadioButton color="darkcyan" value="Activity" />
-                      <Text>Activity</Text>
+                      <View style={{backgroundColor: 'green', padding: 10}}>
+                        <Text>Activity</Text>
+                      </View>
                     </TouchableOpacity>
                     </View>
 
@@ -154,7 +156,9 @@ function Personalize() {
                       onPress={() => setValue('Routine')}
                     >
                       <RadioButton color="darkcyan" value="Routine" />
-                      <Text>Routine</Text>
+                      <View style={{backgroundColor: 'green', padding: 10}}>
+                        <Text>Routine</Text>
+                      </View>
                     </TouchableOpacity>
                     </View>
                   </View>
@@ -293,7 +297,7 @@ interface TagDropdownProps {
     },
     buttonTextContainer: {
       flex: 1,
-      alignItems: 'flex-start'
+      alignItems: 'flex-start',
     },
     textContainer: {
 
