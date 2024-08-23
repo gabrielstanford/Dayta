@@ -1,6 +1,6 @@
 import {ModalProps, Modal, View, StyleSheet, Dimensions, Text, TouchableWithoutFeedback, Platform, TouchableOpacity, Keyboard, KeyboardAvoidingView} from 'react-native'
 import {ThemedText} from './ThemedText'
-import {Button} from '@rneui/themed'
+import CustomButton from './CustomButton'
 import TimeDropdown from './TimeDropdown'
 import {useState, useEffect} from 'react'
 import Slider from '@react-native-community/slider';
@@ -14,7 +14,7 @@ import { create } from 'react-test-renderer'
 import RNPickerSelect from 'react-native-picker-select'
 
 const {width, height} = Dimensions.get("window");
-const buttonWidth = width/6.25
+const buttonWidth = width*0.6
   
   interface MultitaskModalProps extends ModalProps {
     MultitaskModalVisible: boolean;
@@ -167,7 +167,7 @@ const CreateRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisib
             </KeyboardAvoidingView>
             </TouchableWithoutFeedback>
             <View style={styles.nextContainer}>
-                  <Button title="Next" style={styles.nextButton} onPress={() => onNext(createFull())} />
+                  <CustomButton title="Next" onPress={() => onNext(createFull())} />
               </View>
             </View>
           
@@ -236,13 +236,8 @@ const styles = StyleSheet.create({
       },
 
       nextContainer: {
-        left: ((width/1.1) / 2) - (buttonWidth / 2), // Center horizontally more precisely
-
+        left: ((width) / 2) - (buttonWidth / 2), // Center horizontally more precisely
       },
-      nextButton: {
-        paddingTop: 10,
-        width: buttonWidth,
-      }
 })
 
 const androidCustom = StyleSheet.create({

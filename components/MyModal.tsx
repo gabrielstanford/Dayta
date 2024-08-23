@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import { Modal, View, Text, StyleSheet, ModalProps, Dimensions, TouchableOpacity} from 'react-native';
 import {ThemedText} from './ThemedText'
-import {Button} from '@rneui/themed'
+import CustomButton from './CustomButton'
 import {useAppContext} from '@/contexts/AppContext'
 const {width, height} = Dimensions.get("window");
 const buttonWidth = width/5;
@@ -287,11 +287,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
     >
       <View style={styles.modalOverlay}>
         <View style={styles.headerSection}>
-            <TouchableOpacity onPress={() => closeModal()} style={styles.closeButton}>
-            <View style={styles.buttonContainer}>
-              <Text style={{fontSize: buttonWidth/4, color: 'white'}}>Close</Text>
-          </View>
-          </TouchableOpacity>
+            <CustomButton title="Close" width={width*0.22} fontSize={11} onPress={() => closeModal()} />
           <View style={styles.titleContainer}>
             <ThemedText type="titleText" style={{
             fontSize: titleWidth/7,
@@ -302,14 +298,14 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
           {renderButtons()}
         </View>
           <View style={styles.endButtons}>
-          <Button onPress={() => setSearchModalVisible(true)}>Other</Button>
+          <CustomButton title="Other" width={width*0.4} onPress={() => setSearchModalVisible(true)} />
           {/* <Button onPress={() => {setTimeout(() => {addCustomActivity(  { text: 'Eating CLOUT', iconLibrary: "fontAwesome5", icon: "utensils", keywords: ['Restaurant', 'Cafe'], pressed: false, tags: ['Food/Drink'] },) 
             }, 0); setDurationModalVisible(!durationModalVisible)}}>Custom Act Test</Button> */}
             <ActivitySearchModal visible={searchModalVisible} onClick={handlePress} onClose={() => setSearchModalVisible(false)} />
             <DurationModal style={styles.durationModal} durationModalVisible={durationModalVisible} onSubmit={handleDurationSubmit} onTapOut={() => setDurationModalVisible(false)} activity={selectedActivity as ButtonState}/>
-          <Button color="secondary" onPress={() => setMultitaskModalVisible(true)}>Multi-Activity Block</Button>
+          {/* <CustomButton title="Multi-Activity" width={width*0.4} onPress={() => setMultitaskModalVisible(true)} /> */}
           <MultitaskModal style={styles.durationModal} MultitaskModalVisible={MultitaskModalVisible} onNext={handleMultitaskNext} onTapOut={() => setMultitaskModalVisible(false)}/>
-          <Button color="success" onPress={addRoutine}>Add Routine</Button>
+          <CustomButton title="Add Routine" width={width*0.4} onPress={addRoutine} />
           <AddRoutineModal style={styles.durationModal} MultitaskModalVisible={addRoutineModal} onNext={handleRoutineSubmit} onTapOut={() => setAddRoutineModal(false)} />
           </View>
        </View>
@@ -333,17 +329,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
         marginRight: 20,
         paddingLeft: 5,
       },
-        //close button
-    buttonContainer: {
-      padding: 10
-    },
-    closeButton: {
-      width: buttonWidth,
-      height: buttonHeight,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: '#b4245c',
-    },
+
      titleContainer: {
       flex: 1,
       width: titleWidth,
@@ -351,8 +337,12 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
       alignItems: 'center',
       left: (width / 2) - (titleWidth / 2), // Center horizontally more precisely
     },
+    
     endButtons: {
-      marginBottom: 20
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      padding: 20,
+      paddingBottom: 50,
     },
     buttonTextContainer: {
       flex: 1,

@@ -8,6 +8,7 @@ import {useAuth} from '@/contexts/AuthContext'
 import FetchDayActivities from '@/Data/FetchDayActivities'
 import ActivitySearchModal from './ActivitySearchModal'
 import { SearchBar } from '@rneui/themed'
+import CustomButton from './CustomButton';
 import TimeInput from './TimeInput'
 import { create } from 'react-test-renderer'
 import RNPickerSelect from 'react-native-picker-select'
@@ -16,7 +17,7 @@ import { convertTimeToUnix, adjustDateByDays, decimalToDurationTime } from '@/ut
 import { Routine } from '@/Types/ActivityTypes';
 
 const {width, height} = Dimensions.get("window");
-const buttonWidth = width/6.25
+const buttonWidth = width*0.6
   
   interface MultitaskModalProps extends ModalProps {
     MultitaskModalVisible: boolean;
@@ -126,13 +127,15 @@ const AddRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible,
             
                 <View style={styles.MultitaskModalContent}>
                   <View style={styles.titleContainer}>
-                    <ThemedText type="title"> Add A Routine</ThemedText>
+                    <Text style={styles.title}> Add A Routine</Text>
                   </View>
-                <View style={styles.stepContainer}>
-                  <TagDropdown customRoutines={customRoutines} tagValue={tagValue} setTagValue={setTagValue} />
+                <View style={[styles.stepContainer, {paddingTop: 50}]}>
+                  <View style={styles.tagStyle}>
+                    <TagDropdown customRoutines={customRoutines} tagValue={tagValue} setTagValue={setTagValue} />
+                  </View>
                 </View>
-                <Text style={{paddingLeft: 20, fontWeight: "bold", fontSize: 20, color: "black"}}>Starting At: </Text>
-                <View style={styles.stepContainer}>
+                <Text style={{paddingLeft: 20, fontWeight: "bold", fontSize: 20, color: "darkcyan"}}>Starting At: </Text>
+                <View style={[styles.stepContainer, {paddingTop: 20}]}>
         
                 <TimeDropdown
                       selectedHour={selectedHour}
@@ -143,47 +146,47 @@ const AddRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible,
                       onPeriodChange={handlePeriodChange}
                       />
                 </View>
-                <TouchableOpacity style={styles.nextContainer} onPress={() => handleNext(createStartTime(convertTimeToUnix(generateTimeString())))}>
-                    <Text>Next</Text>
-                </TouchableOpacity>
+                <View style={styles.nextContainer}>
+                  <CustomButton title="Next" width={width*0.6} onPress={() => handleNext(createStartTime(convertTimeToUnix(generateTimeString())))} />
+                </View>
             </View>
             : <View style={styles.MultitaskModalContent}>
-                  <View style={styles.titleContainer}>
-                <TouchableOpacity style={styles.nextContainer} onPress={() => setPart2Visible(false)}>
-                    <Text>Back</Text>
-                </TouchableOpacity>
-                    <ThemedText type="title">Preview</ThemedText>
+                  <View style={styles.headerSection}>
+                    <CustomButton title="Back" width={width*0.2} fontSize={11} onPress={() => setPart2Visible(false)} />
+                    <View style={styles.title2Container}>
+                      <Text style={styles.title}>Preview</Text>
+                    </View>
                   </View>
                   {relevantRoutine && (
-                    <View>
-                    <View style={{flexDirection: 'row'}}>
-                    <Text>
-                    {relevantRoutine.activities[0].button.text}: 
-                    </Text>
-                   <TimeInput custom={"Type2"} time={editDur1} onTimeChange={setEdit1}/>
-                    </View>
-                    <View style={{flexDirection: 'row'}}>
-                    <Text>
+                    <View style={{flex: 6}}>
+                    <View style={styles.actInfo}>
+                      <Text style={styles.actName}>
+                      {relevantRoutine.activities[0].button.text}: 
+                      </Text>
+                    <TimeInput custom={"Type2"} time={editDur1} onTimeChange={setEdit1}/>
+                    </View >
+                    <View style={styles.actInfo}>
+                    <Text style={styles.actName}>
                     {relevantRoutine.activities[1].button.text}: 
                     </Text>
                    <TimeInput custom={"Type2"} time={editDur2} onTimeChange={setEdit2}/>
                     </View>
-                    <View style={{flexDirection: 'row'}}>
-                    <Text>
+                    <View style={styles.actInfo}>
+                    <Text style={styles.actName}>
                     {relevantRoutine.activities[2].button.text}: 
                     </Text>
                    <TimeInput custom={"Type2"} time={editDur3} onTimeChange={setEdit3}/>
                     </View>
-                    <View style={{flexDirection: 'row'}}>
-                    <Text>
+                    <View style={styles.actInfo}>
+                    <Text style={styles.actName}>
                     {relevantRoutine.activities[3].button.text}: 
                     </Text>
                    <TimeInput custom={"Type2"} time={editDur4} onTimeChange={setEdit4}/>
                     </View>
                   </View>)}
-                  <TouchableOpacity style={styles.nextContainer} onPress={() => handleSubmit()}>
-                    <Text>Submit Routine</Text>
-                </TouchableOpacity>
+                  <View style={styles.nextContainer}>
+                    <CustomButton title="Submit Routine" width={buttonWidth} style={styles.nextContainer} onPress={() => handleSubmit()} />
+                  </View>
               </View>}
             </TouchableWithoutFeedback>
           </View>
@@ -227,23 +230,61 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: 10,
       },
-      titleContainer: {
-        marginTop: 10,
-        marginBottom: 5,
-        justifyContent: 'center'
+      headerSection: {
+        flex: 1.5,
+        flexDirection: 'row',
+        position: 'relative',
+        marginRight: 20,
+        paddingLeft: 5,
       },
+      titleContainer: {
+        width: width*0.7,
+        position: 'absolute',
+        alignItems: 'center',
+        left: ((width/1.1) / 2) - (width*0.7 / 2), // Center horizontally more precisely
+        margin: 15,
+      },
+     title2Container: {
+      width: width*0.7,
+      position: 'absolute',
+      alignItems: 'center',
+      left: ((width/1.1) / 2) - (width*0.7 / 2), // Center horizontally more precisely
+      margin: 5,
+    },
+  
+    title: {
+      fontWeight: 'bold',
+      color: 'darkcyan',
+      fontSize: 28
+    },
+    actInfo: {
+      flexDirection: 'row', 
+      marginBottom: 30,
+      justifyContent: 'space-between'
+    },
+    actName: {
+      fontWeight: 'bold',
+      color: "darkcyan",
+      fontSize: 17,
+    },
       stepContainer: {
         flexDirection: 'row',
         alignItems: 'center',
+        paddingBottom: 10,
+        maxHeight: 300, // Example constraint to prevent excessive height
+
+      },
+      tagStyle: {
+        borderColor: 'black', 
+        borderWidth: 2,
+        borderRadius: 20,
         padding: 20,
       },
+      
       nextContainer: {
-        left: ((width/1.1) / 2) - (buttonWidth*2 / 2), // Center horizontally more precisely
-        width: buttonWidth*2,
         alignItems: 'center',
         marginTop: 'auto',
         marginBottom: 20,
-        backgroundColor: 'grey',
       },
 
 })

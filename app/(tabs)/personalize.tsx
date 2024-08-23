@@ -107,6 +107,7 @@ function Personalize() {
               setTimeout(() => {
                 console.log(newRoutine.activities)
               addCustomRoutine(newRoutine);
+            
             }, 0)
             console.log(newRoutine)
             }
