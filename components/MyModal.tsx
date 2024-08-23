@@ -152,7 +152,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
         act3.id = uuid.v4() as string
         act4.id = uuid.v4() as string
         console.log('Acts: ', act1, act2, act3, act4)
-        // addRoutineActivities([act1, act2, act3, act4])
+        addRoutineActivities([act1, act2, act3, act4])
         Toast.show({ type: 'success', text1: 'Added Activity To Journal!'})
       }
 

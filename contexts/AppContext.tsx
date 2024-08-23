@@ -67,7 +67,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     sleepSum: [] as any[],
     tagDurationSum: [] as ActivitySummary[],
     avgTimeByTag: [] as ActivitySummary[],
-    todayTagDurationSum: [] as ActivitySummary[]
+    todayTagDurationSum: [] as ActivitySummary[],
   };
 
   const [state, setState] = useState(initialState);
@@ -325,13 +325,18 @@ useEffect(() => {
     }
   };  
   const addRoutineActivities = async (activities: Activity[]) => {
+    console.log('Activities being sent in: ', activities)
     try {
       for(let i=0; i< activities.length; i++) {
       const tempAct = activities[i]
-      setJustActivities(prevActivities =>
-        prevActivities.some(act => act.id === tempAct.id)
+      setJustActivities(prevActivities => {
+        const prev = prevActivities.some(act => act.id === tempAct.id)
+        if(prev) {
+          alert("duplicate!")
+        }
+        return (prev
           ? prevActivities // Avoid adding duplicates
-          : [...prevActivities, tempAct] // Add new activity
+          : [...prevActivities, tempAct])} // Add new activity
       );
     }
     storage.set('JustActivities', JSON.stringify([...justActivities, activities[0], activities[1], activities[2], activities[3]]))

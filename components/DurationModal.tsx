@@ -52,7 +52,7 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
     FetchDayActivities(user, dateIncrement, justActivities, setDbActivities)
     setDurationHours(0);
     setDurationMinutes(15);
-  }, [durationModalVisible, hasInitialized, user]);
+  }, [durationModalVisible, hasInitialized, user, justActivities]);
 
   useEffect(() => {
     // Filter out activities without an endTime
@@ -66,10 +66,11 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
   const sortedActivities = filteredWithEnd.sort(
     (a, b) => (a.timeBlock.endTime || 0) - (b.timeBlock.endTime || 0)
   );
+  
     if (durationModalVisible) {
+      console.log('initialized?', hasInitialized)
       if (!hasInitialized && sortedActivities.length > 0) {
-        const mostRecentEndTime = unixEndTimeToHMS(
-          sortedActivities[sortedActivities.length-1].timeBlock.endTime);
+        const mostRecentEndTime = unixEndTimeToHMS(sortedActivities[sortedActivities.length-1].timeBlock.endTime);
         setSelectedHour(mostRecentEndTime[0]);
         setSelectedMinute(mostRecentEndTime[1]);
         setSelectedPeriod(mostRecentEndTime[2]);
@@ -80,8 +81,13 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
       setHasInitialized(false);
     }
   }
-  }, [durationModalVisible, hasInitialized, justActivities]);
+  //just by adding dbActivities to the useEffecthook, I am able to 
+  }, [durationModalVisible, hasInitialized, dbActivities]);
   
+  useEffect(() => {
+    console.log("recents finished setting", selectedMinute)
+  }, [selectedHour, selectedMinute, selectedPeriod])
+
   //could implement logic here for making this most likely based on the activity
   const [durationMinutes, setDurationMinutes] = useState(15)
 

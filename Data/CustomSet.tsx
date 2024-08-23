@@ -25,13 +25,60 @@ function useCustomSet() {
   const {user} = useAuth();
   const [todayActs, setTodayActs] = useState<Activity[]>([])
   const {tagDurationSum} = state
-  const [textKeys, setTextKeys] = useState<string[]>([])
+  const [textKeys, setTextKeys] = useState<string[]>([]);
+  const [morningKeys, setMorningKeys] = useState<string[]>([])
+  const [afternoonKeys, setAfternoonKeys] = useState<string[]>([])
+  const [eveningKeys, setEveningKeys] = useState<string[]>([])
   //this function performs two main things: 
   //1. It creates an array containing just the text and tags of all the activities
   //3. It calculates statistics based on this
   //2. it fetches the 9 buttons to display based on this as well
+  const getLocalHours = (time: number) => {
+    const date = new Date(time*1000);
+    const hours = date.getHours();
+    return hours;
+  }
+
+  const createTODStats = () => {
+    const relevantActivities = justActivities.filter(act => act.timeBlock.startTime>1722988800)
+    const morningActs = relevantActivities.filter(act => getLocalHours(act.timeBlock.startTime)>=4 && getLocalHours(act.timeBlock.startTime)<12)
+    const afternoonActs = relevantActivities.filter(act => getLocalHours(act.timeBlock.startTime)>=12 && getLocalHours(act.timeBlock.startTime)<19)
+    const eveningActs = relevantActivities.filter(act => (getLocalHours(act.timeBlock.startTime)>=19 && getLocalHours(act.timeBlock.startTime)<24) || (getLocalHours(act.timeBlock.startTime)>=0 && getLocalHours(act.timeBlock.startTime)<4))
+    const morningText = morningActs.map((activity) => activity.button.text);
+    const afternoonText = afternoonActs.map((activity) => activity.button.text);
+    const eveningText = eveningActs.map((activity) => activity.button.text);
+      //create value counts for each phase of the day and give it its own text key values
+      const morningCounts = countValues(morningText);
+      const morningEntries = Object.entries(morningCounts);
+      morningEntries.sort(([, valueA], [, valueB]) => valueB - valueA);
+      const topMorning = morningEntries.slice(0, 9);
+      const morningSortedTop = Object.fromEntries(topMorning);
+      const morningTextKeys = Object.keys(morningSortedTop);
+      //set morning keys so I'll be able to access it when fetching final array
+      setMorningKeys(morningTextKeys)
+      const afternoonCounts = countValues(afternoonText);
+      const afternoonEntries = Object.entries(afternoonCounts);
+      afternoonEntries.sort(([, valueA], [, valueB]) => valueB - valueA);
+      const topAfternoon = afternoonEntries.slice(0, 9);
+      const afternoonSortedTop = Object.fromEntries(topAfternoon);
+      const afternoonTextKeys = Object.keys(afternoonSortedTop);
+      //set morning keys so I'll be able to access it when fetching final array
+      setAfternoonKeys(afternoonTextKeys)
+      const eveningCounts = countValues(eveningText);
+      const eveningEntries = Object.entries(eveningCounts);
+      eveningEntries.sort(([, valueA], [, valueB]) => valueB - valueA);
+      const topEvening = eveningEntries.slice(0, 9);
+      const eveningSortedTop = Object.fromEntries(topEvening);
+      const eveningTextKeys = Object.keys(eveningSortedTop);
+      //set morning keys so I'll be able to access it when fetching final array
+      console.log('Evening text keys: ', eveningTextKeys)
+
+      setEveningKeys(eveningTextKeys)
+  }
   const createDurationSummary = () => {    
       const relevantActivities = justActivities.filter(act => act.timeBlock.startTime>1722988800)
+      //maybe tinker with what the cutoff is; perhaps it should be lunch
+      
       const activityText = relevantActivities.map((activity) => activity.button.text);
 
       // Step 1: Group activities by name and sum durations
@@ -63,7 +110,6 @@ function useCustomSet() {
 
   const createTagDurationSum = () => {
       const activityTags = justActivities.map((activity) => activity.button.tags);
-      // console.log(activityTags)
         // Step 1: Group activities by name and sum durations
 
           const totalDurationPerTag = justActivities.reduce<Record<string, number>>((acc, activity) => {
@@ -73,9 +119,6 @@ function useCustomSet() {
               
             activity.button.tags.forEach(tag => {
               const normalizedTag = tag.trim().toLowerCase();
-              if(normalizedTag=='Other') {
-                console.log('Normalized tag: ', normalizedTag)
-              }
               if (acc[normalizedTag] && normalizedTag!=="null") {
                 // If the tag already exists, add the duration to the existing value
                 acc[normalizedTag] += activity.timeBlock.duration / 3600; // Convert seconds to hours
@@ -102,8 +145,32 @@ function useCustomSet() {
   }
 
   const createFinalArray = () => {
+    let correspondingKeys: string[] = textKeys
+    const currentDate = new Date();
+    const hours = currentDate.getHours();
+
+    //note that this runs once prematurely (before the text keys initialize, though it shouldn't cause any glitches)
+    if(hours>=4 && hours<12) {
+      if(morningKeys.length>0) {
+        correspondingKeys = morningKeys;
+      }
+    }
+    else if(hours>=12 && hours<19) {
+      if(afternoonKeys.length>0) {
+        correspondingKeys = afternoonKeys;
+      }
+
+    }
+    else if((hours>=19 && hours<24) || (hours>=0 && hours<4)) {
+      if(eveningKeys.length>0) {
+        correspondingKeys = eveningKeys;
+      }
+    }
+    else {
+      alert("Error fetching phase of day")
+    }
     const correspondingButtons = customActivities.filter((button) =>
-      textKeys.includes(button.text)
+      correspondingKeys.includes(button.text)
     );
 
     let updatedArray: ButtonState[] = [...correspondingButtons];
@@ -173,15 +240,11 @@ function useCustomSet() {
   }
 
   const analyzeTodayStats = () => {
-    console.log('analyzing')
-    console.log('Today Activities:', todayActs);
-
     const totalDurationPerTag = todayActs.reduce<Record<string, number>>((acc, activity) => {
       // Iterate over each tag in the current activity
       
       if(activity.button.tags) {
       activity.button.tags.forEach(tag => {
-        console.log(tag)
         const normalizedTag = tag.trim().toLowerCase();
         if (acc[normalizedTag] && normalizedTag!=="null") {
           // If the tag already exists, add the duration to the existing value
@@ -197,7 +260,6 @@ function useCustomSet() {
       return acc;
       }
       else {
-        console.log("No Tags: ", activity)
         return acc
       }
     }, {});
@@ -205,7 +267,6 @@ function useCustomSet() {
     text,
     totalDuration,
   }));
-  console.log('Result: ', result);
   updateState({todayTagDurationSum: result})
   }
 
@@ -221,7 +282,6 @@ function useCustomSet() {
     const wakeHours = wakeInfo.map(slot => (new Date(slot * 1000)).getHours())
     // const allSlots = justActivities.filter(act => act.button.text=="Went To Bed" || act.button.text=="Woke Up")
     // allSlots.sort((a, b) => b.timeBlock.startTime-a.timeBlock.startTime)
-    // console.log(allSlots)
 // Function to calculate the average of numbers
   function avg(arr: number[]) {
     let sum = 0;
@@ -273,15 +333,19 @@ function useCustomSet() {
     createDailyAverageStats();
     }
   }, [justActivities]);
-
+  
   useEffect(() => {
     createFinalArray();
-  }, [textKeys])
+  }, [eveningKeys])
   useEffect(() => {
     if(justActivities.length>0) {
     createSleepStats();
     }
+    
   }, [])
+  useEffect(() => {
+    createTODStats();
+  }, [justActivities])
   useEffect(() => {
     setTimeout(() => {
       if(justActivities)
@@ -290,7 +354,6 @@ function useCustomSet() {
   }, [dateIncrement, justActivities])
   useEffect(() => {
     if (todayActs.length > 0) {
-      console.log('rerun')
       analyzeTodayStats();
     }
   }, [todayActs]); // This will re-run whenever todayActs changes

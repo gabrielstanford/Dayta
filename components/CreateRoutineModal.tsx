@@ -115,6 +115,7 @@ const CreateRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisib
                 </View>
                 <View style={styles.intraStepContainer}>
                   <TagDropdown tagValue={tagValue} setTagValue={setTagValue} />
+                  {tagValue=='Gap Between' ? <TimeInput custom={"Type2"} time={gapBetween1} onTimeChange={setGapBetween1}/> : <></>}
                 </View>
                 <View style={styles.stepContainer}>
                   <TouchableOpacity style={styles.actSearchButton} onPress={() => {setActivityNum(2); setMultiSearchVisible(true)}}>
@@ -126,7 +127,7 @@ const CreateRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisib
                 </View>
                 <View style={styles.intraStepContainer}>
                   <TagDropdown tagValue={tag2Value} setTagValue={setTag2Value} />
-                  
+                  {tag2Value=='Gap Between' ? <TimeInput custom={"Type2"} time={gapBetween2} onTimeChange={setGapBetween2}/> : <></>}
                 </View>
                 <View style={styles.stepContainer}>
                   <TouchableOpacity style={styles.actSearchButton} onPress={() => {setActivityNum(3); setMultiSearchVisible(true)}}>
