@@ -1,3 +1,6 @@
+import SunCalc from 'suncalc';
+import { DateTime } from 'luxon';
+
 export const convertTimeToUnix = (timeString: string, date: Date = new Date()): number => {
     // Parse the time string
     if(timeString!=="888") {
@@ -86,3 +89,45 @@ export const convertTimeToUnix = (timeString: string, date: Date = new Date()): 
     return `${formattedHours}:${formattedMinutes}`;
   };
   
+export function getSunriseSunset(date: Date, timeZone: string): { sunrise: string; sunset: string } {
+  // Create a DateTime object in the given time zone
+  const localDateTime = DateTime.fromJSDate(date).setZone(timeZone);
+  
+  // Calculate sunrise and sunset times using SunCalc
+  const coords = getCoordinatesFromTimeZone(timeZone)
+  if(coords) {
+    const sunTimes = SunCalc.getTimes(date, coords.latitude, coords.longitude);
+    // Convert sunrise and sunset times to the local time zone
+    const sunrise = DateTime.fromJSDate(sunTimes.sunrise).setZone(timeZone).toFormat('yyyy-MM-dd HH:mm:ss');
+    const sunset = DateTime.fromJSDate(sunTimes.sunset).setZone(timeZone).toFormat('yyyy-MM-dd HH:mm:ss');
+    console.log(sunrise, sunset)
+    return { sunrise, sunset };
+  }
+  else {
+    console.log('no coords');
+    return {sunrise: "oui", sunset: "non"}
+  }
+}
+interface TimeZoneCoordinates {
+  latitude: number;
+  longitude: number;
+}
+function getCoordinatesFromTimeZone(timeZone: string): TimeZoneCoordinates | null {
+  const timeZoneMap: { [key: string]: TimeZoneCoordinates } = {
+    'America/New_York': { latitude: 40.7128, longitude: -74.0060 }, // New York City, USA
+    'America/Los_Angeles': { latitude: 34.0522, longitude: -118.2437 }, // Los Angeles, USA
+    'America/Chicago': { latitude: 41.8781, longitude: -87.6298 }, // Chicago, USA
+    'America/Denver': { latitude: 39.7392, longitude: -104.9903 }, // Denver, USA
+    'Europe/London': { latitude: 51.5074, longitude: -0.1278 }, // London, UK
+    'Europe/Paris': { latitude: 48.8566, longitude: 2.3522 }, // Paris, France
+    'Europe/Berlin': { latitude: 52.5200, longitude: 13.4050 }, // Berlin, Germany
+    'Asia/Tokyo': { latitude: 35.6895, longitude: 139.6917 }, // Tokyo, Japan
+    'Asia/Shanghai': { latitude: 31.2304, longitude: 121.4737 }, // Shanghai, China
+    'Asia/Kolkata': { latitude: 22.5726, longitude: 88.3639 }, // Kolkata, India
+    'Australia/Sydney': { latitude: -33.8688, longitude: 151.2093 }, // Sydney, Australia
+    'Africa/Johannesburg': { latitude: -26.2041, longitude: 28.0473 }, // Johannesburg, South Africa
+    // Add more time zones as needed
+  };
+
+  return timeZoneMap[timeZone] || null;
+}

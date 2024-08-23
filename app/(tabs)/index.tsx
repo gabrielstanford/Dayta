@@ -4,16 +4,14 @@ import { useState, useEffect, useRef } from 'react';
 import {AntDesign, MaterialIcons, Ionicons} from '@expo/vector-icons';
 import MyModal from '@/components/MyModal'
 import { useAppContext } from '@/contexts/AppContext';
-import { collection, onSnapshot, getDocs } from 'firebase/firestore';
-import {firestore} from '@/firebase/firebase'
 import {useAuth} from '@/contexts/AuthContext'
-import getFilteredActivityRefs from '@/Data/HandleTime'
 import FetchDayActivities from '@/Data/FetchDayActivities'
 import ActivityDescribeModal from '@/components/ActivityDescribeModal'
 import {DateTime} from 'luxon'
 import {Activity, ActivityWithEnd} from '@/Types/ActivityTypes';
 import HandleSubmitEditing from '@/Data/HandleSubmitEditing';
-import { storage } from '@/utils/mmkvStorage';
+
+// import { getSunriseSunset } from '@/utils/DateTimeUtils';
 
 // Get screen width. This is for more responsive layouts
 const { width, height } = Dimensions.get('window');
@@ -134,6 +132,8 @@ const ActivityItem = ({ activity, onRemove, timeState, dateIncrement, updateActi
 );}
 
 function Journal() {
+  // const timeZone = 'America/Los_Angeles'; // Replace with the user's time zone
+  // const times = getSunriseSunset(new Date(), timeZone)
 
   const { user } = useAuth();
   const [dbActivities, setDbActivities] = useState<Activity[]>([]);
