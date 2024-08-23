@@ -1,4 +1,4 @@
-import {ModalProps, Modal, View, StyleSheet, Dimensions, Text, TouchableWithoutFeedback, Platform, TouchableOpacity, Keyboard} from 'react-native'
+import {ModalProps, Modal, View, StyleSheet, Dimensions, Text, TouchableWithoutFeedback, Platform, TouchableOpacity, Keyboard, KeyboardAvoidingView} from 'react-native'
 import {ThemedText} from './ThemedText'
 import {Button} from '@rneui/themed'
 import TimeDropdown from './TimeDropdown'
@@ -99,9 +99,19 @@ const CreateRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisib
 
         {...modalProps}>
           <TouchableWithoutFeedback onPress={onTapOut}>
-            <View style={styles.MultitaskModalOverlay}>
+            <View 
+            style={styles.MultitaskModalOverlay}>
+            
+            <View style={{flex: 1, justifyContent: 'center'}}>
             <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-                <View style={styles.MultitaskModalContent}>
+            <KeyboardAvoidingView 
+            style={styles.MultitaskModalContent}
+            // enabled={false}
+            keyboardVerticalOffset={250}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            // contentContainerStyle={styles.contContStyle}
+            >
+            {/* <View style={styles.MultitaskModalContent}> */}
                   <View style={styles.titleContainer}>
                     <ThemedText type="title"> Select Activities </ThemedText>
                   </View>
@@ -153,11 +163,14 @@ const CreateRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisib
                   <TagDropdown tagValue={tag4Value} setTagValue={setTag4Value} />
                 </View> */}
                 <ActivitySearchModal visible={multiSearchVisible} onClick={multiSearchPress} onClose={() => setMultiSearchVisible(false)} />
-                <View style={styles.nextContainer}>
-                  <Button title="Next" style={styles.nextButton} onPress={() => onNext(createFull())} />
-                </View>
-            </View>
+
+            </KeyboardAvoidingView>
             </TouchableWithoutFeedback>
+            <View style={styles.nextContainer}>
+                  <Button title="Next" style={styles.nextButton} onPress={() => onNext(createFull())} />
+              </View>
+            </View>
+          
           </View>
         </TouchableWithoutFeedback>
       </Modal>
@@ -194,7 +207,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
       },
       MultitaskModalContent: {
-        flex: .67,
+        flex: 0.67,
         width: width/1,
         height: height,
         padding: 10,
@@ -224,7 +237,7 @@ const styles = StyleSheet.create({
 
       nextContainer: {
         left: ((width/1.1) / 2) - (buttonWidth / 2), // Center horizontally more precisely
-        marginTop: 'auto'
+
       },
       nextButton: {
         paddingTop: 10,

@@ -2,7 +2,7 @@ import {useAppContext, AppProvider} from '@/contexts/AppContext'
 import {ButtonState} from '@/Types/ActivityTypes'
 import {useAuth} from '@/contexts/AuthContext'
 import {Dispatch, SetStateAction, useState} from 'react'
-import {View, Text, TouchableOpacity, StyleSheet, Dimensions, TextInput} from 'react-native'
+import {View, Text, TouchableOpacity, StyleSheet, Dimensions, TextInput, TouchableWithoutFeedback, Keyboard} from 'react-native'
 import { ThemedText } from '@/components/ThemedText'
 import RNPickerSelect from 'react-native-picker-select'
 import { Routine, Activity } from '@/Types/ActivityTypes'
@@ -20,8 +20,8 @@ function Personalize() {
     const {user} = useAuth();
     const [createRoutineModalVisible, setCreateRoutineModalVisible] = useState<boolean>(false);
     const [inputText, setInputText] = useState<string>("")
-    const [tag1Value, setTag1Value] = useState<string>("")
-    const [tag2Value, setTag2Value] = useState<string>("")
+    const [tag1Value, setTag1Value] = useState<string>("null")
+    const [tag2Value, setTag2Value] = useState<string>("null")
     const [routineName, setRoutineName] = useState<string>("");
     const [durationBetween, setDurationBetween] = useState<number[]>([]);
     const [routineActivities, setRoutineActivities] = useState<Activity[]>([])
@@ -67,21 +67,26 @@ function Personalize() {
       setDurationBetween([texts[0][2], texts[1][2], texts[2][2]])
     }
     const handleSubmit = () => {
-        if(inputText.length>3 && tag1Value.length>0) {
+        if(inputText.length>2 && (tag1Value!=="null" || tag2Value!=="null")) {
+          if(tag1Value==tag2Value) {
+            alert("Make sure the tags are not the same")
+            return;
+          }
         let tags=[""];
-        if(tag1Value.length>0 && tag2Value.length>0 && tag2Value!=="null" && tag1Value!=="null") {
+        if(tag1Value!=="null" && tag2Value!=="null") {
             tags=[tag1Value, tag2Value]
         }
-        else if (tag1Value.length>0 && tag1Value!=="null" && tag2Value=="") {
+        else if (tag1Value!=="null") {
           tags=[tag1Value]
         }
-        else if(tag2Value.length>0 && tag2Value!=="null" && tag1Value=="") {
+        else if(tag2Value!=="null") {
           tags=[tag2Value]
         }
         if(tags[0].length>0) {
+          console.log('tags: ', tags)
         const newButton = {text: inputText,  iconLibrary: "materialIcons", icon: "more-horiz", keywords: ['Miscellaneous'], pressed: false, tags: tags}
         setTimeout(() => {
-          addCustomActivity(newButton);
+          // addCustomActivity(newButton);
         }, 0)
         alert("successfully added custom activity. feel free to use it now as often as you'd like!")
          }
@@ -123,7 +128,7 @@ function Personalize() {
     }
     
     return (
-        <>
+      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
         <View style={styles.modalOverlay}>
         <CreateRoutineModal style={{}} MultitaskModalVisible={createRoutineModalVisible} onNext={handleMultitaskNext} onTapOut={() => setCreateRoutineModalVisible(false)}/>
         <View style={styles.titleContainer}>
@@ -174,9 +179,13 @@ function Personalize() {
           </View>
           <View style={styles.tagSection}>
             <ThemedText type="subtitle">Add Tags: </ThemedText>
-            <TagDropdown setTagValue={setTag1Value}/>
-            <TagDropdown setTagValue={setTag2Value}/>
-          </View>
+              <View style={styles.tagStyle}>
+              <TagDropdown setTagValue={setTag1Value}/>
+              </View>
+              <View style={styles.tagStyle}>
+              <TagDropdown setTagValue={setTag2Value}/>
+              </View>
+           </View>
           <View style={styles.createContainer}>
               <TouchableOpacity onPress={() => handleSubmit()} style={styles.closeButton}>
                 <Text style={styles.buttonText}>Create Activity</Text>
@@ -215,7 +224,7 @@ function Personalize() {
           )}
         
         </View>
-        </>
+        </TouchableWithoutFeedback>
     )
 }
 
@@ -237,7 +246,7 @@ interface TagDropdownProps {
       { label: 'Self-Improvement', value: 'Self-Improvement' },
       {label: 'Family Time', value: 'Family Time'},
       { label: 'Helping Others', value: 'Helping Others' },
-
+      {label: 'Intaking Knowledge', value: 'Intaking Knowledge'},
       { label: 'Other', value: 'Other' },
     ]
     return (
@@ -303,13 +312,20 @@ interface TagDropdownProps {
     flexDirection: 'row'
     },
     tagSection: {
-        padding: 30,
         rowGap: 20,
         flexDirection: 'row',
-        justifyContent: 'space-around'
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        paddingTop: 10,
+        paddingBottom: 30,
 
     },
-
+    tagStyle: {
+      borderColor: 'black', 
+      borderWidth: 2,
+      borderRadius: 20,
+      padding: 10,
+    },
     createContainer: {
  
       alignItems: 'center',

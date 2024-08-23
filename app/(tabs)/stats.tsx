@@ -199,7 +199,7 @@ function Stats() {
           {/* <BlockedTime /> */}
           <Text style={{fontSize: 12, color: 'white'}}>Average Wake Time: {decimalToTime(avgWakeTime)}</Text>
           <Text style={{fontSize: 12, color: 'white'}}>Average Sleep Time: {decimalToTime(avgSleepTime-12)}</Text>
-          <Text style={{fontSize: 12, color: 'white'}}>Sleep Lengths: {mapLens(sleepLens)}</Text>
+          {/* <Text style={{fontSize: 12, color: 'white'}}>Sleep Lengths: {mapLens(sleepLens)}</Text> */}
           <SleepLineChart 
           labels={sleepLabels}
           values={sleepValues}
