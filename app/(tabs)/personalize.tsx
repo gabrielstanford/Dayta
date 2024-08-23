@@ -69,20 +69,25 @@ function Personalize() {
     const handleSubmit = () => {
         if(inputText.length>3 && tag1Value.length>0) {
         let tags=[""];
-        if(tag1Value.length>0 && tag2Value.length>0) {
+        if(tag1Value.length>0 && tag2Value.length>0 && tag2Value!=="null" && tag1Value!=="null") {
             tags=[tag1Value, tag2Value]
         }
-        else if (tag1Value.length>0 && tag2Value=="") {
+        else if (tag1Value.length>0 && tag1Value!=="null" && tag2Value=="") {
           tags=[tag1Value]
         }
-        else if(tag2Value.length>0 && tag1Value=="") {
+        else if(tag2Value.length>0 && tag2Value!=="null" && tag1Value=="") {
           tags=[tag2Value]
         }
+        if(tags[0].length>0) {
         const newButton = {text: inputText,  iconLibrary: "materialIcons", icon: "more-horiz", keywords: ['Miscellaneous'], pressed: false, tags: tags}
         setTimeout(() => {
           addCustomActivity(newButton);
         }, 0)
         alert("successfully added custom activity. feel free to use it now as often as you'd like!")
+         }
+         else {
+          alert("Problem with tags. Try again.")
+         }
         }
         else {
         alert("invalid input")

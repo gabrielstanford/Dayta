@@ -170,8 +170,8 @@ function Journal() {
     const flatListRef = useRef<FlatList>(null);
     useEffect(() => {
       const timer = setTimeout(() => {
-        flatListRef.current?.scrollToEnd({ animated: true });
-      }, 100); // Slight delay to ensure list is rendered
+        flatListRef.current?.scrollToEnd({ animated: false });
+      }, 1); // Slight delay to ensure list is rendered
   
       // Clean up the timer if the component unmounts
       setTimedTapped([false, ""])

@@ -35,26 +35,31 @@ const countValues = (array: string[]): ValueCounts => {
 };
 const getTop9WithOther = (activities: ActivitySummary[]): ActivitySummary[] => {
   // Extract the top 9 activities
-  const top9 = activities.slice(0, 9);
+  let result = activities
+  if(activities.length>9) {
+  let top9 = activities.slice(0, 9);
 
   // Calculate the sum of the remaining durations
+
   const remainingSum = activities.slice(9).reduce((sum, activity) => sum + activity.totalDuration, 0);
 
   // Add the 'Other' category with the remaining sum
-  const result = [...top9, { text: 'Other', totalDuration: remainingSum }];
-
+  result = [...top9, { text: 'Other', totalDuration: remainingSum }];
+  }
   return result;
 };
 
 function Stats() {
   
   const {state} = useCustomSet();
-  const { durationSummary, avgSleepTime, avgWakeTime, weekDurationSummary, sleepSum, tagDurationSum } = state;
+  const { durationSummary, avgSleepTime, avgWakeTime, weekDurationSummary, sleepSum, tagDurationSum, todayTagDurationSum } = state;
   const {justActivities} = useAppContext();
   const [durationSumState, setDurationSumState] = useState<ActivitySummary[]>([]);
   const [weekDurationSumState, setWeekDurationSumState] = useState<ActivitySummary[]>([]);
   const [tagDurationSumState, setTagDurationSumState] = useState<ActivitySummary[]>([]);
+  const [todayTagDurationSumState, setTodayTagDurationSumState] = useState<ActivitySummary[]>([]);
   const [enoughDataForCommonChart, setEnoughDataForCommonChart] = useState<boolean>(false);
+  const [enoughDataForToday, setEnoughDataForToday] = useState<boolean>(false);
   const extractTime = (timeStamp: number) => {
     if(timeStamp<500) {
       return 50
@@ -86,15 +91,28 @@ function Stats() {
     );    
     const top9WithOtherTags = getTop9WithOther(sortedDescendingTags)
     setTagDurationSumState(top9WithOtherTags)
-
+    // console.log('Tag Duration Sum Going In: ', todayTagDurationSum)
   }, [justActivities]);
 
+  
+  // useEffect(() => {
+  //   console.log('New sum: ', todayTagDurationSum, todayTagDurationSumState)
+  // }, [todayTagDurationSum, todayTagDurationSumState])
   useEffect(() => {
     if(durationSumState.length>0 && weekDurationSumState.length>0 && tagDurationSumState.length>0) {
+
       setEnoughDataForCommonChart(true)
     }
-  }, [tagDurationSumState])
-  
+  }, [tagDurationSumState, justActivities])
+  useEffect(() => {
+    const sortedDescendingTodayTags = todayTagDurationSum.sort(
+      (a: ActivitySummary, b: ActivitySummary) => b.totalDuration - a.totalDuration
+    );    
+
+    const top9WithOtherTodayTags = getTop9WithOther(sortedDescendingTodayTags)
+    setTodayTagDurationSumState(top9WithOtherTodayTags)
+    setEnoughDataForToday(true);
+  }, [todayTagDurationSum])
   const mapLens = (lens: [string, number][]) => {
     const mapped = sleepLens.map(ind => decimalToDurationTime(ind[1]))
     const filtered = mapped.filter(dur => dur!=="0:00")
@@ -135,9 +153,19 @@ function Stats() {
         <ThemedText type="titleText" style={{fontSize: width/12}}>Statistics</ThemedText>
       </View>
       <View style={styles.chartsContainer}>
+      {enoughDataForToday && (   
+        <>   
+        <Text style={styles.chartTitle}>Today Breakdown By Tags</Text>
+
+          <PieChart
+            labels={todayTagDurationSumState.map(activity => activity.text)}
+            values={todayTagDurationSumState.map(activity => activity.totalDuration)}
+          />
+          </>   )}
       {enoughDataForCommonChart && (
         <View>
         <SafeAreaView style={styles.pieChartContainer}>
+
           <Text style={styles.chartTitle}>All Time</Text>
           <PieChart
             labels={durationSumState.map(activity => activity.text)}
@@ -165,6 +193,7 @@ function Stats() {
           </View> */}
           </View>
       )}
+
       {(avgSleepTime!==0.111 && avgWakeTime!==0.111 && sleepSum.length>0 && sleepLens.length>0) && (
           <View style={styles.timeBlocksContainer}>
           {/* <BlockedTime /> */}

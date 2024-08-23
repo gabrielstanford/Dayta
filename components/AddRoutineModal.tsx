@@ -12,7 +12,7 @@ import TimeInput from './TimeInput'
 import { create } from 'react-test-renderer'
 import RNPickerSelect from 'react-native-picker-select'
 import TimeDropdown from './TimeDropdown'
-import { convertTimeToUnix, adjustDateByDays } from '@/utils/DateTimeUtils';
+import { convertTimeToUnix, adjustDateByDays, decimalToDurationTime } from '@/utils/DateTimeUtils';
 import { Routine } from '@/Types/ActivityTypes';
 
 const {width, height} = Dimensions.get("window");
@@ -39,6 +39,7 @@ const AddRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible,
   const [selectedPeriod, setSelectedPeriod] = useState("AM");
   const {dateIncrement, customRoutines} = useAppContext();
   const [part2Visible, setPart2Visible] = useState<boolean>(false);
+  const [relevantRoutine, setRelevantRoutine] = useState<Routine>()
 
 
   const handleHourChange = (hour: string) => {
@@ -72,8 +73,15 @@ const AddRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible,
     }
     const handleNext = (start: number) => {
       if(tagValue!=="") {
+        const atHand = customRoutines.find(rout => rout.name==tagValue)
+        if(atHand) {
+        setRelevantRoutine(atHand)
 
         setPart2Visible(true)
+        }
+        else {
+          alert("No routine found")
+        }
       } 
       else {alert("Please set the routine")}
     }
@@ -108,7 +116,6 @@ const AddRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible,
                       onPeriodChange={handlePeriodChange}
                       />
                 </View>
-                {/* on submit () => onNext(tagValue, createStartTime(convertTimeToUnix(generateTimeString()))) */}
                 <TouchableOpacity style={styles.nextContainer} onPress={() => handleNext(createStartTime(convertTimeToUnix(generateTimeString())))}>
                     <Text>Next</Text>
                 </TouchableOpacity>
@@ -120,7 +127,21 @@ const AddRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible,
                 </TouchableOpacity>
                     <ThemedText type="title">Preview</ThemedText>
                   </View>
-                
+                  {relevantRoutine && (
+                    <View>
+                    <Text>
+                    {relevantRoutine.activities[0].button.text}: {decimalToDurationTime(relevantRoutine.activities[0].timeBlock.duration/3600)}
+                    </Text>
+                    <Text>
+                    {relevantRoutine.activities[1].button.text}: {decimalToDurationTime(relevantRoutine.activities[1].timeBlock.duration/3600)}
+                    </Text>
+                    <Text>
+                    {relevantRoutine.activities[2].button.text}: {decimalToDurationTime(relevantRoutine.activities[2].timeBlock.duration/3600)}
+                    </Text>
+                    <Text>
+                    {relevantRoutine.activities[3].button.text}: {decimalToDurationTime(relevantRoutine.activities[3].timeBlock.duration/3600)}
+                  </Text>
+                  </View>)}
                   <TouchableOpacity style={styles.nextContainer} onPress={() => onNext(tagValue, createStartTime(convertTimeToUnix(generateTimeString())))}>
                     <Text>Submit Routine</Text>
                 </TouchableOpacity>

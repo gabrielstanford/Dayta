@@ -7,6 +7,7 @@ import getFiltered from './HandleTime'
 import { act } from 'react-test-renderer'
 import { DateTime } from 'luxon'
 import { normalize } from '@rneui/themed'
+import FetchDayActivities from './FetchDayActivities'
 
 interface ValueCounts {
   [key: string]: number;
@@ -20,7 +21,9 @@ const countValues = (array: string[]): ValueCounts => {
 };
 
 function useCustomSet() {
-  const {customActivities, justActivities, updateState, setFinalArray, state} = useAppContext();
+  const {customActivities, justActivities, updateState, setFinalArray, state, dateIncrement} = useAppContext();
+  const {user} = useAuth();
+  const [todayActs, setTodayActs] = useState<Activity[]>([])
   const {tagDurationSum} = state
   const [textKeys, setTextKeys] = useState<string[]>([])
   //this function performs two main things: 
@@ -73,11 +76,12 @@ function useCustomSet() {
               if(normalizedTag=='Other') {
                 console.log('Normalized tag: ', normalizedTag)
               }
-              if (acc[normalizedTag]) {
+              if (acc[normalizedTag] && normalizedTag!=="null") {
                 // If the tag already exists, add the duration to the existing value
                 acc[normalizedTag] += activity.timeBlock.duration / 3600; // Convert seconds to hours
               } else {
                 // If the tag does not exist, initialize it with the duration
+                if(normalizedTag!=="null")
                 acc[normalizedTag] = activity.timeBlock.duration / 3600; // Convert seconds to hours
               }
             });
@@ -88,6 +92,7 @@ function useCustomSet() {
               return acc
             }
           }, {});
+
         const result: ActivitySummary[] = Object.entries(totalDurationPerTag).map(([text, totalDuration]) => ({
           text,
           totalDuration,
@@ -141,20 +146,67 @@ function useCustomSet() {
     updateState({weekDurationSummary: result});
   }
 
-  const createDayDurationStats = () => {
+  const createDailyAverageStats = () => {
     const startTimes = justActivities.map(act => act.timeBlock.startTime)
     const minStart = Math.min(...startTimes)
-    const maxStart = Math.max(...startTimes)
+    let maxStart = Math.max(...startTimes)
+    const now = (Math.floor(Date.now() / 1000))
+    if(maxStart>now) {
+      maxStart = now
+    }
     const minStartDate = DateTime.fromSeconds(minStart);
     const maxStartDate = DateTime.fromSeconds(maxStart);
+    let emptyDayCount: number = 0
+    
+    for(let x = minStart; x < maxStart; x += 86400) {
+      if(startTimes.filter(time => time>x && time<x+86400).length<2) {
+        emptyDayCount=emptyDayCount+1
+      }
+    }
     const diffInDays = maxStartDate.startOf('day').diff(minStartDate.startOf('day'), 'days').days;
-
-    const avgTimeByTag = tagDurationSum.map(item => ({
+    const daysToAvgBy = diffInDays-emptyDayCount;
+    const avgDailyTimeByTag = tagDurationSum.map(item => ({
       text: item.text,
-      totalDuration: item.totalDuration / diffInDays,
+      totalDuration: item.totalDuration / daysToAvgBy,
     }));
+    updateState({avgTimeByTag: avgDailyTimeByTag})
+  }
 
-    updateState({avgTimeByTag: avgTimeByTag})
+  const analyzeTodayStats = () => {
+    console.log('analyzing')
+    console.log('Today Activities:', todayActs);
+
+    const totalDurationPerTag = todayActs.reduce<Record<string, number>>((acc, activity) => {
+      // Iterate over each tag in the current activity
+      
+      if(activity.button.tags) {
+      activity.button.tags.forEach(tag => {
+        console.log(tag)
+        const normalizedTag = tag.trim().toLowerCase();
+        if (acc[normalizedTag] && normalizedTag!=="null") {
+          // If the tag already exists, add the duration to the existing value
+          acc[normalizedTag] += activity.timeBlock.duration / 3600; // Convert seconds to hours
+        } else {
+
+          // If the tag does not exist, initialize it with the duration
+          if(normalizedTag!=="null") {
+          acc[normalizedTag] = activity.timeBlock.duration / 3600; // Convert seconds to hours
+          }
+        }
+      });
+      return acc;
+      }
+      else {
+        console.log("No Tags: ", activity)
+        return acc
+      }
+    }, {});
+  const result: ActivitySummary[] = Object.entries(totalDurationPerTag).map(([text, totalDuration]) => ({
+    text,
+    totalDuration,
+  }));
+  console.log('Result: ', result);
+  updateState({todayTagDurationSum: result})
   }
 
   const createSleepStats = () => {
@@ -215,18 +267,32 @@ function useCustomSet() {
   }
   useEffect(() => {
     if(justActivities.length>0) {
-      createFinalArray();
+    createFinalArray();
     createDurationSummary();
     createWeekDurationStats();
     createTagDurationSum();
-    createDayDurationStats();
+    createDailyAverageStats();
     }
   }, [justActivities]);
+
   useEffect(() => {
     if(justActivities.length>0) {
     createSleepStats();
     }
   }, [])
+  useEffect(() => {
+    setTimeout(() => {
+      if(justActivities)
+      FetchDayActivities(user, dateIncrement, justActivities, setTodayActs)
+    }, 50)
+  }, [dateIncrement, justActivities])
+  useEffect(() => {
+    if (todayActs.length > 0) {
+      console.log('rerun')
+      analyzeTodayStats();
+    }
+  }, [todayActs]); // This will re-run whenever todayActs changes
+
   return {finalArray: useAppContext().finalArray, state: useAppContext().state}
 };
 

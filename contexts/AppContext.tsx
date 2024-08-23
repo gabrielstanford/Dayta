@@ -7,6 +7,7 @@ import {Activity, ButtonState, DatedActivities, ActivitySummary, StatisticsState
 import {ActivityButtons, shuffle} from '@/Data/FetchCustomActivities';
 import { storage } from '@/utils/mmkvStorage';
 import {useCustomSet} from '@/Data/CustomSet'
+import FetchDayActivities from '@/Data/FetchDayActivities';
 
 type UpdateState = (newState: Partial<StatisticsState>) => void;
 interface AppContextProps {
@@ -50,12 +51,14 @@ const AppContext = createContext<AppContextProps | undefined>(undefined);
 console.log('running context')
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [justActivities, setJustActivities] = useState<Activity[]>([]);
+  const [dayActivities, setDayActivities] = useState<Activity[]>([]);
   const [allActivities, setAllActivities] = useState<DatedActivities[]>([]);
   const [customActivities, setCustomActivities] = useState<ButtonState[]>([]);
   const [customRoutines, setCustomRoutines] = useState<Routine[]>([]);
   const [dateIncrement, setDateIncrement] = useState(0);
   const [updateLocalStorage, setUpdateLocalStorage] = useState(false);
   const [finalArray, setFinalArray] = useState<ButtonState[]>([])
+
   const initialState = {
     durationSummary: [] as ActivitySummary[],
     avgSleepTime: 0.111,
@@ -63,8 +66,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     weekDurationSummary: [] as ActivitySummary[],
     sleepSum: [] as any[],
     tagDurationSum: [] as ActivitySummary[],
-    avgTimeByTag: [] as ActivitySummary[]
+    avgTimeByTag: [] as ActivitySummary[],
+    todayTagDurationSum: [] as ActivitySummary[]
   };
+
   const [state, setState] = useState(initialState);
   const updateState = (newState: Partial<typeof initialState>) => {
     setState(prevState => ({ ...prevState, ...newState }));
