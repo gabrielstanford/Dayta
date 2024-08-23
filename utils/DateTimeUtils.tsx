@@ -78,9 +78,11 @@ export const convertTimeToUnix = (timeString: string, date: Date = new Date()): 
     const hours = Math.floor(decimal);
     const minutes = Math.round((decimal - hours) * 60);
   
-    // Format minutes to always be two digits
+    // Format hours and minutes to always be two digits
+    const formattedHours = hours.toString().padStart(2, '0');
     const formattedMinutes = minutes.toString().padStart(2, '0');
   
-    // Return time in 'H:MM' format
-    return `${hours}:${formattedMinutes}`;
+    // Return time in 'HH:MM' format
+    return `${formattedHours}:${formattedMinutes}`;
   };
+  

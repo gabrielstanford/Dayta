@@ -1,4 +1,4 @@
-import {ModalProps, Modal, View, StyleSheet, Dimensions, Text, TouchableWithoutFeedback, Platform, TouchableOpacity} from 'react-native'
+import {ModalProps, Modal, View, StyleSheet, Dimensions, Text, TouchableWithoutFeedback, Platform, TouchableOpacity, Keyboard} from 'react-native'
 import {ThemedText} from './ThemedText'
 import {Button} from '@rneui/themed'
 import TimeDropdown from './TimeDropdown'
@@ -100,7 +100,7 @@ const CreateRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisib
         {...modalProps}>
           <TouchableWithoutFeedback onPress={onTapOut}>
             <View style={styles.MultitaskModalOverlay}>
-            <TouchableWithoutFeedback>
+            <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
                 <View style={styles.MultitaskModalContent}>
                   <View style={styles.titleContainer}>
                     <ThemedText type="title"> Select Activities </ThemedText>

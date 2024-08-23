@@ -1,4 +1,4 @@
-import {ModalProps, Modal, View, StyleSheet, Dimensions, Text, TouchableWithoutFeedback, Platform, TouchableOpacity} from 'react-native'
+import {ModalProps, Modal, View, StyleSheet, Dimensions, Text, TouchableWithoutFeedback, Platform, TouchableOpacity, Keyboard} from 'react-native'
 import {ThemedText} from './ThemedText'
 import {Button} from '@rneui/themed'
 import {useState, useEffect} from 'react'
@@ -20,7 +20,7 @@ const buttonWidth = width/6.25
   
   interface MultitaskModalProps extends ModalProps {
     MultitaskModalVisible: boolean;
-    onNext: (routineName: string, startTime: number) => void;
+    onNext: (routine: Routine, startTime: number) => void;
     onTapOut: () => void;
   }
 
@@ -37,6 +37,11 @@ const AddRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible,
   const [selectedHour, setSelectedHour] = useState("10");
   const [selectedMinute, setSelectedMinute] = useState("30");
   const [selectedPeriod, setSelectedPeriod] = useState("AM");
+  const [editDur1, setEdit1] = useState<string>("00:10");
+  const [editDur2, setEdit2] = useState<string>("00:10");
+  const [editDur3, setEdit3] = useState<string>("00:10");
+  const [editDur4, setEdit4] = useState<string>("00:10");
+
   const {dateIncrement, customRoutines} = useAppContext();
   const [part2Visible, setPart2Visible] = useState<boolean>(false);
   const [relevantRoutine, setRelevantRoutine] = useState<Routine>()
@@ -76,6 +81,10 @@ const AddRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible,
         const atHand = customRoutines.find(rout => rout.name==tagValue)
         if(atHand) {
         setRelevantRoutine(atHand)
+        setEdit1(decimalToDurationTime(atHand.activities[0].timeBlock.duration/3600))
+        setEdit2(decimalToDurationTime(atHand.activities[1].timeBlock.duration/3600))
+        setEdit3(decimalToDurationTime(atHand.activities[2].timeBlock.duration/3600))
+        setEdit4(decimalToDurationTime(atHand.activities[3].timeBlock.duration/3600))
 
         setPart2Visible(true)
         }
@@ -84,6 +93,24 @@ const AddRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible,
         }
       } 
       else {alert("Please set the routine")}
+    }
+    const handleSubmit = () => {
+      if(relevantRoutine) {
+      let updatedDur1Act = relevantRoutine.activities[0];
+      let updatedDur2Act = relevantRoutine.activities[1];
+      let updatedDur3Act = relevantRoutine.activities[2];
+      let updatedDur4Act = relevantRoutine.activities[3];
+      updatedDur1Act.timeBlock.duration = timeStringToSeconds(editDur1);
+      updatedDur2Act.timeBlock.duration = timeStringToSeconds(editDur2);
+      updatedDur3Act.timeBlock.duration = timeStringToSeconds(editDur3);
+      updatedDur4Act.timeBlock.duration = timeStringToSeconds(editDur4);
+      let newRoutine: Routine = relevantRoutine
+      newRoutine.activities = [updatedDur1Act, updatedDur2Act, updatedDur3Act, updatedDur4Act]
+      onNext(newRoutine as Routine, createStartTime(convertTimeToUnix(generateTimeString())))
+      }
+      else {
+        alert("Please enter a routine")
+      }
     }
     return(
         <Modal 
@@ -94,7 +121,7 @@ const AddRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible,
         {...modalProps}>
           <TouchableWithoutFeedback onPress={() => {onTapOut(); setTimeout(() => {setPart2Visible(false)}, 80)}}>
             <View style={styles.MultitaskModalOverlay}>
-            <TouchableWithoutFeedback>
+            <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
             {!part2Visible ? 
             
                 <View style={styles.MultitaskModalContent}>
@@ -102,7 +129,7 @@ const AddRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible,
                     <ThemedText type="title"> Add A Routine</ThemedText>
                   </View>
                 <View style={styles.stepContainer}>
-                  <TagDropdown customRoutines={customRoutines} setTagValue={setTagValue} />
+                  <TagDropdown customRoutines={customRoutines} tagValue={tagValue} setTagValue={setTagValue} />
                 </View>
                 <Text style={{paddingLeft: 20, fontWeight: "bold", fontSize: 20, color: "black"}}>Starting At: </Text>
                 <View style={styles.stepContainer}>
@@ -129,20 +156,32 @@ const AddRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible,
                   </View>
                   {relevantRoutine && (
                     <View>
+                    <View style={{flexDirection: 'row'}}>
                     <Text>
-                    {relevantRoutine.activities[0].button.text}: {decimalToDurationTime(relevantRoutine.activities[0].timeBlock.duration/3600)}
+                    {relevantRoutine.activities[0].button.text}: 
                     </Text>
+                   <TimeInput custom={"Type2"} time={editDur1} onTimeChange={setEdit1}/>
+                    </View>
+                    <View style={{flexDirection: 'row'}}>
                     <Text>
-                    {relevantRoutine.activities[1].button.text}: {decimalToDurationTime(relevantRoutine.activities[1].timeBlock.duration/3600)}
+                    {relevantRoutine.activities[1].button.text}: 
                     </Text>
+                   <TimeInput custom={"Type2"} time={editDur2} onTimeChange={setEdit2}/>
+                    </View>
+                    <View style={{flexDirection: 'row'}}>
                     <Text>
-                    {relevantRoutine.activities[2].button.text}: {decimalToDurationTime(relevantRoutine.activities[2].timeBlock.duration/3600)}
+                    {relevantRoutine.activities[2].button.text}: 
                     </Text>
+                   <TimeInput custom={"Type2"} time={editDur3} onTimeChange={setEdit3}/>
+                    </View>
+                    <View style={{flexDirection: 'row'}}>
                     <Text>
-                    {relevantRoutine.activities[3].button.text}: {decimalToDurationTime(relevantRoutine.activities[3].timeBlock.duration/3600)}
-                  </Text>
+                    {relevantRoutine.activities[3].button.text}: 
+                    </Text>
+                   <TimeInput custom={"Type2"} time={editDur4} onTimeChange={setEdit4}/>
+                    </View>
                   </View>)}
-                  <TouchableOpacity style={styles.nextContainer} onPress={() => onNext(tagValue, createStartTime(convertTimeToUnix(generateTimeString())))}>
+                  <TouchableOpacity style={styles.nextContainer} onPress={() => handleSubmit()}>
                     <Text>Submit Routine</Text>
                 </TouchableOpacity>
               </View>}
@@ -155,16 +194,18 @@ const AddRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible,
 }
 
 interface TagDropdownProps {
+    tagValue: string;
     setTagValue: React.Dispatch<React.SetStateAction<string>>;
     customRoutines: Routine[]; 
   }
-  const TagDropdown: React.FC<TagDropdownProps> = ({ setTagValue, customRoutines}) => {
+  const TagDropdown: React.FC<TagDropdownProps> = ({ tagValue, setTagValue, customRoutines}) => {
     const tags = customRoutines.map(routine => ({
       label: routine.name,
       value: routine.name,
     }));
     return (
       <RNPickerSelect
+        value={tagValue}
         onValueChange={(value) => setTagValue(value)}
         items={tags}
       />

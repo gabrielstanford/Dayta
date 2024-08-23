@@ -14,7 +14,7 @@ import MultitaskModal from './MultitaskModal'
 import ActivitySearchModal from './ActivitySearchModal'
 import { useCustomSet} from '@/Data/CustomSet'
 import Toast from 'react-native-toast-message'
-import {ButtonState, Activity, TimeBlock} from '@/Types/ActivityTypes'
+import {ButtonState, Activity, TimeBlock, Routine} from '@/Types/ActivityTypes'
 import AddRoutineModal from './AddRoutineModal';
 
 //next: add search
@@ -101,13 +101,12 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
       
   };
 
-  const handleRoutineSubmit = (routineName: string, startTime: number) => {
+  const handleRoutineSubmit = (routine: Routine, startTime: number) => {
     setAddRoutineModal(false);
     
-    
-    const routine = customRoutines.find(routine => routine.name==routineName)
-    const durationBetweens = routine?.durationBetween
+    const durationBetweens = routine.durationBetween
     const populateTimes = (activities: Activity[], betweens: number[]) => {
+      if(betweens.length>1) {
       const firstEnd = startTime + activities[0].timeBlock.duration
       const secondStart = firstEnd + betweens[0]
       const secondEnd = secondStart + activities[1].timeBlock.duration
@@ -117,15 +116,28 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
       const fourthEnd = fourthStart + activities[3].timeBlock.duration
 
       return [startTime, firstEnd, secondStart, secondEnd, thirdStart, thirdEnd, fourthStart, fourthEnd]
+      }
+      else {
+        console.log('No duration betweens included')
+        const firstEnd = startTime + activities[0].timeBlock.duration
+        const secondStart = firstEnd + 60
+        const secondEnd = secondStart + activities[1].timeBlock.duration
+        const thirdStart = secondEnd + 60
+        const thirdEnd = thirdStart + activities[2].timeBlock.duration
+        const fourthStart = thirdEnd + 60
+        const fourthEnd = fourthStart + activities[3].timeBlock.duration
+  
+        return [startTime, firstEnd, secondStart, secondEnd, thirdStart, thirdEnd, fourthStart, fourthEnd]
+      }
     }
 
     if(routine) {
+      let act1 = routine.activities[0]
+      let act2 = routine.activities[1]
+      let act3 = routine.activities[2]
+      let act4 = routine.activities[3]
       if(durationBetweens) {
         const times: number[] = populateTimes(routine.activities, durationBetweens);
-        let act1 = routine.activities[0]
-        let act2 = routine.activities[1]
-        let act3 = routine.activities[2]
-        let act4 = routine.activities[3]
         act1.timeBlock.startTime = times[0]
         act1.timeBlock.endTime = times[1]
         act2.timeBlock.startTime = times[2]
@@ -134,11 +146,34 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
         act3.timeBlock.endTime = times[5]
         act4.timeBlock.startTime = times[6]
         act4.timeBlock.endTime = times[7]
-        addRoutineActivities([act1, act2, act3, act4])
+        //have to avoid duplicates
+        act1.id = uuid.v4() as string
+        act2.id = uuid.v4() as string
+        act3.id = uuid.v4() as string
+        act4.id = uuid.v4() as string
+        console.log('Acts: ', act1, act2, act3, act4)
+        // addRoutineActivities([act1, act2, act3, act4])
         Toast.show({ type: 'success', text1: 'Added Activity To Journal!'})
       }
+
       else {
-        alert("Please Add Durations Between The Activities")
+        // alert("Please Add Durations Between The Activities")
+        const times: number[] = populateTimes(routine.activities, [0]);
+        act1.timeBlock.startTime = times[0]
+        act1.timeBlock.endTime = times[1]
+        act2.timeBlock.startTime = times[2]
+        act2.timeBlock.endTime = times[3]
+        act3.timeBlock.startTime = times[4]
+        act3.timeBlock.endTime = times[5]
+        act4.timeBlock.startTime = times[6]
+        act4.timeBlock.endTime = times[7]
+        //have to avoid duplicates
+        act1.id = uuid.v4() as string
+        act2.id = uuid.v4() as string
+        act3.id = uuid.v4() as string
+        act4.id = uuid.v4() as string
+        addRoutineActivities([act1, act2, act3, act4])
+        Toast.show({ type: 'success', text1: 'Added Activity To Journal!'})
       }
     }
     else {

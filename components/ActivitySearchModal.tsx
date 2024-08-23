@@ -1,6 +1,6 @@
 // ActivitySearch.tsx
 import React, { useState, useEffect } from 'react';
-import { View, FlatList, Text, StyleSheet, Pressable, Modal, Dimensions, TouchableWithoutFeedback , TouchableOpacity} from 'react-native';
+import { View, FlatList, Text, StyleSheet, Pressable, Modal, Dimensions, TouchableWithoutFeedback , TouchableOpacity, Keyboard} from 'react-native';
 import { SearchBar } from '@rneui/themed';
 import {ButtonState} from '@/Types/ActivityTypes'
 import {useAppContext} from '@/contexts/AppContext'
@@ -19,8 +19,8 @@ const ActivitySearchModal: React.FC<SearchProps> = ({visible, onClose, onClick})
   const [results, setResults] = useState<ButtonState[]>(customActivities);
 
   useEffect(() => {
-    // const alphabeticalActs = 
-    setResults(customActivities);
+    const alphabeticalActs = customActivities.sort((a, b) => a.text.localeCompare(b.text));
+    setResults(alphabeticalActs);
   }, [customActivities])
   const handleSearch = (text: string) => {
     setQuery(text);
@@ -49,7 +49,7 @@ const ActivitySearchModal: React.FC<SearchProps> = ({visible, onClose, onClick})
   >
     <TouchableWithoutFeedback onPress={onClose}>
       <View style={styles.modalOverlay}>
-      <TouchableWithoutFeedback>
+      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
         <View style={styles.modalContent}>
         <SearchBar
           placeholder="Search activities"

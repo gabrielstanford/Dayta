@@ -267,7 +267,6 @@ function useCustomSet() {
   }
   useEffect(() => {
     if(justActivities.length>0) {
-    createFinalArray();
     createDurationSummary();
     createWeekDurationStats();
     createTagDurationSum();
@@ -275,6 +274,9 @@ function useCustomSet() {
     }
   }, [justActivities]);
 
+  useEffect(() => {
+    createFinalArray();
+  }, [textKeys])
   useEffect(() => {
     if(justActivities.length>0) {
     createSleepStats();
