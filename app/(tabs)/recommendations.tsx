@@ -7,6 +7,9 @@ import { Activity } from '@/Types/ActivityTypes';
 import { useCustomSet } from '@/Data/CustomSet';
 import { useAppContext } from '@/contexts/AppContext';
 import RecDescribeModal from '@/components/RecDescribeModal';
+import LogicModal from '@/components/LogicModal'
+import CustomButton from '@/components/CustomButton'
+
 //import firestore from '@react-native-firebase/firestore'
 
 const { width, height } = Dimensions.get('window');
@@ -36,6 +39,7 @@ export default function Recommendations() {
   const {tagDurationSum, avgTimeByTag} = state
   const [todayActivities, setTodayActivities] = useState<Activity[]>([]);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [logicModalVisible, setLogicModalVisible] = useState<boolean>(false);
   const {user} = useAuth();
   useEffect(() => {
     FetchDayActivities(user, 0, justActivities, setTodayActivities)
@@ -68,6 +72,7 @@ export default function Recommendations() {
   return (
     <View style={styles.layoutContainer}>
       <RecDescribeModal visible={modalVisible} onClose={() => setModalVisible(false)} speel={entertainmentSpeel} />
+      <LogicModal visible={logicModalVisible} onClose={() => setLogicModalVisible(false)} speel={"Filler Text"}/>
       <View style={styles.titleContainer}>
         <ThemedText type="titleText" style={{fontSize: width/12}}>Recommendations</ThemedText>
       </View>
@@ -86,6 +91,7 @@ export default function Recommendations() {
       <View style={styles.stepContainer}>
         <ThemedText type="journalText">Rec 3: Drink Your Coffee 1 Hour Later</ThemedText>
       </View>
+      <CustomButton title="info" onPress={() => setLogicModalVisible(true)}/>
     </View>
   );
 }

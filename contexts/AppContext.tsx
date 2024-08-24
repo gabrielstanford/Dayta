@@ -68,6 +68,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     tagDurationSum: [] as ActivitySummary[],
     avgTimeByTag: [] as ActivitySummary[],
     todayTagDurationSum: [] as ActivitySummary[],
+    summaryDurs: [] as [string, number][]
   };
 
   const [state, setState] = useState(initialState);

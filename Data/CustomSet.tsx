@@ -271,6 +271,8 @@ function useCustomSet() {
   }
 
   const createSleepStats = () => {
+    const relevantActivities = justActivities.filter(act => act.timeBlock.startTime>1722988800)
+
     const allSleepSlots = justActivities.filter(act => act.button.text=="Went To Bed" )
     const allWakeSlots = justActivities.filter(act => act.button.text=="Woke Up")
 
@@ -305,25 +307,33 @@ function useCustomSet() {
     //get earliest date in sleep, turn that into a date increment
     // let startDate = -12
     let elements: any[] = [];
-    let summaryStats: any[] = []
+    let sumElements: any[]=[]
+    let summaryStats: any[] = [];
+    let summaryDurs: any[] = [];
     for (let startDate = -12 ; startDate <= 0; startDate++) {
+
       let element = getFiltered(startDate);
       const filteredSleep = sleepInfo.filter(num => (num>element[2] && num<element[3]))
       const filteredWake = wakeInfo.filter(num => (num>element[2] && num<element[3]))
-      element = [...element, filteredWake, filteredSleep]
+      const filteredActs = relevantActivities.filter(act => act.timeBlock.startTime>element[2] && act.timeBlock.startTime<element[3])
+      const justDurs = filteredActs.map(act => act.timeBlock.duration)
+      const sum = justDurs.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+
+      const summedElement = [...element, sum]
+      element = [...element, filteredWake, filteredSleep ]
       elements = [...elements, element]
+      sumElements = [...sumElements, summedElement]
       summaryStats = [...summaryStats, [element[0], element[4], element[5]]]
+      summaryDurs = [...summaryDurs, [summedElement[0], summedElement[4]]]
+
     }
     
-    return summaryStats
+    return {summaryStats, summaryDurs}
     }
-    const sumStats = generateDateArray();
-    updateState({sleepSum: sumStats})
-
+    const {summaryStats, summaryDurs} = generateDateArray();
     const averageSleepTime = avg(sleepHours)
     const averageWakeTime = avg(wakeHours)
-    updateState({avgSleepTime: averageSleepTime})
-    updateState({avgWakeTime: averageWakeTime})
+    updateState({sleepSum: summaryStats, summaryDurs: summaryDurs, avgSleepTime: averageSleepTime, avgWakeTime: averageWakeTime})
   }
   useEffect(() => {
     if(justActivities.length>0) {

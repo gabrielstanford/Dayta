@@ -52,7 +52,7 @@ const getTop9WithOther = (activities: ActivitySummary[]): ActivitySummary[] => {
 function Stats() {
   
   const {state} = useCustomSet();
-  const { durationSummary, avgSleepTime, avgWakeTime, weekDurationSummary, sleepSum, tagDurationSum, todayTagDurationSum } = state;
+  const { durationSummary, avgSleepTime, avgWakeTime, weekDurationSummary, sleepSum, tagDurationSum, todayTagDurationSum, summaryDurs } = state;
   const {justActivities} = useAppContext();
   const [durationSumState, setDurationSumState] = useState<ActivitySummary[]>([]);
   const [weekDurationSumState, setWeekDurationSumState] = useState<ActivitySummary[]>([]);
@@ -182,15 +182,16 @@ function Stats() {
             values={tagDurationSumState.map(activity => activity.totalDuration)}
           />
          </SafeAreaView>
-          {/* <View style={styles.barChartContainer}>
+          <View >
             <ThemedText type="subtitle">
-              Click On Bars To Get Info!
+              Time Logging Over Time
             </ThemedText>
             <DashboardChart
-              x={durationSumState.map(activity => activity.text)}
-              y={durationSumState.map(activity => activity.totalDuration)}
+              x={summaryDurs.map(index => index[0])}
+              y={summaryDurs.map(index => index[1]/3600)}
             />
-          </View> */}
+          </View>
+
           </View>
       )}
 
