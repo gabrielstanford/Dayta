@@ -83,7 +83,6 @@ function Personalize() {
           tags=[tag2Value]
         }
         if(tags[0].length>0) {
-          console.log('tags: ', tags)
         const newButton = {text: inputText,  iconLibrary: "materialIcons", icon: "more-horiz", keywords: ['Miscellaneous'], pressed: false, tags: tags}
         setTimeout(() => {
           addCustomActivity(newButton);
@@ -105,11 +104,11 @@ function Personalize() {
             alert("success")
             const newRoutine: Routine = {name: routineName, durationBetween: durationBetween, activities: routineActivities}
               setTimeout(() => {
-                console.log(newRoutine.activities)
-              addCustomRoutine(newRoutine);
+                console.log('Would be adding routine: ', newRoutine, 'with activities: ', newRoutine.activities)
+                
+              // addCustomRoutine(newRoutine);
             
             }, 0)
-            console.log(newRoutine)
             }
             else {
               alert("Please make sure the duration betweens are set correctly.")
@@ -122,10 +121,7 @@ function Personalize() {
         else {
           alert("Add a Routine Name")
         }
-        // const newRoutine: Routine = {name: routineName, activities: routineActivities}
-        // setTimeout(() => {
-        //   addCustomRoutine(newRoutine);
-        // }, 0)
+
     }
     
     return (

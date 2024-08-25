@@ -236,7 +236,8 @@ const styles = StyleSheet.create({
       },
 
       nextContainer: {
-        left: ((width) / 2) - (buttonWidth / 2), // Center horizontally more precisely
+        alignItems: 'center'
+        // left: ((width) / 2) - (buttonWidth / 2), // Center horizontally more precisely
       },
 })
 

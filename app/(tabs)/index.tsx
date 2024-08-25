@@ -155,13 +155,9 @@ function Journal() {
     //this is terrible architecture; I should absolutely not be reading from the database on every date increment and every little update. 
         //I should instead read from local storage more.
         if(justActivities.length>0) {
-          console.log('Fetching Activities With Context; should have full activities')
           FetchDayActivities(user, dateIncrement, justActivities, setDbActivities)
         }
-        else {
-          console.log('Using Database')
-          FetchDayActivities(user, dateIncrement, [], setDbActivities)
-        }
+
     setLocalTime(DateTime.local().plus({ days: dateIncrement }))
     setTimedTapped([false, ""])
   }, [user, dateIncrement, justActivities, version]);
@@ -364,38 +360,4 @@ const styles2 = StyleSheet.create({
   },
 })
 
-// const Index: React.FC = () => {
-//   return (
-//     <AppProvider>
-//       <Journal />
-//     </AppProvider>
-//   );
-// };
-
 export default Journal;
-// import React, { createContext, useContext, useState, useEffect } from 'react';
-// import {useAppContext, AppProvider} from '@/contexts/TestProvider'
-// import { View, Text, Button } from 'react-native';
-
-// const Journal = () => {
-//   const { one, addOne } = useAppContext();
-
-//   useEffect(() => {
-//     console.log('Index re-rendering. Custom Activities:', addOne);
-//   }, [addOne]);
-
-//   return (
-//     <View>
-//       <Button title="Add Activity" onPress={addOne} />
-//     </View>
-//   );
-// };
-
-// // App Component
-// export const Index = () => {
-//   return (
-//     <AppProvider>
-//       <Journal />
-//     </AppProvider>
-//   );
-// };

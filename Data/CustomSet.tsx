@@ -71,7 +71,6 @@ function useCustomSet() {
       const eveningSortedTop = Object.fromEntries(topEvening);
       const eveningTextKeys = Object.keys(eveningSortedTop);
       //set morning keys so I'll be able to access it when fetching final array
-      console.log('Evening text keys: ', eveningTextKeys)
 
       setEveningKeys(eveningTextKeys)
   }
@@ -319,9 +318,7 @@ function useCustomSet() {
       const filteredWake = wakeInfo.filter(num => (num>element[2] && num<element[3]))
       const filteredActs = relevantActivities.filter(act => act.timeBlock.startTime>element[2] && act.timeBlock.startTime<element[3] && act.timeBlock.duration!==undefined)
       const justDurs = filteredActs.map(act => act.timeBlock.duration)
-      console.log('durs: ', justDurs)
       const sum = justDurs.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
-      console.log('sum: ', sum)
       const summedElement = [...element, sum]
       element = [...element, filteredWake, filteredSleep ]
       elements = [...elements, element]
