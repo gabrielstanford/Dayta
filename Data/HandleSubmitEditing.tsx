@@ -42,9 +42,8 @@ export default function HandleSubmitEditing(inputValue: string, input2Value: str
                     alert('Activity Updated');
                     }
                     else {
-                    alert('Activity Updated (Moved Day)')
                     moveActivity(activity, updates)
-                    alert('Activity Moved')
+                    alert('Activity Updated')
                     }
                     
                   }

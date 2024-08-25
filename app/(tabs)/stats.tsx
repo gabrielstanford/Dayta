@@ -59,6 +59,7 @@ function Stats() {
   const [tagDurationSumState, setTagDurationSumState] = useState<ActivitySummary[]>([]);
   const [todayTagDurationSumState, setTodayTagDurationSumState] = useState<ActivitySummary[]>([]);
   const [enoughDataForCommonChart, setEnoughDataForCommonChart] = useState<boolean>(false);
+  const [enoughDataForLogChart, setEnoughDataForLogChart] = useState<boolean>(false);
   const [enoughDataForToday, setEnoughDataForToday] = useState<boolean>(false);
   const extractTime = (timeStamp: number) => {
     if(timeStamp<500) {
@@ -95,15 +96,21 @@ function Stats() {
   }, [justActivities]);
 
   
-  // useEffect(() => {
-  //   console.log('New sum: ', todayTagDurationSum, todayTagDurationSumState)
-  // }, [todayTagDurationSum, todayTagDurationSumState])
+  useEffect(() => {
+    console.log('New sum: ', todayTagDurationSum, todayTagDurationSumState)
+  }, [todayTagDurationSum, todayTagDurationSumState])
   useEffect(() => {
     if(durationSumState.length>0 && weekDurationSumState.length>0 && tagDurationSumState.length>0) {
 
       setEnoughDataForCommonChart(true)
     }
   }, [tagDurationSumState, justActivities])
+
+  useEffect(() => {
+    if(summaryDurs.length>0)
+      console.log('Summary Durs: ', summaryDurs)
+      setEnoughDataForLogChart(true);
+  }, [summaryDurs])
   useEffect(() => {
     const sortedDescendingTodayTags = todayTagDurationSum.sort(
       (a: ActivitySummary, b: ActivitySummary) => b.totalDuration - a.totalDuration
@@ -182,7 +189,11 @@ function Stats() {
             values={tagDurationSumState.map(activity => activity.totalDuration)}
           />
          </SafeAreaView>
-          <View >
+
+          </View>
+      )}
+      {enoughDataForLogChart && (         
+         <View >
             <ThemedText type="subtitle">
               Time Logging Over Time
             </ThemedText>
@@ -190,16 +201,12 @@ function Stats() {
               x={summaryDurs.map(index => index[0])}
               y={summaryDurs.map(index => index[1]/3600)}
             />
-          </View>
-
-          </View>
-      )}
-
+          </View>)}
       {(avgSleepTime!==0.111 && avgWakeTime!==0.111 && sleepSum.length>0 && sleepLens.length>0) && (
           <View style={styles.timeBlocksContainer}>
           {/* <BlockedTime /> */}
           <Text style={{fontSize: 12, color: 'white'}}>Average Wake Time: {decimalToTime(avgWakeTime)}</Text>
-          <Text style={{fontSize: 12, color: 'white'}}>Average Sleep Time: {decimalToTime(avgSleepTime-12)}</Text>
+          <Text style={{fontSize: 12, color: 'white'}}>Average Sleep Time: {decimalToTime(avgSleepTime)}</Text>
           {/* <Text style={{fontSize: 12, color: 'white'}}>Sleep Lengths: {mapLens(sleepLens)}</Text> */}
           <SleepLineChart 
           labels={sleepLabels}
@@ -208,11 +215,11 @@ function Stats() {
         </View>
         )}
       
-      {!enoughDataForCommonChart && (
+      {/* {!enoughDataForCommonChart && (
         <View style={styles.noDataContainer}>
           <ThemedText type="titleText" style={{fontSize: width/12}}>We Need More Data! Come Back Later :)</ThemedText>
         </View>
-      )}
+      )} */}
     </View>
     </View>
     </ScrollView>

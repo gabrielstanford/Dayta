@@ -111,10 +111,12 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
       const secondStart = firstEnd + betweens[0]
       const secondEnd = secondStart + activities[1].timeBlock.duration
       const thirdStart = secondEnd>firstEnd ? secondEnd + betweens[1] : firstEnd + betweens[1]
+      
       const thirdEnd = thirdStart + activities[2].timeBlock.duration
       const fourthStart = thirdEnd>secondEnd ? thirdEnd + betweens[2] : secondEnd + betweens[2]
       const fourthEnd = fourthStart + activities[3].timeBlock.duration
 
+      console.log(firstEnd, secondStart, secondEnd, thirdStart, thirdEnd, fourthStart, fourthEnd)
       return [startTime, firstEnd, secondStart, secondEnd, thirdStart, thirdEnd, fourthStart, fourthEnd]
       }
       else {

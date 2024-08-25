@@ -1,7 +1,11 @@
 import {ModalProps, Modal, View, StyleSheet, Dimensions, Text, TouchableWithoutFeedback, FlatList, TouchableOpacity} from 'react-native'
 import {ThemedText} from './ThemedText'
+import React, {useState} from 'react'
 import {Button} from '@rneui/themed'
 import {Activity} from '@/Types/ActivityTypes'
+import { useAppContext } from '@/contexts/AppContext';
+import RNPickerSelect from 'react-native-picker-select'
+import { AntDesign } from '@expo/vector-icons';
 
 const {width, height} = Dimensions.get("window");
 const buttonWidth = width/6.25
@@ -15,11 +19,35 @@ const buttonWidth = width/6.25
   }
   interface ActivityItemProps {
     activity: Activity;
+    updateActivity: (activity: Activity, updates: Partial<Activity>) => void;
+    changeTags: boolean;
+    setChangeTags: React.Dispatch<React.SetStateAction<boolean>>
     onTap: () => void
   }
 
-  const ActivityItem = ({ activity, onTap }: ActivityItemProps) => {
+  const ActivityItem = ({ activity, changeTags, setChangeTags, updateActivity, onTap }: ActivityItemProps) => {
 
+    if(changeTags == true) {   
+      
+    const tags = activity.button.tags
+
+    const newTag = "Entertainment"
+    const finalTags = [newTag]
+    
+    const updates: Partial<Activity> = {
+      //first turn input value into unix. Create function for this. 
+      button: {
+        text: activity.button.text,
+        keywords: activity.button.keywords,
+        iconLibrary: activity.button.iconLibrary,
+        icon: activity.button.icon,
+        pressed: false,
+        tags: finalTags
+      },
+    };
+    updateActivity(activity, updates)
+    setChangeTags(false)
+    }
     return (
     <>
       <View style={styles.activityContainer}>
@@ -35,11 +63,17 @@ const buttonWidth = width/6.25
                 <Text style={styles.activityName}>{activity.button.tags} </Text>
               </TouchableOpacity>
             </View>
+           {/* <TouchableOpacity onPress={() => setTagAddVisible(true)}>
+            <AntDesign name="pluscircle" size={width/13} color="black" />
+          </TouchableOpacity> */}
           </View>
           </>
   );}
 const ActivityDescribeModal: React.FC<MultitaskModalProps> = ({ ActivityDescribeVisible, Info, onClose, onTapOut, ...modalProps }) => {
 
+    const {updateActivity} = useAppContext();
+    const [changeTags, setChangeTags] = useState(false);
+    
     return(
         <Modal 
         transparent={true}
@@ -56,7 +90,7 @@ const ActivityDescribeModal: React.FC<MultitaskModalProps> = ({ ActivityDescribe
                   </View>
                   <FlatList 
                     data={Info}
-                    renderItem={({ item }) => <ActivityItem activity={item} onTap={() => alert("Not Pressable")}/>}
+                    renderItem={({ item }) => <ActivityItem activity={item} changeTags={changeTags} setChangeTags={setChangeTags} updateActivity={updateActivity} onTap={() => alert("Not Pressable")}/>}
                     keyExtractor={(item) => item.id}
                     contentContainerStyle={styles.listContent}
                     />

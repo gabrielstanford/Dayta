@@ -130,6 +130,18 @@ const moveActivity = async (
   }
 
   try {
+    const updatedActivities = justActivities.map((act) => {
+      if (act.id === activity.id) {
+        return {
+          ...act,
+          ...updates, // Spread the input properties to update the matching activity
+        };
+      }
+      return act;
+    });
+    // Set the updated array
+    setJustActivities(updatedActivities);
+    storage.set('JustActivities', JSON.stringify(updatedActivities))
     const currentStartDate = new Date(activity.timeBlock.startTime * 1000).toISOString().split('T')[0];
     
     if (updates.timeBlock && updates.timeBlock.startTime) {
