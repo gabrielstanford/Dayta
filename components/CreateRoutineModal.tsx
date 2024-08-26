@@ -10,8 +10,10 @@ import FetchDayActivities from '@/Data/FetchDayActivities'
 import ActivitySearchModal from './ActivitySearchModal'
 import { SearchBar } from '@rneui/themed'
 import TimeInput from './TimeInput'
+import { RoutineActivity } from '@/Types/ActivityTypes'
 import { create } from 'react-test-renderer'
 import RNPickerSelect from 'react-native-picker-select'
+import { Ionicons } from '@expo/vector-icons'
 
 const {width, height} = Dimensions.get("window");
 const buttonWidth = width*0.6
@@ -48,48 +50,85 @@ const CreateRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisib
   const [activityFour, setActivityFour] = useState<string>("Activity Four")
   const [durationFour, setDurationFour] = useState<string>("00:10");
 
+  const [routineActivities, setRoutineActivities] = useState<RoutineActivity[]>([
+    { name: "", duration: "00:10", tag: "Consecutive", gapBetween: "00:01" },
+    { name: "", duration: "00:10", tag: "Consecutive", gapBetween: "00:01" },
+    // You can initialize more empty activities here or add them dynamically.
+  ]);
+  const addActivity = () => {
+    if (routineActivities.length < 10) {
+      setRoutineActivities((prev) => [
+        ...prev,
+        { name: "", duration: "00:10", tag: "Consecutive", gapBetween: "00:01" }
+      ]);
+    }
+  };
+  const removeActivity = (index: number) => {
+    if(routineActivities.length>2) {
+    setRoutineActivities((prev) => prev.filter((_, i) => i !== index));
+    }
+    else {
+      alert("Routines must have at least 2 activities!")
+    }
+  };
+// Update a specific activity by index
+    const updateActivity = (index: number, updatedFields: Partial<RoutineActivity>) => {
+      console.log(index, updatedFields)
+      setRoutineActivities(prevActivities => 
+        prevActivities.map((activity, i) => 
+          i === index ? { ...activity, ...updatedFields } : activity
+        )
+      );
+    };
   // const [tag4Value, setTag4Value] = useState<string>("Consecutive")
 
   const multiSearchPress = (text: string) => {
+      // Update the selected activity in the routineActivities array
+      updateActivity(activityNum - 1, { name: text });
 
-        if(activityNum==1) {
-            setActivityOne(text)
-        }
-        if(activityNum==2) {
-            setActivityTwo(text)
-        }
-        if(activityNum==3) {
-            setActivityThree(text)
-        }
-        if(activityNum==4) {
-            setActivityFour(text)
-        }
-        setMultiSearchVisible(false);
-    }
+      // Hide the search modal after selecting an activity
+      setMultiSearchVisible(false);
+  };
 
-    const createFull: () => [string, number, number][] = () => {
-      const durOne =  timeStringToSeconds(durationOne);
-      const durTwo =  timeStringToSeconds(durationTwo);
-      const durThree =  timeStringToSeconds(durationThree);
+      const createFull: () => [string, number, number][] = () => {
+        // Initialize arrays to hold durations and gaps
+      
+        const activityDetails: [string, number, number][] = [];
+        
+        // Loop through routineActivities to build activityDetails
+        routineActivities.forEach((activity, index) => {
+          if(activity.duration=='00:00') {
+            alert("Please make sure all activities have durations");
+            return;
+          }
+          else if(activity.name=="") {
+            alert("Please make sure all activities have names");
+            return;
+          }
+          else {
+            const duration = timeStringToSeconds(activity.duration);
+            let gapBetween = 0;
 
-      let durBetweenOne: number = timeStringToSeconds(gapBetween1);
-      let durBetweenTwo: number = timeStringToSeconds(gapBetween2);
-      let durBetweenThree: number = timeStringToSeconds(gapBetween3);
+            // Determine the gap between activities if not the last activity
+            if (index < routineActivities.length - 1) {
+                gapBetween = timeStringToSeconds(activity.gapBetween || '00:01');
 
-        if(tagValue=="Overlapping") {
-          durBetweenOne = -durOne
-        }
+                if (activity.tag === "Overlapping") {
+                    gapBetween = -duration;
+                }
+                if(activity.tag === "Consecutive") {
+                  gapBetween = 60
+                }
+            }
 
-        if(tag2Value=="Overlapping") {
-          durBetweenTwo = -durTwo
-        }
+            // Add the current activity's details to the array
+            activityDetails.push([activity.name || `Activity ${index + 1}`, duration, gapBetween]);
+          }
+        });
+        console.log(activityDetails)
+        return activityDetails;
+    };
 
-        if(tag3Value=="Overlapping") {
-          durBetweenTwo = -durThree
-        }
-
-        return [[activityOne, durOne, durBetweenOne], [activityTwo, durTwo, durBetweenTwo], [activityThree, durThree, durBetweenThree], [activityFour, timeStringToSeconds(durationFour), 0]]
-    }
   
     return(
         <Modal 
@@ -115,50 +154,53 @@ const CreateRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisib
                   <View style={styles.titleContainer}>
                     <ThemedText type="title"> Select Activities </ThemedText>
                   </View>
+              {/* Dynamically render each activity input group */}
+            {routineActivities.map((activity, index) => (
+              <View key={index}>
                 <View style={styles.stepContainer}>
-                  <TouchableOpacity style={styles.actSearchButton} onPress={() => {setActivityNum(1); setMultiSearchVisible(true)}}>
-                        <Text>{activityOne}</Text>
+                  <TouchableOpacity 
+                    style={styles.actSearchButton} 
+                    onPress={() => { setActivityNum(index + 1); setMultiSearchVisible(true); }}
+                  >
+                    <Text>{activity.name || `Activity ${index + 1}`}</Text>
                   </TouchableOpacity>
-                  <View style={{flex: 1}}>
-                    <TimeInput custom={"Type1"} time={durationOne} onTimeChange={setDurationOne}/>
+                  <View style={{ flex: 1 }}>
+                    <TimeInput 
+                      custom="Type1" 
+                      time={activity.duration || ''} 
+                      onTimeChange={(time) => updateActivity(index, { duration: time as string})}
+                    />
                   </View>
-                </View>
-                <View style={styles.intraStepContainer}>
-                  <TagDropdown tagValue={tagValue} setTagValue={setTagValue} />
-                  {tagValue=='Gap Between' ? <TimeInput custom={"Type2"} time={gapBetween1} onTimeChange={setGapBetween1}/> : <></>}
-                </View>
-                <View style={styles.stepContainer}>
-                  <TouchableOpacity style={styles.actSearchButton} onPress={() => {setActivityNum(2); setMultiSearchVisible(true)}}>
-                        <Text>{activityTwo}</Text>
+                        {/* Add the trash can icon here */}
+                  <TouchableOpacity onPress={() => removeActivity(index)}>
+                    <Ionicons name="trash-bin-outline" size={24} color="red" />
                   </TouchableOpacity>
-                  <View style={{flex: 1}}>
-                    <TimeInput custom={"Type1"} time={durationTwo} onTimeChange={setDurationTwo}/>
+                </View>
+
+                {index < routineActivities.length - 1 && (
+                  <View style={styles.intraStepContainer}>
+                    <TagDropdown 
+                      tagValue={activity.tag || ''} 
+                      setTagValue={(value) => updateActivity(index, { tag: value as string })}
+                    />
+                    {activity.tag === 'Gap Between' && (
+                      <TimeInput 
+                        custom="Type2" 
+                        time={activity.gapBetween || ''} 
+                        onTimeChange={(time) => updateActivity(index, { gapBetween: time as string })}
+                      />
+                    )}
                   </View>
+                )}
+              </View>
+            ))}
+              {/* Add Activity Button */}
+              {routineActivities.length < 5 && (
+                <View style={styles.addActivityContainer}>
+                  <CustomButton title="Add" width={width*0.3} onPress={addActivity} />
                 </View>
-                <View style={styles.intraStepContainer}>
-                  <TagDropdown tagValue={tag2Value} setTagValue={setTag2Value} />
-                  {tag2Value=='Gap Between' ? <TimeInput custom={"Type2"} time={gapBetween2} onTimeChange={setGapBetween2}/> : <></>}
-                </View>
-                <View style={styles.stepContainer}>
-                  <TouchableOpacity style={styles.actSearchButton} onPress={() => {setActivityNum(3); setMultiSearchVisible(true)}}>
-                        <Text>{activityThree}</Text>
-                  </TouchableOpacity>
-                  <View style={{flex: 1}}>
-                    <TimeInput custom={"Type1"} time={durationThree} onTimeChange={setDurationThree}/>
-                  </View>
-                </View>
-                <View style={styles.intraStepContainer}>
-                  <TagDropdown tagValue={tag3Value} setTagValue={setTag3Value} />
-                  {tag3Value=='Gap Between' ? <TimeInput custom={"Type2"} time={gapBetween3} onTimeChange={setGapBetween3}/> : <></>}
-                </View>
-                <View style={styles.stepContainer}>
-                  <TouchableOpacity style={styles.actSearchButton} onPress={() => {setActivityNum(4); setMultiSearchVisible(true)}}>
-                        <Text>{activityFour}</Text>
-                  </TouchableOpacity>
-                  <View style={{flex: 1}}>
-                    <TimeInput custom={"Type1"} time={durationFour} onTimeChange={setDurationFour}/>
-                  </View>
-                </View>
+              )}
+
                 {/* <View style={styles.intraStepContainer}>
                   <TagDropdown tagValue={tag4Value} setTagValue={setTag4Value} />
                 </View> */}
@@ -207,7 +249,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
       },
       MultitaskModalContent: {
-        flex: 0.67,
+        flex: 0.8,
         width: width/1,
         height: height,
         padding: 10,
@@ -234,7 +276,9 @@ const styles = StyleSheet.create({
         padding: 20,
         flex: 1
       },
+      addActivityContainer: {
 
+      },
       nextContainer: {
         alignItems: 'center'
         // left: ((width) / 2) - (buttonWidth / 2), // Center horizontally more precisely

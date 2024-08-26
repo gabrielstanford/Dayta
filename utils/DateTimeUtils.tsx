@@ -35,6 +35,20 @@ export const convertTimeToUnix = (timeString: string, date: Date = new Date()): 
   }
   };
 
+  export const timeStringToSeconds = (timeString: string): number => {
+    // Split the time string into hours and minutes
+    const [hours, minutes] = timeString.split(':').map(Number);
+  
+    // Validate hours and minutes
+    if (isNaN(hours) || isNaN(minutes) || hours < 0 || minutes < 0 || minutes >= 60) {
+      return 0; // Default value for invalid time input
+    }
+  
+    // Convert hours and minutes to seconds
+    return (hours * 3600) + (minutes * 60);
+  };
+  
+
   export function adjustDateByDays(date: Date, days: number): Date {
     // Create a copy of the original date to avoid mutating it
     const adjustedDate = new Date(date);

@@ -70,7 +70,7 @@ interface ActivityItemProps {
 
 const ActivityItem = ({ activity, onRemove, timeState, dateIncrement, updateActivity, moveActivity, onTimeTap, onTap }: ActivityItemProps) => {
   let specialButton = false
-  if(activity.button.text=='Woke Up' || activity.button.text=='Went To Bed' || activity.button.text=='Coffee') {
+  if(activity.button.text=='Woke Up' || activity.button.text=='Went To Bed' || activity.button.text=='Coffee' || activity.parentRoutName) {
     specialButton=true
   }
 

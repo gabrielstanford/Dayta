@@ -16,6 +16,7 @@ export type ButtonState = {
   }
   export interface Activity {
     id: string;
+    parentRoutName?: string;
     button: ButtonState;
     timeBlock: TimeBlock;
     Multi?: Activity[]
@@ -34,6 +35,7 @@ export type ButtonState = {
 
   export interface ActivityWithEnd {
     id: string;
+    parentRoutName?: string;
     button: ButtonState;
     timeBlock: WithEndTime;
     Multi?: Activity[]
@@ -43,9 +45,12 @@ export type ButtonState = {
     text: string;
     totalDuration: number;
   }
-  interface Between {
-
-  }
+  export interface RoutineActivity {
+  name: string;
+  duration: string;
+  tag: string;
+  gapBetween: string;
+}
   export interface Routine {
     name: string;
     durationBetween?: number[]

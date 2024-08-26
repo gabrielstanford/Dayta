@@ -36,36 +36,37 @@ function Personalize() {
     }
 
     const handleMultitaskNext = (texts: [string, number, number][]) => {
-      // const activities = customActivities.filter((item: ButtonState) => texts.includes(item.text))
-      // if(activities) {
-      // setMultiActivity(activities)
-      // setSelectedActivity(null)
-      // }
-      setCreateRoutineModalVisible(false)
-      const button1 = customActivities.find(act => act.text==texts[0][0])
-      const button2 = customActivities.find(act => act.text==texts[1][0])
-      const button3 = customActivities.find(act => act.text==texts[2][0])
-      const button4 = customActivities.find(act => act.text==texts[3][0])
-    
-      if(button1) {
-      const act1: Activity = {id: uuid.v4() as string, button: button1, timeBlock: {startTime: 0, duration: texts[0][1] as number, endTime: 0}}
-      setRoutineActivities([act1])
-      }
-      if(button2) {
-        const act2: Activity = {id: uuid.v4() as string, button: button2, timeBlock: {startTime: 0, duration: texts[1][1] as number, endTime: 0}}
-        setRoutineActivities((prevActs: Activity[]) => {return [...prevActs, act2]})
-      }
-      if(button3) {
-      const act3 = {id: uuid.v4() as string, button: button3, timeBlock: {startTime: 0, duration: texts[2][1] as number, endTime: 0}}
-      setRoutineActivities((prevActs: Activity[]) => {return [...prevActs, act3]})
-
-      }
-      if(button4) {
-        const act4 = {id: uuid.v4() as string, button: button4, timeBlock: {startTime: 0, duration: texts[3][1] as number, endTime: 0}}
-        setRoutineActivities((prevActs: Activity[]) => {return [...prevActs, act4]})
-      }
-      setDurationBetween([texts[0][2], texts[1][2], texts[2][2]])
-    }
+      // Close the modal
+      setCreateRoutineModalVisible(false);
+  
+      // Create a new array to hold the activities
+      const newActivities: Activity[] = [];
+  
+      // Iterate over the texts array to build the activities
+      texts.forEach((text, index) => {
+          const [name, duration, gapBetween] = text;
+          const button = customActivities.find(act => act.text === name);
+  
+          if (button) {
+              const newActivity: Activity = {
+                  id: uuid.v4() as string,
+                  button: button,
+                  timeBlock: {
+                      startTime: 0,
+                      duration: duration,
+                      endTime: 0
+                  }
+              };
+              newActivities.push(newActivity);
+          }
+      });
+  
+      // Update the routine activities state
+      setRoutineActivities(newActivities);
+      // Set duration between activities
+      setDurationBetween(texts.map(text => text[2]));
+  };
+  
     const handleSubmit = () => {
         if(inputText.length>2 && (tag1Value!=="null" || tag2Value!=="null")) {
           if(tag1Value==tag2Value) {
@@ -99,14 +100,13 @@ function Personalize() {
     }
     const handleRoutineSubmit = () => {
         if(routineName.length>0) {
-          if(routineActivities.length==4) {
-            if(durationBetween.length==3) {
+          if(routineActivities.length>=2) {
+            if(durationBetween.length==routineActivities.length) {
             alert("success")
             const newRoutine: Routine = {name: routineName, durationBetween: durationBetween, activities: routineActivities}
               setTimeout(() => {
-                console.log('Would be adding routine: ', newRoutine, 'with activities: ', newRoutine.activities)
-                
-              // addCustomRoutine(newRoutine);
+
+                addCustomRoutine(newRoutine);
             
             }, 0)
             }
@@ -115,7 +115,7 @@ function Personalize() {
             }
           }
           else {
-            alert("Please add exactly 4 activities.")
+            alert("Please make sure you have enough activities.")
           }
         }
         else {

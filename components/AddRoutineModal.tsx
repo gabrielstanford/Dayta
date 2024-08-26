@@ -1,20 +1,12 @@
 import {ModalProps, Modal, View, StyleSheet, Dimensions, Text, TouchableWithoutFeedback, Platform, TouchableOpacity, Keyboard} from 'react-native'
-import {ThemedText} from './ThemedText'
-import {Button} from '@rneui/themed'
 import {useState, useEffect} from 'react'
-import Slider from '@react-native-community/slider';
 import {useAppContext} from '@/contexts/AppContext'
-import {useAuth} from '@/contexts/AuthContext'
-import FetchDayActivities from '@/Data/FetchDayActivities'
-import ActivitySearchModal from './ActivitySearchModal'
-import { SearchBar } from '@rneui/themed'
 import CustomButton from './CustomButton';
 import TimeInput from './TimeInput'
-import { create } from 'react-test-renderer'
 import RNPickerSelect from 'react-native-picker-select'
 import TimeDropdown from './TimeDropdown'
 import { convertTimeToUnix, adjustDateByDays, decimalToDurationTime } from '@/utils/DateTimeUtils';
-import { Routine } from '@/Types/ActivityTypes';
+import { Routine,  Activity } from '@/Types/ActivityTypes';
 
 const {width, height} = Dimensions.get("window");
 const buttonWidth = width*0.6
@@ -38,15 +30,30 @@ const AddRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible,
   const [selectedHour, setSelectedHour] = useState("10");
   const [selectedMinute, setSelectedMinute] = useState("30");
   const [selectedPeriod, setSelectedPeriod] = useState("AM");
-  const [editDur1, setEdit1] = useState<string>("00:10");
-  const [editDur2, setEdit2] = useState<string>("00:10");
-  const [editDur3, setEdit3] = useState<string>("00:10");
-  const [editDur4, setEdit4] = useState<string>("00:10");
-
   const {dateIncrement, customRoutines} = useAppContext();
   const [part2Visible, setPart2Visible] = useState<boolean>(false);
   const [relevantRoutine, setRelevantRoutine] = useState<Routine>()
 
+  const [editDurations, setEditDurations] = useState<string[]>([]);
+  useEffect(() => {
+    if(relevantRoutine) {
+    const durs = relevantRoutine.activities.map(activity => decimalToDurationTime(activity.timeBlock.duration/3600))
+
+    setEditDurations(durs);
+    }
+  }, [relevantRoutine])
+
+  useEffect(() => {
+    if(relevantRoutine)
+    setPart2Visible(true)
+  }, [editDurations])
+  const handleTimeChange = (index: number, time: string) => {
+    setEditDurations(prevDurations => {
+      const updatedDurations = [...prevDurations];
+      updatedDurations[index] = time;
+      return updatedDurations;
+    });
+  };
 
   const handleHourChange = (hour: string) => {
     setSelectedHour(hour);
@@ -81,13 +88,12 @@ const AddRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible,
       if(tagValue!=="") {
         const atHand = customRoutines.find(rout => rout.name==tagValue)
         if(atHand) {
-        setRelevantRoutine(atHand)
-        setEdit1(decimalToDurationTime(atHand.activities[0].timeBlock.duration/3600))
-        setEdit2(decimalToDurationTime(atHand.activities[1].timeBlock.duration/3600))
-        setEdit3(decimalToDurationTime(atHand.activities[2].timeBlock.duration/3600))
-        setEdit4(decimalToDurationTime(atHand.activities[3].timeBlock.duration/3600))
-
-        setPart2Visible(true)
+          if(atHand==relevantRoutine) {
+            setPart2Visible(true)
+          }
+          else {
+            setRelevantRoutine(atHand);
+          }
         }
         else {
           alert("No routine found")
@@ -96,23 +102,34 @@ const AddRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible,
       else {alert("Please set the routine")}
     }
     const handleSubmit = () => {
-      if(relevantRoutine) {
-      let updatedDur1Act = relevantRoutine.activities[0];
-      let updatedDur2Act = relevantRoutine.activities[1];
-      let updatedDur3Act = relevantRoutine.activities[2];
-      let updatedDur4Act = relevantRoutine.activities[3];
-      updatedDur1Act.timeBlock.duration = timeStringToSeconds(editDur1);
-      updatedDur2Act.timeBlock.duration = timeStringToSeconds(editDur2);
-      updatedDur3Act.timeBlock.duration = timeStringToSeconds(editDur3);
-      updatedDur4Act.timeBlock.duration = timeStringToSeconds(editDur4);
-      let newRoutine: Routine = relevantRoutine
-      newRoutine.activities = [updatedDur1Act, updatedDur2Act, updatedDur3Act, updatedDur4Act]
-      onNext(newRoutine as Routine, createStartTime(convertTimeToUnix(generateTimeString())))
+      if (relevantRoutine) {
+        // Create a new array of updated activities
+        const updatedActivities = relevantRoutine.activities.map((activity, index) => {
+          // Ensure that editDurations is properly indexed
+          const editedDuration = editDurations[index] || '00:00';
+          return {
+            ...activity,
+            timeBlock: {
+              ...activity.timeBlock,
+              duration: timeStringToSeconds(editedDuration),
+            },
+          };
+        });
+    
+        // Create a new routine with the updated activities
+        const newRoutine: Routine = {
+          ...relevantRoutine,
+          activities: updatedActivities,
+        };
+    
+        // Pass the updated routine and calculated start time to the onNext function
+        setPart2Visible(false);
+        onNext(newRoutine, createStartTime(convertTimeToUnix(generateTimeString())));
+      } else {
+        alert("Please enter a routine");
       }
-      else {
-        alert("Please enter a routine")
-      }
-    }
+    };
+    
     return(
         <Modal 
         transparent={true}
@@ -157,33 +174,22 @@ const AddRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible,
                       <Text style={styles.title}>Preview</Text>
                     </View>
                   </View>
-                  {relevantRoutine && (
-                    <View style={{flex: 6}}>
-                    <View style={styles.actInfo}>
-                      <Text style={styles.actName}>
-                      {relevantRoutine.activities[0].button.text}: 
-                      </Text>
-                    <TimeInput custom={"Type2"} time={editDur1} onTimeChange={setEdit1}/>
-                    </View >
-                    <View style={styles.actInfo}>
-                    <Text style={styles.actName}>
-                    {relevantRoutine.activities[1].button.text}: 
-                    </Text>
-                   <TimeInput custom={"Type2"} time={editDur2} onTimeChange={setEdit2}/>
+                    {relevantRoutine && (
+                    <View style={{ flex: 6 }}>
+                      {relevantRoutine.activities.map((activity: Activity, index: number) => (
+                        <View key={activity.id} style={styles.actInfo}>
+                          <Text style={styles.actName}>
+                            {activity.button.text}:
+                          </Text>
+                          <TimeInput
+                            custom={"Type2"}
+                            time={editDurations[index] || '00:00'}
+                            onTimeChange={time => handleTimeChange(index, time as string)}
+                          />
+                        </View>
+                      ))}
                     </View>
-                    <View style={styles.actInfo}>
-                    <Text style={styles.actName}>
-                    {relevantRoutine.activities[2].button.text}: 
-                    </Text>
-                   <TimeInput custom={"Type2"} time={editDur3} onTimeChange={setEdit3}/>
-                    </View>
-                    <View style={styles.actInfo}>
-                    <Text style={styles.actName}>
-                    {relevantRoutine.activities[3].button.text}: 
-                    </Text>
-                   <TimeInput custom={"Type2"} time={editDur4} onTimeChange={setEdit4}/>
-                    </View>
-                  </View>)}
+                    )}
                   <View style={styles.nextContainer}>
                     <CustomButton title="Submit Routine" width={buttonWidth} style={styles.nextContainer} onPress={() => handleSubmit()} />
                   </View>

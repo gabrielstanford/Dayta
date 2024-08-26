@@ -415,9 +415,14 @@ useEffect(() => {
 
   const addCustomRoutine = async (routine: Routine) => {
     try {
-      setCustomRoutines((prevActs: Routine[]) => [...prevActs, routine] // Add new activity
-      );
-      storage.set('CustomRoutines', JSON.stringify([...customRoutines, routine]))
+      setCustomRoutines((prevRouts: Routine[]) => {
+        const prev = prevRouts.some(rout => rout.name === routine.name)
+        if(prev) {
+          alert("duplicate!")
+        }
+        return (!prev ?
+          [...prevRouts, routine] : [...prevRouts])});
+        storage.set('CustomRoutines', JSON.stringify([...customRoutines, routine]))
         if (user) {
         //first add to context, in background add to local storage/database
         const routineRef = doc(firestore, 'users', user.uid, 'customRoutines', routine.name); // Using routine name as ID
