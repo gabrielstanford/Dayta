@@ -110,12 +110,15 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
       const populateTimes = (activities: Activity[], betweens: number[]) => {
         const times: number[] = [];
         let currentTime = startTime;
-  
+        const startDate = new Date(currentTime*1000)
+        if(startDate.getHours()<4) {
+          currentTime = currentTime+86400
+        }
         activities.forEach((activity, index) => {
           const activityDuration = activity.timeBlock.duration;
-          const activityStartTime = currentTime;
+          let activityStartTime = currentTime;
           const activityEndTime = activityStartTime + activityDuration;
-  
+
           times.push(activityStartTime, activityEndTime);
   
           // Calculate the start time for the next activity

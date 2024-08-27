@@ -75,7 +75,6 @@ function useCustomSet() {
       setEveningKeys(eveningTextKeys)
   }
   const createDurationSummary = () => {   
-    console.log('Just Activities: ', justActivities) 
 
       const relevantActivities = justActivities.filter(act =>  act!==null && act.timeBlock.startTime>1722988800 && act.timeBlock.duration!==undefined)
       //maybe tinker with what the cutoff is; perhaps it should be lunch
@@ -242,6 +241,7 @@ function useCustomSet() {
   }
 
   const analyzeTodayStats = () => {
+  
     const relevantActs = todayActs.filter(act => act!==null && act.timeBlock.duration!==undefined)
     const totalDurationPerTag = relevantActs.reduce<Record<string, number>>((acc, activity) => {
       // Iterate over each tag in the current activity
@@ -250,6 +250,12 @@ function useCustomSet() {
         const tag = activity.button.tags[0];
       // activity.button.tags.forEach(tag => {
         const normalizedTag = tag.trim().toLowerCase();
+        // if(normalizedTag=="work/study") {
+        //   console.log('work activity: ', activity)
+        // }
+        // else {
+        //   console.log('activity: ', activity.button.text, 'tag: ', normalizedTag)
+        // }
         if (acc[normalizedTag] && normalizedTag!=="null") {
           // If the tag already exists, add the duration to the existing value
           acc[normalizedTag] += activity.timeBlock.duration / 3600; // Convert seconds to hours

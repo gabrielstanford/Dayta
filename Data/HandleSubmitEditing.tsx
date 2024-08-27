@@ -39,11 +39,13 @@ export default function HandleSubmitEditing(inputValue: string, input2Value: str
                     const dayDiff = calculateDayDifference(startUnixTimestamp, activity.timeBlock.startTime)
                     if(dayDiff==0) {
                     updateActivity(activity, updates)
+                    console.log('updates: ', updates)
                     alert('Activity Updated');
                     }
                     else {
                     moveActivity(activity, updates)
-                    alert('Activity Updated')
+                    console.log('updates: ', updates)
+                    alert('Activity Moved')
                     }
                     
                   }

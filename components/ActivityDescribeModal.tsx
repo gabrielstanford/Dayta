@@ -7,7 +7,7 @@ import { useAppContext } from '@/contexts/AppContext';
 import RNPickerSelect from 'react-native-picker-select'
 import { AntDesign } from '@expo/vector-icons';
 import CategoryBar from './CategoryBar'
-import {Feather, MaterialCommunityIcons, FontAwesome} from '@expo/vector-icons'
+import {Feather, MaterialCommunityIcons, FontAwesome, FontAwesome5, MaterialIcons} from '@expo/vector-icons'
 
 const {width, height} = Dimensions.get("window");
 const buttonWidth = width/6.25
@@ -30,10 +30,15 @@ const buttonWidth = width/6.25
 
   const ActivityItem = ({ activity, updatedCat, updatedTags, setUpdatedTags, updateActivity, onTap }: ActivityItemProps) => {
     const iconMapping: { [key: string]: JSX.Element } = {
-      sunlight: <Feather name="sun" style={styles.category} />,
-      coffee: <Feather name="coffee" style={styles.category} />,
-      exercise: <MaterialCommunityIcons name="dumbbell" style={styles.category} />,
-      meditation: <MaterialCommunityIcons name="meditation" style={styles.category} />,
+      "sunlight": <Feather name="sun" style={styles.category} />,
+      "coffee": <Feather name="coffee" style={styles.category} />,
+      "intense activity": <MaterialCommunityIcons name="dumbbell" style={styles.category} />,
+      "exercise": <MaterialCommunityIcons name="dumbbell" style={styles.category} />,
+      "light activity": <FontAwesome5 name="heartbeat" style={styles.category} />,
+      "mental stimulation": <FontAwesome5 name="brain" style={styles.category} />,
+      "meditation": <MaterialCommunityIcons name="meditation" style={styles.category} />,
+      "electronics": <MaterialIcons name="phone-iphone" style={styles.category} />,
+      "dopamine rush": <FontAwesome5 name="bolt" style={styles.category} />
       // Add more categories and corresponding JSX elements here
     };
 

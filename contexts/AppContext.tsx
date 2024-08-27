@@ -169,6 +169,7 @@ const moveActivity = async (
         ...activityData,
         timeBlock: {
           startTime: updates.timeBlock.startTime,
+          duration: updates.timeBlock.duration,
           endTime: updates.timeBlock.endTime,
         },
         updatedAt: serverTimestamp(), // Optional: add an update timestamp

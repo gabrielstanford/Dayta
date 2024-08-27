@@ -1,7 +1,7 @@
 import { StyleSheet, View, Dimensions, FlatList, Text, TouchableOpacity, TextInput, KeyboardAvoidingView} from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { useState, useEffect, useRef } from 'react';
-import {AntDesign, MaterialIcons, Ionicons, Feather, MaterialCommunityIcons} from '@expo/vector-icons';
+import {AntDesign, MaterialIcons, Ionicons, Feather, MaterialCommunityIcons, FontAwesome5} from '@expo/vector-icons';
 import MyModal from '@/components/MyModal'
 import { useAppContext } from '@/contexts/AppContext';
 import {useAuth} from '@/contexts/AuthContext'
@@ -86,14 +86,19 @@ const ActivityItem = ({ activity, onRemove, timeState, dateIncrement, updateActi
    };
    let Cat: string[] = []
    if(activity.button.category && activity.button.category.length>0) {
-    Cat = activity.button.category
+    Cat = activity.button.category.map(cat => cat.toLowerCase())
    }
 
    const iconMapping: { [key: string]: JSX.Element } = {
-    sunlight: <Feather name="sun" style={styles.category} />,
-    coffee: <Feather name="coffee" style={styles.category} />,
-    exercise: <MaterialCommunityIcons name="dumbbell" style={styles.category} />,
-    meditation: <MaterialCommunityIcons name="meditation" style={styles.category} />,
+    "sunlight": <Feather name="sun" style={styles.category} />,
+    "coffee": <Feather name="coffee" style={styles.category} />,
+    "intense activity": <MaterialCommunityIcons name="dumbbell" style={styles.category} />,
+    "exercise": <MaterialCommunityIcons name="dumbbell" style={styles.category} />,
+    "light activity": <FontAwesome5 name="heartbeat" style={styles.category} />,
+    "mental stimulation": <FontAwesome5 name="brain" style={styles.category} />,
+    "meditation": <MaterialCommunityIcons name="meditation" style={styles.category} />,
+    "electronics": <MaterialIcons name="phone-iphone" style={styles.category} />,
+    "dopamine rush": <FontAwesome5 name="bolt" style={styles.category} />
     // Add more categories and corresponding JSX elements here
   };
   return (
@@ -163,7 +168,6 @@ function Journal() {
   useEffect(() => {
     if(activityInfo) {
       setActivityDescribeVisible(true);
-      console.log('act info set, opening activitydescribe ', activityInfo)
     }
     }, [activityInfo])
   const { justActivities, removeActivity, updateActivity, moveActivity, dateIncrement, setDateIncrement } = useAppContext();

@@ -29,7 +29,7 @@ const tagToColor: { [key: string]: string } = {
   'music': colors[4],
   'entertainment': colors[5],
   'social': colors[6],
-  'travel/Commute': colors[7],
+  'travel/commute': colors[7],
   'hobbies': colors[8],
   'chores': colors[9],
   'self-improvement': colors[10],
@@ -45,7 +45,7 @@ interface PieChartProps {
 }
 const setColor = (label: string, index: number, labels: string[]) => {
   let col = tagToColor[label]
-   if(!(labels.includes("entertainment") && labels.includes("work/study"))) {
+   if(!(labels.includes("work/study") || labels.includes("relax"))) {
     col = colors[index]
    }
   return col

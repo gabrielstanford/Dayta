@@ -23,9 +23,7 @@ interface ActivitySummary {
   totalDuration: number;
 }
 
-// Example usage
-// console.log(decimalToTime(8.5)); // Output: '8:30'
-// console.log(decimalToTime(14.75)); // Output: '14:45'
+
 // Utility function to count value occurrences
 const countValues = (array: string[]): ValueCounts => {
   return array.reduce((acc: ValueCounts, value: string) => {
@@ -92,13 +90,9 @@ function Stats() {
     );    
     const top9WithOtherTags = getTop9WithOther(sortedDescendingTags)
     setTagDurationSumState(top9WithOtherTags)
-    // console.log('Tag Duration Sum Going In: ', todayTagDurationSum)
   }, [justActivities]);
 
   
-  useEffect(() => {
-    console.log('New sum: ', todayTagDurationSum, todayTagDurationSumState)
-  }, [todayTagDurationSum, todayTagDurationSumState])
   useEffect(() => {
     if(durationSumState.length>0 && weekDurationSumState.length>0 && tagDurationSumState.length>0) {
 
@@ -108,7 +102,6 @@ function Stats() {
 
   useEffect(() => {
     if(summaryDurs.length>0)
-      console.log('Summary Durs: ', summaryDurs)
       setEnoughDataForLogChart(true);
   }, [summaryDurs])
   useEffect(() => {
