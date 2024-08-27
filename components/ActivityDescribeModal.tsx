@@ -7,7 +7,7 @@ import { useAppContext } from '@/contexts/AppContext';
 import RNPickerSelect from 'react-native-picker-select'
 import { AntDesign } from '@expo/vector-icons';
 import CategoryBar from './CategoryBar'
-import {Feather, MaterialCommunityIcons} from '@expo/vector-icons'
+import {Feather, MaterialCommunityIcons, FontAwesome} from '@expo/vector-icons'
 
 const {width, height} = Dimensions.get("window");
 const buttonWidth = width/6.25
@@ -22,13 +22,13 @@ const buttonWidth = width/6.25
   interface ActivityItemProps {
     activity: Activity;
     updateActivity: (activity: Activity, updates: Partial<Activity>) => void;
-    changeTags: boolean;
+    updatedTags: string[];
+    setUpdatedTags: React.Dispatch<React.SetStateAction<string[]>>
     updatedCat: string[];
-    setChangeTags: React.Dispatch<React.SetStateAction<boolean>>
     onTap: () => void
   }
 
-  const ActivityItem = ({ activity, updatedCat, changeTags, setChangeTags, updateActivity, onTap }: ActivityItemProps) => {
+  const ActivityItem = ({ activity, updatedCat, updatedTags, setUpdatedTags, updateActivity, onTap }: ActivityItemProps) => {
     const iconMapping: { [key: string]: JSX.Element } = {
       sunlight: <Feather name="sun" style={styles.category} />,
       coffee: <Feather name="coffee" style={styles.category} />,
@@ -36,27 +36,47 @@ const buttonWidth = width/6.25
       meditation: <MaterialCommunityIcons name="meditation" style={styles.category} />,
       // Add more categories and corresponding JSX elements here
     };
-    if(changeTags == true) {   
-      
-    const tags = activity.button.tags
 
-    const newTag = "Entertainment"
-    const finalTags = [newTag]
-    
-    const updates: Partial<Activity> = {
-      //first turn input value into unix. Create function for this. 
-      button: {
-        text: activity.button.text,
-        keywords: activity.button.keywords,
-        iconLibrary: activity.button.iconLibrary,
-        icon: activity.button.icon,
-        pressed: false,
-        tags: finalTags
-      },
+    const handleSetTagValue = (index: number, value: string) => {
+      const newTags = [...updatedTags];
+      newTags[index] = value;
+      setUpdatedTags(newTags);
     };
-    updateActivity(activity, updates)
-    setChangeTags(false)
-    }
+  
+    // Add a new tag
+    const handleAddTag = () => {
+      setUpdatedTags([...updatedTags, '']); // Adding a new empty tag
+    };
+  
+    // Delete a tag
+    const handleDeleteTag = (index: number) => {
+      if (updatedTags.length > 1) {
+        const newTags = updatedTags.filter((_, i) => i !== index);
+        setUpdatedTags(newTags);
+      }
+    };
+  
+    // if(changeTags == true) {   
+      
+    // const tags = activity.button.tags
+
+    // const newTag = "Entertainment"
+    // const finalTags = [newTag]
+    
+    // const updates: Partial<Activity> = {
+    //   //first turn input value into unix. Create function for this. 
+    //   button: {
+    //     text: activity.button.text,
+    //     keywords: activity.button.keywords,
+    //     iconLibrary: activity.button.iconLibrary,
+    //     icon: activity.button.icon,
+    //     pressed: false,
+    //     tags: finalTags
+    //   },
+    // };
+    // updateActivity(activity, updates)
+    // setChangeTags(false)
+    // }
     console.log(updatedCat)
     return (
     <>
@@ -73,7 +93,25 @@ const buttonWidth = width/6.25
             )) : <></>}          
           </View>
           <View style={styles.tagContainer}>
-          {activity.button.tags.map(tag => <Text key={tag} style={styles.tags}>{tag}</Text>)}
+          {updatedTags.map((tag, index) => (
+        <View key={index} style={styles.tagItem}>
+          <TagDropdown
+            tagValue={tag}
+            setTagValue={(value) => handleSetTagValue(index, value as string)}
+          />
+          {updatedTags.length > 1 && (
+            <TouchableOpacity onPress={() => handleDeleteTag(index)}>
+              <FontAwesome name="minus-circle" size={16} color="red" style={styles.minusIcon} />
+            </TouchableOpacity>
+          )}
+        </View>
+      ))}
+
+      {updatedTags.length < 4 && (
+        <TouchableOpacity onPress={handleAddTag} style={styles.addButton}>
+          <FontAwesome name="plus-circle" size={20} color="green" />
+        </TouchableOpacity>
+        )}
           </View>
         </View>
       </View>
@@ -83,9 +121,33 @@ const buttonWidth = width/6.25
 const ActivityDescribeModal: React.FC<MultitaskModalProps> = ({ ActivityDescribeVisible, Info, onClose, onTapOut, ...modalProps }) => {
 
     const {updateActivity} = useAppContext();
-    const [changeTags, setChangeTags] = useState(false);
+    const startingTags: string[] = Info.button.tags
+    const [updatedTags, setUpdatedTags] = useState(startingTags);
     const startingCat: string[] = Info.button.category ? Info.button.category : []
     const [updatedCat, setUpdatedCat] = useState<string[]>(startingCat as string[]);
+
+    // Submit the tags to the database
+    const handleSubmitTags = () => {
+      let cat: string[] = []
+      if(Info.button.category) {
+        cat = Info.button.category
+      }
+      const updates: Partial<Activity> = {
+        //first turn input value into unix. Create function for this. 
+        button: {
+          text: Info.button.text,
+          keywords: Info.button.keywords,
+          iconLibrary: Info.button.iconLibrary,
+          icon: Info.button.icon,
+          pressed: false,
+          tags: updatedTags,
+          category: cat
+        },
+      };
+      console.log('updates: ', updates)
+      updateActivity(Info, updates);
+      // Add your database logic here
+    };
 
     useEffect(() => {
       if(Info.button.category) {
@@ -93,6 +155,12 @@ const ActivityDescribeModal: React.FC<MultitaskModalProps> = ({ ActivityDescribe
       }
       else {
         setUpdatedCat([])
+      }
+      if(Info.button.tags) {
+        setUpdatedTags(Info.button.tags)
+      }
+      else {
+        setUpdatedTags([]);
       }
     }, [Info])
     const addCategory = (text: string) => {
@@ -169,11 +237,11 @@ const ActivityDescribeModal: React.FC<MultitaskModalProps> = ({ ActivityDescribe
                     <ThemedText type="title">Activity Info</ThemedText>
                   </View>
                 {Info ? 
-                <ActivityItem activity={Info} changeTags={changeTags} updatedCat={updatedCat} setChangeTags={setChangeTags} updateActivity={updateActivity} onTap={() => alert("Not Pressable")}/> : 
+                <ActivityItem activity={Info} updatedTags={updatedTags} updatedCat={updatedCat} setUpdatedTags={setUpdatedTags} updateActivity={updateActivity} onTap={() => alert("Not Pressable")}/> : 
                 <Text>Invalid Activity</Text>}
                 <CategoryBar current={updatedCat} onPress={addCategory} deleteCat={onDelete}/>
                 <View style={styles.nextContainer}>
-                  <Button title="Next" style={styles.nextButton} onPress={onClose} />
+                  <Button title="Next" style={styles.nextButton} onPress={() => {handleSubmitTags(); onClose()}} />
                 </View>
             </View>
             </TouchableWithoutFeedback>
@@ -183,7 +251,36 @@ const ActivityDescribeModal: React.FC<MultitaskModalProps> = ({ ActivityDescribe
     );
     
 }
-
+interface TagDropdownProps {
+  tagValue: string;
+  setTagValue: React.Dispatch<React.SetStateAction<string>>;
+}
+const TagDropdown: React.FC<TagDropdownProps> = ({ tagValue, setTagValue }) => {
+  const tags = [
+    { label: 'Food/Drink', value: 'Food/Drink'},
+    { label: 'Physical', value: 'Physical' },
+    { label: 'Relax', value: 'Relax' },
+    { label: 'Music', value: 'Music' },
+    { label: 'Entertainment', value: 'Entertainment' },
+    { label: 'Social', value: 'Social' },
+    { label: 'Work/Study', value: 'Work/Study' },
+    { label: 'Travel/Commute', value: 'Travel/Commute' },
+    { label: 'Hobbies', value: 'Hobbies' },
+    { label: 'Chores', value: 'Chores' },
+    { label: 'Self-Improvement', value: 'Self-Improvement' },
+    {label: 'Family Time', value: 'Family Time'},
+    { label: 'Helping Others', value: 'Helping Others' },
+    {label: 'Intaking Knowledge', value: 'Intaking Knowledge'},
+    { label: 'Other', value: 'Other' },
+  ]
+  return (
+    <RNPickerSelect
+      value={tagValue}
+      onValueChange={(value) => setTagValue(value)}
+      items={tags}
+    />
+  );
+};
 const styles = StyleSheet.create({
     MultitaskModalOverlay: {
         flex: 1,
@@ -243,6 +340,17 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 4 },
         flexDirection: 'row',
         // alignItems: 'center',
+      },
+      tagItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 8,
+      },
+      minusIcon: {
+        marginLeft: 8,
+      },
+      addButton: {
+        marginTop: 8,
       },
       detailsContainer: {
         flexDirection: 'row',

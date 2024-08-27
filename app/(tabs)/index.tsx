@@ -163,6 +163,7 @@ function Journal() {
   useEffect(() => {
     if(activityInfo) {
       setActivityDescribeVisible(true);
+      console.log('act info set, opening activitydescribe ', activityInfo)
     }
     }, [activityInfo])
   const { justActivities, removeActivity, updateActivity, moveActivity, dateIncrement, setDateIncrement } = useAppContext();
@@ -208,7 +209,13 @@ function Journal() {
         alert('multiActivity')
       }
       else {
-        setActivityInfo(activity)
+        if(activityInfo==activity) {
+          setActivityDescribeVisible(true);
+        }
+        else {
+          setActivityInfo(activity)
+
+        }
       }
     }
     // console.log('DbActivities for index: ', dbActivities)

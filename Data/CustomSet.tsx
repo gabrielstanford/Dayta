@@ -115,8 +115,8 @@ function useCustomSet() {
             // Iterate over each tag in the current activity
             
             if(activity.button.tags) {
-              
-            activity.button.tags.forEach(tag => {
+              const tag = activity.button.tags[0]
+            // activity.button.tags.forEach(tag => {
               const normalizedTag = tag.trim().toLowerCase();
               if (acc[normalizedTag] && normalizedTag!=="null") {
                 // If the tag already exists, add the duration to the existing value
@@ -126,7 +126,7 @@ function useCustomSet() {
                 if(normalizedTag!=="null")
                 acc[normalizedTag] = activity.timeBlock.duration / 3600; // Convert seconds to hours
               }
-            });
+            // });
             return acc;
             }
             else {
@@ -245,7 +245,8 @@ function useCustomSet() {
       // Iterate over each tag in the current activity
       
       if(activity.button.tags) {
-      activity.button.tags.forEach(tag => {
+        const tag = activity.button.tags[0];
+      // activity.button.tags.forEach(tag => {
         const normalizedTag = tag.trim().toLowerCase();
         if (acc[normalizedTag] && normalizedTag!=="null") {
           // If the tag already exists, add the duration to the existing value
@@ -257,7 +258,7 @@ function useCustomSet() {
           acc[normalizedTag] = activity.timeBlock.duration / 3600; // Convert seconds to hours
           }
         }
-      });
+      // });
       return acc;
       }
       else {
