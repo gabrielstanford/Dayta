@@ -9,7 +9,8 @@ function FetchDayActivities(user: any, dateIncrement: number, justActivities: Ac
       if(justActivities.length>0) {
                 // Function to get filtered activity references
                 const filtActivities = getFilteredActivityRefs(dateIncrement);
-                const arrayEnd: ActivityWithEnd[] = justActivities.filter((act): act is Activity & {timeBlock: {endTime: number}} => act.timeBlock.endTime!=null) 
+                const relevant = justActivities.filter(act => act!==null &&  act.timeBlock != null)
+                const arrayEnd: ActivityWithEnd[] = relevant.filter((act): act is Activity & {timeBlock: {endTime: number}} => act.timeBlock.endTime!=null) 
                 const dayActivities: ActivityWithEnd[] = arrayEnd.filter(act => (act.timeBlock.startTime>=filtActivities[2] && act.timeBlock.startTime<=filtActivities[3]))
                   // Sort by startTime
                   

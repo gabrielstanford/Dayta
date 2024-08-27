@@ -18,6 +18,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
       setUser(user);
       setLoading(false);
+      console.log('user logged in')
     });
     return () => unsubscribe();
   }, []);

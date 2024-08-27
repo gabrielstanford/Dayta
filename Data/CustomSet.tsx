@@ -40,7 +40,7 @@ function useCustomSet() {
   }
 
   const createTODStats = () => {
-    const relevantActivities = justActivities.filter(act => act.timeBlock.startTime>1722988800)
+    const relevantActivities = justActivities.filter(act => act!==null && act.timeBlock.startTime>1722988800)
     const morningActs = relevantActivities.filter(act => getLocalHours(act.timeBlock.startTime)>=4 && getLocalHours(act.timeBlock.startTime)<12)
     const afternoonActs = relevantActivities.filter(act => getLocalHours(act.timeBlock.startTime)>=12 && getLocalHours(act.timeBlock.startTime)<19)
     const eveningActs = relevantActivities.filter(act => (getLocalHours(act.timeBlock.startTime)>=19 && getLocalHours(act.timeBlock.startTime)<24) || (getLocalHours(act.timeBlock.startTime)>=0 && getLocalHours(act.timeBlock.startTime)<4))
@@ -74,8 +74,10 @@ function useCustomSet() {
 
       setEveningKeys(eveningTextKeys)
   }
-  const createDurationSummary = () => {    
-      const relevantActivities = justActivities.filter(act => act.timeBlock.startTime>1722988800 && act.timeBlock.duration!==undefined)
+  const createDurationSummary = () => {   
+    console.log('Just Activities: ', justActivities) 
+
+      const relevantActivities = justActivities.filter(act =>  act!==null && act.timeBlock.startTime>1722988800 && act.timeBlock.duration!==undefined)
       //maybe tinker with what the cutoff is; perhaps it should be lunch
       
       const activityText = relevantActivities.map((activity) => activity.button.text);
@@ -108,7 +110,7 @@ function useCustomSet() {
   };
 
   const createTagDurationSum = () => {
-      const relevantActs = justActivities.filter((activity) => activity.timeBlock.duration!==undefined);
+      const relevantActs = justActivities.filter((activity) => activity!==null && activity.timeBlock.duration!==undefined);
         // Step 1: Group activities by name and sum durations
 
           const totalDurationPerTag = relevantActs.reduce<Record<string, number>>((acc, activity) => {
@@ -191,7 +193,7 @@ function useCustomSet() {
       const oneWeekInSeconds = 7 * 24 * 60 * 60; // One week in seconds
       return currentTimestamp - oneWeekInSeconds;
     };
-    const relevantActivities = justActivities.filter(act => act.timeBlock.startTime>getUnixTimestampMinusOneWeek() && act.timeBlock.duration!==undefined)
+    const relevantActivities = justActivities.filter(act => act!==null && act.timeBlock.startTime>getUnixTimestampMinusOneWeek() && act.timeBlock.duration!==undefined)
     const activityText = relevantActivities.map((activity) => activity.button.text);
 
     // Step 1: Group activities by name and sum durations
@@ -213,7 +215,7 @@ function useCustomSet() {
   }
 
   const createDailyAverageStats = () => {
-    const relevantActivities = justActivities.filter(act => act.timeBlock.duration!==undefined)
+    const relevantActivities = justActivities.filter(act => act!==null && act.timeBlock.duration!==undefined)
     const startTimes = relevantActivities.map(act => act.timeBlock.startTime)
     const minStart = Math.min(...startTimes)
     let maxStart = Math.max(...startTimes)
@@ -240,7 +242,7 @@ function useCustomSet() {
   }
 
   const analyzeTodayStats = () => {
-    const relevantActs = todayActs.filter(act => act.timeBlock.duration!==undefined)
+    const relevantActs = todayActs.filter(act => act!==null && act.timeBlock.duration!==undefined)
     const totalDurationPerTag = relevantActs.reduce<Record<string, number>>((acc, activity) => {
       // Iterate over each tag in the current activity
       
@@ -273,7 +275,7 @@ function useCustomSet() {
   }
 
   const createSleepStats = () => {
-    const relevantActivities = justActivities.filter(act => act.timeBlock.startTime>1722988800)
+    const relevantActivities = justActivities.filter(act => act!==null && act.timeBlock.startTime>1722988800)
 
     const allSleepSlots = justActivities.filter(act => act.button.text=="Went To Bed" )
     const allWakeSlots = justActivities.filter(act => act.button.text=="Woke Up")
