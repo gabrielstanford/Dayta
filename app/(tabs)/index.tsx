@@ -10,8 +10,9 @@ import ActivityDescribeModal from '@/components/ActivityDescribeModal'
 import {DateTime} from 'luxon'
 import {Activity, ActivityWithEnd} from '@/Types/ActivityTypes';
 import HandleSubmitEditing from '@/Data/HandleSubmitEditing';
+import uuid from 'react-native-uuid'
 
-// import { getSunriseSunset } from '@/utils/DateTimeUtils';
+import { getSunriseSunset, generateISODate } from '@/utils/DateTimeUtils';
 
 // Get screen width. This is for more responsive layouts
 const { width, height } = Dimensions.get('window');
@@ -69,9 +70,19 @@ interface ActivityItemProps {
 }
 
 const ActivityItem = ({ activity, onRemove, timeState, dateIncrement, updateActivity, moveActivity, onTimeTap, onTap }: ActivityItemProps) => {
-  let specialButton = false
-  if(activity.button.text=='Woke Up' || activity.button.text=='Went To Bed' || activity.button.text=='Coffee' || activity.parentRoutName) {
+  let specialButton = false;
+  let sunrise = false;
+  let sunset = false;
+  let rout = false;
+  if(activity.button.text=='Woke Up' || activity.button.text=='Went To Bed' || activity.button.text=='Coffee') {
     specialButton=true
+  }
+  if(activity.parentRoutName && activity.parentRoutName!=="sun") {
+    rout = true
+  }
+  else if(activity.button.text=='Sunrise' || activity.button.text=="Sunset") {
+    console.log('sunrise')
+    sunrise = true;
   }
 
   const [inputValue, setInputValue] = useState<string>(convertUnixToTimeString(activity.timeBlock.startTime, activity.timeBlock.endTime, true));
@@ -101,10 +112,24 @@ const ActivityItem = ({ activity, onRemove, timeState, dateIncrement, updateActi
     "dopamine rush": <FontAwesome5 name="bolt" style={styles.category} />
     // Add more categories and corresponding JSX elements here
   };
-  return (
+  const getActivityContainerStyle = () => {
+    if (specialButton) {
+      return styles2.activityContainer;
+    } else if (sunrise) {
+      return styles3.activityContainer;
+    } else if (rout) {
+      return styles4.activityContainer;
+    } else {
+      return styles.activityContainer;
+    }
+  }
   
-    <View style={specialButton ? styles2.activityContainer : styles.activityContainer}>
-    <TouchableOpacity onPress={() => onTap(activity)} style={styles.allTouchables}>
+  return (
+   
+    <View>
+
+        <View style={getActivityContainerStyle()}>
+          <TouchableOpacity onPress={() => onTap(activity)} style={styles.allTouchables}>
         <TouchableOpacity onPress={() => onTimeTap(activity)} style={styles.touchableTime}>
           <View style={styles.timeContainer}>
             {(timeState[0] && activity.id==timeState[1]) ? 
@@ -151,19 +176,74 @@ const ActivityItem = ({ activity, onRemove, timeState, dateIncrement, updateActi
       </TouchableOpacity>
       </TouchableOpacity>
     </View>
+    </View>
 );}
 
 function Journal() {
-  // const timeZone = 'America/Los_Angeles'; // Replace with the user's time zone
-  // const times = getSunriseSunset(new Date(), timeZone)
 
   const { user } = useAuth();
   const [dbActivities, setDbActivities] = useState<Activity[]>([]);
+
+  const [version, setVersion] = useState(0)
+  const [activityInfo, setActivityInfo] = useState<Activity>()
+  const [sunriseTime, setSunriseTime] = useState<number>(0);
+  const [sunsetTime, setSunsetTime] = useState<number>(0);
+  const sunriseActivity: ActivityWithEnd = {
+    id: uuid.v4() as string,
+    parentRoutName: 'sun',  // Optional field to identify special types
+    button: 
+      { text: 'Sunrise', 
+        iconLibrary: "materialIcons", 
+        icon: "brunch-dining", 
+        keywords: ['Eating', 'Meal'], 
+        pressed: false, 
+        tags: ['Food/Drink'] 
+      },
+ 
+    timeBlock: {
+      startTime: sunriseTime,  // Unix timestamp
+      endTime: sunriseTime,    // You might want to use the same value for both
+      duration: 0,
+    },
+  };
+
+  const sunsetActivity: ActivityWithEnd = {
+    id: uuid.v4() as string,
+    parentRoutName: 'sun',  // Optional field to identify special types
+    button: 
+      { text: 'Sunset', 
+        iconLibrary: "materialIcons", 
+        icon: "brunch-dining", 
+        keywords: ['Eating', 'Meal'], 
+        pressed: false, 
+        tags: ['Food/Drink'] 
+      },
+ 
+    timeBlock: {
+      startTime: sunsetTime,  // Unix timestamp
+      endTime: sunsetTime,    // You might want to use the same value for both
+      duration: 0,
+    },
+  };
   const filteredWithEnd: ActivityWithEnd[] = dbActivities.filter(
     (act): act is Activity & { timeBlock: { endTime: number } } => act.timeBlock.endTime !== null
   );
-  const [version, setVersion] = useState(0)
-  const [activityInfo, setActivityInfo] = useState<Activity>()
+  const withSunriseSunset: ActivityWithEnd[] = [...filteredWithEnd, sunriseActivity, sunsetActivity]
+  withSunriseSunset.sort((a, b) => a.timeBlock.endTime - b.timeBlock.endTime);
+  const generateSunriseSunset = () => {
+      const timeZone = 'America/Los_Angeles'; // Replace with the user's time zone
+      const today = generateISODate(dateIncrement, timeZone);
+      const todayDate = new Date(today)
+      const {sunrise, sunset} = getSunriseSunset(todayDate, timeZone)
+
+      const sunriseDate = new Date(sunrise);
+      const sunsetDate = new Date(sunset)
+      const sunriseUnix = Math.floor(sunriseDate.getTime() / 1000)
+      const sunsetUnix = Math.floor(sunsetDate.getTime() / 1000)
+      setSunriseTime(sunriseUnix);
+      setSunsetTime(sunsetUnix);
+      
+  }
 
   useEffect(() => {
     if(activityInfo) {
@@ -178,6 +258,9 @@ function Journal() {
     removeActivity(act);
     setVersion(prevVersion => prevVersion + 1)
   }
+  useEffect(() => {
+    generateSunriseSunset();
+}, [dateIncrement])
   const [activityDescribeVisible, setActivityDescribeVisible] = useState<boolean>(false);
   useEffect(() => {
     //this is terrible architecture; I should absolutely not be reading from the database on every date increment and every little update. 
@@ -222,6 +305,7 @@ function Journal() {
         }
       }
     }
+    
     // console.log('DbActivities for index: ', dbActivities)
   return (
     
@@ -246,14 +330,14 @@ function Journal() {
               </View>
         </TouchableOpacity>
         </View>
-        {filteredWithEnd.length>0 ? 
+        {withSunriseSunset.length>0 ? 
         <KeyboardAvoidingView 
         behavior= {'padding'}
         keyboardVerticalOffset={80} 
         style={{marginBottom: 80}}>
         <FlatList 
         ref={flatListRef}
-        data={filteredWithEnd}
+        data={withSunriseSunset}
         renderItem={({ item }) => <ActivityItem activity={item} onRemove={remove} timeState={isTimeTapped} dateIncrement={dateIncrement} updateActivity={updateActivity} moveActivity={moveActivity} onTimeTap={timeTapped} onTap={activityTapped}/>}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
@@ -268,6 +352,11 @@ function Journal() {
         <View style={styles.plusButtonContainer}>
           <TouchableOpacity onPress={toggleModal}>
             <AntDesign name="pluscircle" size={width/6.25} color="black" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.otherButtonContainer}>
+          <TouchableOpacity onPress={toggleModal}>
+            <MaterialIcons name="other-houses" size={width/8} color="black" />
           </TouchableOpacity>
         </View>
       </View>
@@ -368,6 +457,12 @@ plusButtonContainer: {
     left: (width / 2) - (buttonWidth / 2), // Center horizontally more precisely
     width: buttonWidth
 },
+otherButtonContainer: {
+  position: 'absolute', // Absolute positioning to overlay everything
+  bottom: height/40.6, // Space from the bottom of the container
+  left: width-buttonWidth-20, // Center horizontally more precisely
+  width: buttonWidth
+},
 });
 
 const styles2 = StyleSheet.create({
@@ -388,6 +483,38 @@ const styles2 = StyleSheet.create({
     flex: 2.5,
     flexDirection: 'row',
     flexWrap: 'nowrap',
+  },
+})
+
+const styles3 = StyleSheet.create({
+  activityContainer: {
+    flex: 1,
+    backgroundColor: 'orange',
+    borderRadius: 10,
+    padding: 15,
+    marginTop: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+})
+
+const styles4 = StyleSheet.create({
+  activityContainer: {
+    flex: 1,
+    backgroundColor: 'lightgreen',
+    borderRadius: 10,
+    padding: 15,
+    marginTop: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 })
 

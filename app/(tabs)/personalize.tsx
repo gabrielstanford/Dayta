@@ -325,6 +325,7 @@ interface TagDropdownProps {
       borderColor: 'black', 
       borderWidth: 2,
       borderRadius: 20,
+      // backgroundColor: 'black',
       padding: 10,
     },
     createContainer: {

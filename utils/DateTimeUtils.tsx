@@ -105,7 +105,6 @@ export const convertTimeToUnix = (timeString: string, date: Date = new Date()): 
   
 export function getSunriseSunset(date: Date, timeZone: string): { sunrise: string; sunset: string } {
   // Create a DateTime object in the given time zone
-  const localDateTime = DateTime.fromJSDate(date).setZone(timeZone);
   
   // Calculate sunrise and sunset times using SunCalc
   const coords = getCoordinatesFromTimeZone(timeZone)
@@ -144,4 +143,16 @@ function getCoordinatesFromTimeZone(timeZone: string): TimeZoneCoordinates | nul
   };
 
   return timeZoneMap[timeZone] || null;
+}
+
+export const generateISODate = (adjustment: number, userTimeZone: string) => {
+  const nowInUserTimezone = DateTime.now().setZone(userTimeZone).plus({ days: adjustment })
+  const dateIso = nowInUserTimezone.toISO()
+  let finalIso = ""
+  if(dateIso) {
+    finalIso = dateIso
+  }
+  
+  return finalIso
+  
 }

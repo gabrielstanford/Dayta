@@ -4,8 +4,8 @@ export const ActivityButtons: ButtonState[] = [
   // Food/Drink Related
   { text: 'Breakfast', iconLibrary: "materialCommunityIcons", icon: "food-variant", keywords: ['Eating', 'Meal'], pressed: false, tags: ['Food/Drink'] },
   { text: 'Snacking', iconLibrary: "fontAwesome5", icon: "apple-alt", keywords: ['Eating', 'Meal', 'Snack', 'Quick Snack'], pressed: false, tags: ['Food/Drink'] },
-  { text: 'Coffee', iconLibrary: "materialCommunityIcons", icon: "coffee", keywords: ['Cafe', 'Espresso', 'Black Coffee'], pressed: false, tags: ['Food/Drink'] },
-  { text: 'Preparing My Coffee', iconLibrary: "materialIcons", icon: "coffee-maker", keywords: ['Cafe', 'Espresso', 'Espresso Machine', 'Coffee Machine'], pressed: false, tags: ['Food/Drink'] },
+  { text: 'Coffee', iconLibrary: "materialCommunityIcons", icon: "coffee", keywords: ['Cafe', 'Espresso', 'Black Coffee'], pressed: false, tags: ['Food/Drink'], category: ["Coffee"] },
+  { text: 'Preparing My Coffee', iconLibrary: "materialIcons", icon: "coffee-maker", keywords: ['Cafe', 'Espresso', 'Espresso Machine', 'Coffee Machine'], pressed: false, tags: ['Food/Drink'], category: ["Coffee"] },
   { text: 'Lunch', iconLibrary: "materialCommunityIcons", icon: "food-variant", keywords: ['Eating', 'Meal'], pressed: false, tags: ['Food/Drink'] },
   { text: 'Dinner', iconLibrary: "materialCommunityIcons", icon: "food-variant", keywords: ['Eating', 'Meal'], pressed: false, tags: ['Food/Drink'] },
   { text: 'Meal', iconLibrary: "materialCommunityIcons", icon: "food-variant", keywords: ['Eating', 'Breakfast', 'Lunch', 'Dinner', 'Snack'], pressed: false, tags: ['Food/Drink'] },
