@@ -354,32 +354,23 @@ useEffect(() => {
     }
     storage.set('JustActivities', JSON.stringify([...justActivities, activities[0], activities[1], activities[2], activities[3]]))
     if (user) {
-      const startDate = new Date(activities[0].timeBlock.startTime * 1000).toISOString().split('T')[0];
-      const dateRef = doc(firestore, 'users', user.uid, 'dates', startDate);
-      const activity1Ref = doc(dateRef, 'activities', activities[0].id);
-      const activity2Ref = doc(dateRef, 'activities', activities[1].id);
-      const activity3Ref = doc(dateRef, 'activities', activities[2].id);
-      const activity4Ref = doc(dateRef, 'activities', activities[3].id);
-      // Update or create the date document with a timestamp
-      await setDoc(dateRef, { createdAt: serverTimestamp() }, { merge: true });
+         // Get the start date from the first activity
+        const startDate = new Date(activities[0].timeBlock.startTime * 1000).toISOString().split('T')[0];
+          
+        // Reference to the date document
+        const dateRef = doc(firestore, 'users', user.uid, 'dates', startDate);
 
-      // Save the activity to the activities subcollection
-      await setDoc(activity1Ref, {
-        ...activities[0],
-        createdAt: serverTimestamp(), // Optional: add timestamp to the activity
-      });
-      await setDoc(activity2Ref, {
-        ...activities[1],
-        createdAt: serverTimestamp(), // Optional: add timestamp to the activity
-      });
-      await setDoc(activity3Ref, {
-        ...activities[2],
-        createdAt: serverTimestamp(), // Optional: add timestamp to the activity
-      });
-      await setDoc(activity4Ref, {
-        ...activities[3],
-        createdAt: serverTimestamp(), // Optional: add timestamp to the activity
-      });
+        // Update or create the date document with a timestamp
+        await setDoc(dateRef, { createdAt: serverTimestamp() }, { merge: true });
+
+        // Iterate over the activities array and save each one to the activities subcollection
+        for (const activity of activities) {
+          const activityRef = doc(dateRef, 'activities', activity.id);
+          await setDoc(activityRef, {
+            ...activity,
+            createdAt: serverTimestamp(), // Optional: add timestamp to the activity
+          });
+        }
     }
     }
     catch {

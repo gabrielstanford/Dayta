@@ -1,7 +1,7 @@
 import { StyleSheet, View, Dimensions, FlatList, Text, TouchableOpacity, TextInput, KeyboardAvoidingView} from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { useState, useEffect, useRef } from 'react';
-import {AntDesign, MaterialIcons, Ionicons} from '@expo/vector-icons';
+import {AntDesign, MaterialIcons, Ionicons, Feather, MaterialCommunityIcons} from '@expo/vector-icons';
 import MyModal from '@/components/MyModal'
 import { useAppContext } from '@/contexts/AppContext';
 import {useAuth} from '@/contexts/AuthContext'
@@ -84,8 +84,18 @@ const ActivityItem = ({ activity, onRemove, timeState, dateIncrement, updateActi
   const handleInput2Change = (text: string) => {
     setInput2Value(text); 
    };
+   let Cat: string[] = []
+   if(activity.button.category && activity.button.category.length>0) {
+    Cat = activity.button.category
+   }
 
-
+   const iconMapping: { [key: string]: JSX.Element } = {
+    sunlight: <Feather name="sun" style={styles.category} />,
+    coffee: <Feather name="coffee" style={styles.category} />,
+    exercise: <MaterialCommunityIcons name="dumbbell" style={styles.category} />,
+    meditation: <MaterialCommunityIcons name="meditation" style={styles.category} />,
+    // Add more categories and corresponding JSX elements here
+  };
   return (
   
     <View style={specialButton ? styles2.activityContainer : styles.activityContainer}>
@@ -124,6 +134,13 @@ const ActivityItem = ({ activity, onRemove, timeState, dateIncrement, updateActi
         <View style={styles.touchableActivity}>
           <Text style={styles.activityName}>{activity.button.text}</Text>
           </View>
+          <View style={{}}>
+          {Cat.length>0 ? Cat.map((cat) => (
+              <View key={cat}>
+                {iconMapping[cat] || <Feather name="help-circle" style={styles.category} />}
+              </View>
+            )) : <></>}  
+            </View>
       <TouchableOpacity onPress={() => onRemove(activity)} style={styles.touchableDelete}>
         <MaterialIcons name="delete" size={width / 15} color="black" />
       </TouchableOpacity>
@@ -141,7 +158,13 @@ function Journal() {
     (act): act is Activity & { timeBlock: { endTime: number } } => act.timeBlock.endTime !== null
   );
   const [version, setVersion] = useState(0)
-  const [activityInfo, setActivityInfo] = useState<Activity[]>([])
+  const [activityInfo, setActivityInfo] = useState<Activity>()
+
+  useEffect(() => {
+    if(activityInfo) {
+      setActivityDescribeVisible(true);
+    }
+    }, [activityInfo])
   const { justActivities, removeActivity, updateActivity, moveActivity, dateIncrement, setDateIncrement } = useAppContext();
 
   const [isTimeTapped, setTimedTapped] = useState<(boolean | string)[]>([false, ""]);
@@ -182,25 +205,18 @@ function Journal() {
     const activityTapped = (activity: Activity) => {
       setTimedTapped([false, ""])
       if(activity.button.text=="Multi-Activity") {
-        if(activity.Multi) {
-        let multiActivities: Activity[] = []
-        for(let i=0; i<activity.Multi.length; i++) {
-          multiActivities[i]=activity.Multi[i];
-        }
-        setActivityInfo(multiActivities)
-      }
+        alert('multiActivity')
       }
       else {
-        setActivityInfo([activity])
+        setActivityInfo(activity)
       }
-      setActivityDescribeVisible(true);
     }
     // console.log('DbActivities for index: ', dbActivities)
   return (
     
       <View style={styles.layoutContainer}>
         <MyModal visible={modalVisible} onClose={toggleModal} />
-        <ActivityDescribeModal style={styles.durationModal} ActivityDescribeVisible={activityDescribeVisible} Info={activityInfo} onClose={() => setActivityDescribeVisible(false)} onTapOut={() => setActivityDescribeVisible(false)}/>
+        {activityInfo && (<ActivityDescribeModal style={styles.durationModal} ActivityDescribeVisible={activityDescribeVisible} Info={activityInfo as Activity} onClose={() => setActivityDescribeVisible(false)} onTapOut={() => setActivityDescribeVisible(false)}/>)}
 
         <View style={styles.contentContainer} >
               <View style={{alignItems: 'center'}}>
@@ -294,6 +310,10 @@ activityContainer: {
   shadowOffset: { width: 0, height: 4 },
   flexDirection: 'row',
   alignItems: 'center',
+},
+category: { 
+  fontSize: 15,
+  color: 'red',
 },
 detailsContainer: {
   flex: 1, // Allows this section to take up the remaining space
