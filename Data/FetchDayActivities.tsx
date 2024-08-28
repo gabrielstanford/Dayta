@@ -4,23 +4,30 @@ import getFilteredActivityRefs from '@/Data/HandleTime'
 import { storage } from '@/utils/mmkvStorage';
 import { Activity, ActivityWithEnd } from '@/Types/ActivityTypes';
 
-function FetchDayActivities(user: any, dateIncrement: number, justActivities: Activity[], setDbActivities: any) {
+function FetchDayActivities(user: any, dateIncrement: number, justActivities: Activity[], setDbActivities: any, ends: boolean) {
     if (user) {
       if(justActivities.length>0) {
                 // Function to get filtered activity references
                 const filtActivities = getFilteredActivityRefs(dateIncrement);
                 const relevant = justActivities.filter(act => act!==null &&  act.timeBlock != null)
-                const arrayEnd: ActivityWithEnd[] = relevant.filter((act): act is Activity & {timeBlock: {endTime: number}} => act.timeBlock.endTime!=null) 
-                const dayActivities: ActivityWithEnd[] = arrayEnd.filter(act => (act.timeBlock.startTime>=filtActivities[2] && act.timeBlock.startTime<=filtActivities[3]))
+                if(!ends) {
+
+                  const arrayEnd: ActivityWithEnd[] = relevant.filter((act): act is Activity & {timeBlock: {endTime: number}} => act.timeBlock.endTime!=null) 
+                const dayActivitiesWithEnd: ActivityWithEnd[] = arrayEnd.filter(act => (act.timeBlock.startTime>=filtActivities[2] && act.timeBlock.startTime<=filtActivities[3]))
                   // Sort by startTime
                   
-                  dayActivities.sort((a, b) => a.timeBlock.endTime - b.timeBlock.endTime);
-            
+                  dayActivitiesWithEnd.sort((a, b) => a.timeBlock.endTime - b.timeBlock.endTime);
+              
                   // Update state with the sorted activities
                   //set local storage
                   // storage.set('testActivity', 'First Storage Test');
 
+                  setDbActivities(dayActivitiesWithEnd);
+                }
+                else {
+                  const dayActivities: Activity[] = relevant.filter(act => (act.timeBlock.startTime>=filtActivities[2] && act.timeBlock.startTime<=filtActivities[3]))
                   setDbActivities(dayActivities);
+                }
       }
       else {
         

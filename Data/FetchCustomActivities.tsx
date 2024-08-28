@@ -63,7 +63,7 @@ export const ActivityButtons: ButtonState[] = [
   { text: 'Movie Watching', iconLibrary: "fontAwesome5", icon: "film", keywords: ['Cinema', 'Film', 'Theater', 'Theatre'], pressed: false, tags: ['Entertainment'], category: ["Electronics", "Dopamine Rush"] },
   { text: 'Social Media', iconLibrary: "materialCommunityIcons", icon: "twitter", keywords: ['Instagram', 'Facebook', 'Twitter', 'Snapchat', 'Socializing', 'Online', 'Scrolling'], pressed: false, tags: ['Entertainment'], category: ["Electronics", "Dopamine Rush"] },
   { text: 'Gaming', iconLibrary: "materialCommunityIcons", icon: "gamepad-variant-outline", keywords: ['Video Games', 'Computer Games', 'PlayStation', 'Xbox', 'Nintendo'], pressed: false, tags: ['Entertainment', 'Dopamine Rush'], category: ["Electronics"] },
-  { text: 'Reading', iconLibrary: "materialIcons", icon: "menu-book", keywords: ['Books', 'Novels', 'Comics'], pressed: false, tags: ['Entertainment'], category: ["Mental Stimulation"]},
+  { text: 'Reading', iconLibrary: "materialIcons", icon: "menu-book", keywords: ['Books', 'Novels', 'Comics'], pressed: false, tags: ['Relax'], category: ["Mental Stimulation"]},
   { text: 'Going to a Museum', iconLibrary: "fontAwesome5", icon: "university", keywords: ['Art', 'History', 'Exhibits'], pressed: false, tags: ['Entertainment']},
   { text: 'Other Entertainment Activity', iconLibrary: "materialIcons", icon: "more-horiz", keywords: ['Miscellaneous'], pressed: false, tags: ['Entertainment']},
   // Social

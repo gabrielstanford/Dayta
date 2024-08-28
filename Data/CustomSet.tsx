@@ -368,7 +368,7 @@ function useCustomSet() {
   useEffect(() => {
     setTimeout(() => {
       if(justActivities)
-      FetchDayActivities(user, dateIncrement, justActivities, setTodayActs)
+      FetchDayActivities(user, dateIncrement, justActivities, setTodayActs, true)
     }, 50)
   }, [dateIncrement, justActivities])
   useEffect(() => {

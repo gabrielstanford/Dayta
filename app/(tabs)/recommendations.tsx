@@ -42,7 +42,7 @@ export default function Recommendations() {
   const [logicModalVisible, setLogicModalVisible] = useState<boolean>(false);
   const {user} = useAuth();
   useEffect(() => {
-    FetchDayActivities(user, 0, justActivities, setTodayActivities)
+    FetchDayActivities(user, 0, justActivities, setTodayActivities, true)
   }, [justActivities])
 
   useEffect(() => {

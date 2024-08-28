@@ -11,6 +11,7 @@ import {DateTime} from 'luxon'
 import {Activity, ActivityWithEnd} from '@/Types/ActivityTypes';
 import HandleSubmitEditing from '@/Data/HandleSubmitEditing';
 import uuid from 'react-native-uuid'
+import NoStartTimeModal from '@/components/NoStartTimeModal';
 
 import { getSunriseSunset, generateISODate } from '@/utils/DateTimeUtils';
 
@@ -81,7 +82,6 @@ const ActivityItem = ({ activity, onRemove, timeState, dateIncrement, updateActi
     rout = true
   }
   else if(activity.button.text=='Sunrise' || activity.button.text=="Sunset") {
-    console.log('sunrise')
     sunrise = true;
   }
 
@@ -230,6 +230,9 @@ function Journal() {
   );
   const withSunriseSunset: ActivityWithEnd[] = [...filteredWithEnd, sunriseActivity, sunsetActivity]
   withSunriseSunset.sort((a, b) => a.timeBlock.endTime - b.timeBlock.endTime);
+
+  const noEnd: Activity[] = dbActivities.filter((act) => act.timeBlock.endTime == null || !(act.timeBlock.endTime>0))
+  console.log('No end: ', noEnd)
   const generateSunriseSunset = () => {
       const timeZone = 'America/Los_Angeles'; // Replace with the user's time zone
       const today = generateISODate(dateIncrement, timeZone);
@@ -254,6 +257,7 @@ function Journal() {
 
   const [isTimeTapped, setTimedTapped] = useState<(boolean | string)[]>([false, ""]);
   const [localTime, setLocalTime] = useState<DateTime>(DateTime.local().plus({ days: dateIncrement }))
+  const [noStartModalVisible, setNoStartModalVisible] = useState<boolean>(false);
   const remove = (act: Activity) => {
     removeActivity(act);
     setVersion(prevVersion => prevVersion + 1)
@@ -266,7 +270,7 @@ function Journal() {
     //this is terrible architecture; I should absolutely not be reading from the database on every date increment and every little update. 
         //I should instead read from local storage more.
         if(justActivities.length>0) {
-          FetchDayActivities(user, dateIncrement, justActivities, setDbActivities)
+          FetchDayActivities(user, dateIncrement, justActivities, setDbActivities, true)
         }
 
     setLocalTime(DateTime.local().plus({ days: dateIncrement }))
@@ -306,13 +310,15 @@ function Journal() {
       }
     }
     
-    // console.log('DbActivities for index: ', dbActivities)
+    const toggleNoStartModal = () => {
+      setNoStartModalVisible(true);
+    }
   return (
     
       <View style={styles.layoutContainer}>
         <MyModal visible={modalVisible} onClose={toggleModal} />
         {activityInfo && (<ActivityDescribeModal style={styles.durationModal} ActivityDescribeVisible={activityDescribeVisible} Info={activityInfo as Activity} onClose={() => setActivityDescribeVisible(false)} onTapOut={() => setActivityDescribeVisible(false)}/>)}
-
+        <NoStartTimeModal visible={noStartModalVisible} onClose={() => setNoStartModalVisible(false)} remove={remove} otherArray={noEnd}/>
         <View style={styles.contentContainer} >
               <View style={{alignItems: 'center'}}>
                 <ThemedText type="titleText" style={{fontSize: width/12}}>My Journal</ThemedText>
@@ -355,7 +361,7 @@ function Journal() {
           </TouchableOpacity>
         </View>
         <View style={styles.otherButtonContainer}>
-          <TouchableOpacity onPress={toggleModal}>
+          <TouchableOpacity onPress={toggleNoStartModal}>
             <MaterialIcons name="other-houses" size={width/8} color="black" />
           </TouchableOpacity>
         </View>

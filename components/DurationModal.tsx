@@ -49,7 +49,7 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
 
   useEffect(() => {
     //consider adding functionality for setting this for past days but not necessary now
-    FetchDayActivities(user, dateIncrement, justActivities, setDbActivities)
+    FetchDayActivities(user, dateIncrement, justActivities, setDbActivities, false)
     setDurationHours(0);
     setDurationMinutes(15);
   }, [durationModalVisible, hasInitialized, user, justActivities]);
@@ -114,7 +114,6 @@ const DurationModal: React.FC<DurationModalProps> = ({ durationModalVisible, onS
     timeString = selectedHour + ":" + selectedMinute + " " + selectedPeriod
     }
     else {
-      alert("no start time included")
     }
     return timeString
   }
