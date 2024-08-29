@@ -1,12 +1,13 @@
-import { StyleSheet, View, Dimensions, TouchableOpacity, Text } from 'react-native';
+import { StyleSheet, View, Dimensions, TouchableOpacity, Text, Platform, SafeAreaView, Animated, Easing} from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
-import {useState, useEffect} from 'react'
+import {useState, useEffect, useRef} from 'react'
 import FetchDayActivities from '@/Data/FetchDayActivities';
 import { useAuth } from '@/contexts/AuthContext';
 import { Activity } from '@/Types/ActivityTypes';
 import { useCustomSet } from '@/Data/CustomSet';
 import { useAppContext } from '@/contexts/AppContext';
 import RecDescribeModal from '@/components/RecDescribeModal';
+import Swiper from 'react-native-deck-swiper';
 import LogicModal from '@/components/LogicModal'
 import CustomButton from '@/components/CustomButton'
 
@@ -40,11 +41,6 @@ export default function Recommendations() {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [logicModalVisible, setLogicModalVisible] = useState<boolean>(false);
 
-  
-  const recCategory = "Sleep Hygiene"
-  const windDown = "Night-Time Wind Down Routine"
-  const impactScore = 9
-  const recDetails = "Based on your entries, we gather that your sleep habits could use some serious improvement. Sleep is one of the most important parts of our health and well-being, and improving your sleep is proven to have numerous incredible benefits. A few simple shifts in your routine will make all the difference. Click below to generate a detailed report on your current habits and an actionable plan to improve! "
   const calculateExerciseScore = (light: number, mod: number, vig: number) => {
     const lightScore = light/300;
     const modScore = mod/150;
@@ -54,37 +50,90 @@ export default function Recommendations() {
     return totalScore
   }
 
-  console.log('exercise score: ', calculateExerciseScore(30, 20, 70))
+  const [cards, setCards] = useState([
+    { windDown: "Night-Time Wind Down Routine", recCategory: 'Sleep Hygiene', impactScore: 9, recDetails: 'Based on your entries, we gather that your sleep habits could use some serious improvement. Sleep is one of the most important parts of our health and well-being, and improving your sleep is proven to have numerous incredible benefits. A few simple shifts in your routine will make all the difference. Click below to generate a detailed report on your current habits and an actionable plan to improve!' },
+    { windDown: 'Unwind', recCategory: 'Reading', impactScore: 7, recDetails: 'Read a calming book before bed.' },
+    { windDown: 'New', recCategory: 'Reading', impactScore: 7, recDetails: 'Read a calming book before bed.' },
+    // { windDown: 'Calm', recCategory: 'Breathing', impactScore: 8, recDetails: 'Deep breathing exercises to calm the mind.' },
+    // Add more cards as needed
+  ]);
+  const swiperRef = useRef<any>(null);
+  const [cardIndex, setCardIndex] = useState(0);
+
+  useEffect(() => {
+    if (swiperRef.current) {
+      swiperRef.current.jumpToCardIndex(cardIndex);
+    }
+  }, [cardIndex]);
+
+  const onSwipedRight = () => {
+    if (cardIndex > 0) {
+      setCardIndex(cardIndex - 1);
+    }
+  };
+
+  const onSwipedLeft = () => {
+    if (cardIndex < cards.length - 1) {
+      setCardIndex(cardIndex + 1);
+    }
+  };
   
+  const arrowTranslateX = useRef(new Animated.Value(-50)).current; // Start with the arrow off-screen
+
+  const animateArrow = () => {
+    Animated.sequence([
+      Animated.timing(arrowTranslateX, {
+        toValue: 0, // Move the arrow into view
+        duration: 800,
+        easing: Easing.out(Easing.ease),
+        useNativeDriver: true,
+      }),
+      Animated.timing(arrowTranslateX, {
+        toValue: -50, // Move the arrow back out of view
+        duration: 800,
+        delay: 800,
+        easing: Easing.out(Easing.ease),
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      // Loop the animation
+      animateArrow();
+    });
+  };
+  useEffect(() => {
+    animateArrow();
+  }, [cardIndex]);
   const {user} = useAuth();
   useEffect(() => {
     FetchDayActivities(user, 0, justActivities, setTodayActivities, true)
   }, [justActivities])
 
   console.log('sleep sum: ', sleepSum)
-  // useEffect(() => {
-  //   const entertainment = avgTimeByTag.find(tag => tag.text=="entertainment")
-  //   const work = avgTimeByTag.find(tag => tag.text=="work/study")
 
-  //   if(entertainment) {
-  //     if(entertainment.totalDuration>1) {
-  //       console.log("excessive entertainment")
-  //       const timeSpent = decimalToTime(entertainment.totalDuration)
-  //       setRec1(`You spend about ${timeSpent} on entertaining activities daily. Let's take tangible, realistic steps to fix that and make you happier in the long run.`)
-  //     }
-  //     if(work) {
-  //       if(work.totalDuration<4) {
-  //         const timeSpent = decimalToTime(work.totalDuration)
-  //         if(rec1=="") {
-  //           setRec1(`You spend about ${timeSpent} on work activities daily. You might want to consider upping this a bit to make you feel more productive.`)
-  //         }
-  //         else {
-  //           setRec2(`You spend about ${timeSpent} on work activities daily. You might want to consider upping this a bit to make you feel more productive.`)
-  //         }
-  //       }
-  //     }
-  //   }
-  // }, [todayActivities])
+  const renderCard = (card: any) => {
+    return (
+      <View style={styles.recContainer}>
+        <View style={styles.recTitle}>
+          <Text style={[styles.recText, { color: 'white' }]}>{card.windDown}</Text>
+        </View>
+        <View style={styles.recCategory}>
+          <Text style={styles.recText}>Category: </Text>
+          <Text style={[styles.recText, { color: 'white' }]}>{card.recCategory}</Text>
+        </View>
+        <View style={styles.recCategory}>
+          <Text style={styles.recText}>Impact Score: </Text>
+          <Text style={[styles.recText, { color: 'white' }]}>{card.impactScore}/10</Text>
+        </View>
+        <View style={styles.recCategory}>
+          <Text style={styles.recText}>Details: </Text>
+          <Text style={[styles.recText, { color: 'white' }]}>{card.recDetails}</Text>
+        </View>
+        <View style={styles.diveInButtonContainer}>
+          <CustomButton title="Dive In" onPress={() => setLogicModalVisible(true)} />
+        </View>
+      </View>
+    );
+  };
 
   return (
     <View style={styles.layoutContainer}>
@@ -93,30 +142,71 @@ export default function Recommendations() {
       <View style={styles.titleContainer}>
         <ThemedText type="titleText" style={{fontSize: width/12}}>Recommendations</ThemedText>
       </View>
-      <View style={styles.recContainer}>
-        <View style={styles.recTitle}>
-          <Text style={styles.recText}></Text>
-          <Text style={[styles.recText, {color: 'white'}]}>{windDown}</Text>
-      </View>
-        <View style={styles.recCategory}>
-          <Text style={styles.recText}>Category: </Text> 
-          <Text style={[styles.recText, {color: 'white'}]}>{recCategory}</Text>
-        </View>
-        <View style={styles.recCategory}>
-          <Text style={styles.recText}>Impact Score: </Text> 
-          <Text style={[styles.recText, {color: 'white'}]}>{impactScore}/10</Text>
-        </View>
-        <View style={styles.recCategory}>
-          <Text style={styles.recText}>Details: </Text> 
-          <Text style={[styles.recText, {color: 'white'}]}>{recDetails}</Text>
-        </View>
-        <View style={styles.diveInButtonContainer}>
-          <CustomButton title="Dive In" onPress={() => setLogicModalVisible(true)} />
-        </View>
-      </View>
-      {/* <View style={styles.infoButtonContainer}>
-        <CustomButton title="info" onPress={() => setLogicModalVisible(true)} />
-      </View> */}
+      <SafeAreaView style={{flex: 1}}>
+        <Swiper
+          ref={swiperRef}
+          cards={cards}
+          cardIndex={cardIndex}
+          renderCard={renderCard}
+          onSwipedRight={onSwipedRight}
+          onSwipedLeft={onSwipedLeft}
+          stackSize={1}
+          disableTopSwipe
+          disableBottomSwipe
+          disableRightSwipe={cardIndex <= 0} // Disable right swipe at the last card
+          disableLeftSwipe={cardIndex >= cards.length - 1} // Disable left swipe at the first card
+          animateCardOpacity
+          backgroundColor="transparent"
+          cardHorizontalMargin={0}
+          cardVerticalMargin={0}
+          useViewOverflow={Platform.OS === 'ios'}
+          infinite={false}
+          showSecondCard={false}
+          key={cardIndex}  // Force re-render on card index change
+          stackSeparation={15}
+          overlayLabels={{
+            left: {
+              title: 'Next',
+              style: {
+                label: {
+                  backgroundColor: 'green',
+                  borderColor: 'green',
+                  color: 'white',
+                  borderWidth: 1,
+                },
+                wrapper: {
+                  flexDirection: 'column',
+                  alignItems: 'flex-end',
+                  justifyContent: 'flex-start',
+                  marginTop: 20,
+                  marginLeft: -20,
+                },
+              },
+            },
+            right: {
+              title: 'Prev',
+              style: {
+                label: {
+                  backgroundColor: 'green',
+                  borderColor: 'green',
+                  color: 'white',
+                  borderWidth: 1,
+                },
+                wrapper: {
+                  flexDirection: 'column',
+                  alignItems: 'flex-start',
+                  justifyContent: 'flex-start',
+                  marginTop: 20,
+                  marginLeft: 20,
+                },
+              },
+            },
+          }}
+        />
+      </SafeAreaView>
+      <Animated.View style={[styles.arrowContainer, { transform: [{ translateX: arrowTranslateX }] }]}>
+      <Text style={styles.arrowText}>→</Text>
+    </Animated.View>
     </View>
   );
 }
@@ -171,5 +261,14 @@ const styles = StyleSheet.create({
   },
   recText: {
     fontSize: 20, color: 'orange', fontStyle: 'italic'
-  }
+  },
+  arrowContainer: {
+    position: 'absolute',
+    bottom: 30,
+    right: 20,
+  },
+  arrowText: {
+    fontSize: 40,
+    color: '#000',
+  },
 });

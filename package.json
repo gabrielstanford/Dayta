@@ -51,6 +51,7 @@
     "react-native-chart-kit": "^6.12.0",
     "react-native-chart-kit-with-pressable-bar-graph": "^6.11.4",
     "react-native-cli": "^2.0.1",
+    "react-native-deck-swiper": "^2.0.17",
     "react-native-gesture-handler": "~2.16.1",
     "react-native-masked-text": "^1.13.0",
     "react-native-mmkv": "^2.12.2",
