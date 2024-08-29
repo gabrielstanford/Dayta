@@ -4,6 +4,7 @@ export type ButtonState = {
   icon: string;
   keywords: string[];
   tags: string[];
+  movementIntensity?: number;
   category?: string[]
   pressed: boolean;
   id?: string;

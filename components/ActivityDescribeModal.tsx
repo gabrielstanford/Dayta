@@ -25,10 +25,11 @@ const buttonWidth = width/6.25
     updatedTags: string[];
     setUpdatedTags: React.Dispatch<React.SetStateAction<string[]>>
     updatedCat: string[];
+    movementIntensity: number;
     onTap: () => void
   }
 
-  const ActivityItem = ({ activity, updatedCat, updatedTags, setUpdatedTags, updateActivity, onTap }: ActivityItemProps) => {
+  const ActivityItem = ({ activity, updatedCat, updatedTags, setUpdatedTags, movementIntensity, updateActivity, onTap }: ActivityItemProps) => {
     const iconMapping: { [key: string]: JSX.Element } = {
       "sunlight": <Feather name="sun" style={styles.category} />,
       "coffee": <Feather name="coffee" style={styles.category} />,
@@ -93,7 +94,8 @@ const buttonWidth = width/6.25
           <View style={styles.categoryContainer}>
           {updatedCat.length>0 ? updatedCat.map((cat) => (
               <View key={cat}>
-                {iconMapping[cat] || <Feather name="help-circle" style={styles.category} />}
+                {iconMapping[cat.toLowerCase()] || <Feather name="help-circle" style={styles.category} />}
+                
               </View>
             )) : <></>}          
           </View>
@@ -109,6 +111,9 @@ const buttonWidth = width/6.25
               <FontAwesome name="minus-circle" size={16} color="red" style={styles.minusIcon} />
             </TouchableOpacity>
           )}
+          <View>
+            <Text>Movement Intensity: {movementIntensity}</Text>
+          </View>
         </View>
       ))}
 
@@ -130,6 +135,8 @@ const ActivityDescribeModal: React.FC<MultitaskModalProps> = ({ ActivityDescribe
     const [updatedTags, setUpdatedTags] = useState(startingTags);
     const startingCat: string[] = Info.button.category ? Info.button.category : []
     const [updatedCat, setUpdatedCat] = useState<string[]>(startingCat as string[]);
+    const startingMovementIntensity: number = Info.button.movementIntensity ? Info.button.movementIntensity : 0
+    const [movementIntensity, setMovementIntensity] = useState<number>(startingMovementIntensity)
 
     // Submit the tags to the database
     const handleSubmitTags = () => {
@@ -242,7 +249,7 @@ const ActivityDescribeModal: React.FC<MultitaskModalProps> = ({ ActivityDescribe
                     <ThemedText type="title">Activity Info</ThemedText>
                   </View>
                 {Info ? 
-                <ActivityItem activity={Info} updatedTags={updatedTags} updatedCat={updatedCat} setUpdatedTags={setUpdatedTags} updateActivity={updateActivity} onTap={() => alert("Not Pressable")}/> : 
+                <ActivityItem activity={Info} updatedTags={updatedTags} movementIntensity={movementIntensity} updatedCat={updatedCat} setUpdatedTags={setUpdatedTags} updateActivity={updateActivity} onTap={() => alert("Not Pressable")}/> : 
                 <Text>Invalid Activity</Text>}
                 <CategoryBar current={updatedCat} onPress={addCategory} deleteCat={onDelete}/>
                 <View style={styles.nextContainer}>

@@ -23,7 +23,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   height = 48, // Default height
   paddingVertical = 12, // Default padding vertical
   paddingHorizontal = 20, // Default padding horizontal
-  color = '#007bff', // Default button color
+  color = 'orange', // Default button color
   fontSize = 16, // Default font size
   disabled = false,
   style,
