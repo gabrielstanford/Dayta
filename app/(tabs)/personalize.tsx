@@ -1,14 +1,14 @@
 import {useAppContext, AppProvider} from '@/contexts/AppContext'
 import {ButtonState} from '@/Types/ActivityTypes'
 import {useAuth} from '@/contexts/AuthContext'
-import {Dispatch, SetStateAction, useState} from 'react'
-import {View, Text, TouchableOpacity, StyleSheet, Dimensions, TextInput, TouchableWithoutFeedback, Keyboard} from 'react-native'
+import {Dispatch, SetStateAction, useState, useRef} from 'react'
+import {View, Text, TouchableOpacity, StyleSheet, Dimensions, TextInput, TouchableWithoutFeedback, Keyboard, FlatList} from 'react-native'
 import { ThemedText } from '@/components/ThemedText'
 import RNPickerSelect from 'react-native-picker-select'
 import { Routine, Activity } from '@/Types/ActivityTypes'
 import CreateRoutineModal from '@/components/CreateRoutineModal'
 import uuid from 'react-native-uuid'
-import {RadioButton} from 'react-native-paper'
+import CustomButton from '@/components/CustomButton'
 
 const {width, height} = Dimensions.get("window");
 const buttonWidth = width/5;
@@ -26,7 +26,8 @@ function Personalize() {
     const [durationBetween, setDurationBetween] = useState<number[]>([]);
     const [routineActivities, setRoutineActivities] = useState<Activity[]>([])
     const [value, setValue] = useState<string>("Activity");
-
+    const [pageType, setPageType] = useState<string>("Create")
+    const flatListRef = useRef<FlatList>(null);
     const handleInputChange = (text: string) => {
         setInputText(text); 
        };
@@ -123,79 +124,54 @@ function Personalize() {
         }
 
     }
-    
-    return (
-      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-        <View style={styles.modalOverlay}>
-        <CreateRoutineModal style={{}} MultitaskModalVisible={createRoutineModalVisible} onNext={handleMultitaskNext} onTapOut={() => setCreateRoutineModalVisible(false)}/>
-        <View style={styles.titleContainer}>
-              <ThemedText type="titleText" style={{fontSize: width/12}}>Personalization</ThemedText>
-            </View>
-          {/* <View style={styles.headerSection}>
-          </View> */}
-           <RadioButton.Group onValueChange={value => setValue(value)} value={value}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'center'}}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center'}}>
-                    <TouchableOpacity
-                        style={styles.radioButtonContainer}
-                        onPress={() => setValue('Activity')}
-                    >
-                      <RadioButton color="darkcyan" value="Activity" />
-                      <View style={{backgroundColor: 'green', padding: 10}}>
-                        <Text>Activity</Text>
-                      </View>
-                    </TouchableOpacity>
-                    </View>
 
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <TouchableOpacity
-                      style={styles.radioButtonContainer}
-                      onPress={() => setValue('Routine')}
-                    >
-                      <RadioButton color="darkcyan" value="Routine" />
-                      <View style={{backgroundColor: 'green', padding: 10}}>
-                        <Text>Routine</Text>
-                      </View>
-                    </TouchableOpacity>
-                    </View>
-                  </View>
-                </RadioButton.Group>
-          {value=='Activity' ? (  
-            <View style={styles.createActivityContainer}>
+    const renderContent = () => {
+      if (pageType === "Create" && value === 'Activity') {
+        return (
+          <View style={styles.container}>
           <View style={styles.textSection}>
-            <Text style={{fontSize: width/16, color: 'white', fontStyle: 'italic'}}>Create Custom Activity</Text>
-            <View style={styles.textContainer}>
-            <ThemedText type="subtitle">Activity Name: </ThemedText>
-            <View style={styles.inputText}>
-            <TextInput value={inputText} 
-                onChangeText={handleInputChange}
-                maxLength={30}
-                keyboardType="default" 
-                // onSubmitEditing={() => handleSubmit(newButton)}
-                returnKeyType="done"
-                style={styles.textInputContainer}
-            />
-            </View>
-            </View>
+          <View style={{alignItems: 'center'}}>
+            <Text style={styles.inputTitle}>Create Custom Activity</Text>
           </View>
-          <View style={styles.tagSection}>
-            <ThemedText type="subtitle">Add Tags: </ThemedText>
+          <View style={styles.textContainer}>
+          <ThemedText type="subtitle">Activity Name: </ThemedText>
+          <View style={styles.inputText}>
+          <TextInput value={inputText} 
+              onChangeText={handleInputChange}
+              maxLength={30}
+              keyboardType="default" 
+              // onSubmitEditing={() => handleSubmit(newButton)}
+              returnKeyType="done"
+              style={styles.textInputContainer}
+          />
+          </View>
+          </View>
+        </View>
+        <View style={styles.tagSection}>
+          <ThemedText type="subtitle">Add Tags: </ThemedText>
+            <View style={styles.tagsContainer}>
               <View style={styles.tagStyle}>
               <TagDropdown setTagValue={setTag1Value}/>
               </View>
               <View style={styles.tagStyle}>
               <TagDropdown setTagValue={setTag2Value}/>
               </View>
-           </View>
-          <View style={styles.createContainer}>
-              <TouchableOpacity onPress={() => handleSubmit()} style={styles.closeButton}>
-                <Text style={styles.buttonText}>Create Activity</Text>
-              </TouchableOpacity>
             </View>
-          </View>) : (
-          <View style={styles.createActivityContainer}>
+         </View>
+        <View style={styles.createContainer}>
+            <TouchableOpacity onPress={() => handleSubmit()} style={styles.closeButton}>
+              <Text style={styles.buttonText}>Create Activity</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        );
+      } else if (pageType === "Create" && value === 'Routine') {
+        return (
+          <View style={styles.container}>
           <View style={styles.textSection}>
-            <Text style={{fontSize: width/16, color: 'white', fontStyle: 'italic'}}>Create Custom Routine</Text>
+            <View style={{alignItems: 'center'}}>
+              <Text style={styles.inputTitle}>Create Custom Routine</Text>
+            </View>
             <View style={styles.textContainer}>
             <ThemedText type="subtitle">Routine Name: </ThemedText>
             <View style={styles.inputText}>
@@ -222,8 +198,53 @@ function Personalize() {
               </TouchableOpacity>
             </View>
           </View>
-          )}
-        
+        );
+      } else if (pageType === "Edit" && value === 'Activity') {
+        return (
+          <View style={styles.container}>
+              <FlatList
+                ref={flatListRef}
+                data={customActivities}
+                keyExtractor={(item) => item.text}
+                style={styles.flatList}
+                renderItem={({ item}) => ( 
+                  <View style={styles.resultContainer}>
+                      <Text >{item.text}</Text>  
+                  </View>
+                )}
+              />
+
+            {/* Add your content here */}
+          </View>
+        );
+      } else if (pageType === "Edit" && value === 'Routine') {
+        return (
+          <View style={styles.container}>
+            <Text>Edit Routine Page</Text>
+            {/* Add your content here */}
+          </View>
+        );
+      } else {
+        return null;
+      }
+    };
+    
+    return (
+      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+        <View style={styles.modalOverlay}>
+          <CreateRoutineModal style={{}} MultitaskModalVisible={createRoutineModalVisible} onNext={handleMultitaskNext} onTapOut={() => setCreateRoutineModalVisible(false)}/>
+          <View style={styles.titleContainer}>
+              <ThemedText type="titleText" style={{fontSize: width/12}}>Personalization</ThemedText>
+          </View>
+          <View style={styles.startButtons}>
+            <CustomButton title="Activity" width={width*0.4} onPress={() => setValue('Activity')} />
+            <CustomButton title="Routine" width={width*0.4} onPress={() => setValue('Routine')}/>
+          </View>
+            {renderContent()}
+          <View style={styles.endButtons}>
+            <CustomButton title="Create" width={width*0.4} onPress={() => {setPageType("Create")}} />
+            <CustomButton title="Edit" width={width*0.4} onPress={() => {setPageType("Edit")}} />
+          </View>
         </View>
         </TouchableWithoutFeedback>
     )
@@ -284,29 +305,41 @@ interface TagDropdownProps {
       padding: 10,
       backgroundColor: 'yellow'
     },
-    radioButtonContainer: {
+    valueButtonContainer: {
       flexDirection: 'row',
-      alignItems: 'center',
       marginVertical: 8,
+      borderColor: 'orange',
+      borderWidth: 2,
     },
-    createActivityContainer: {
+    container: {
+      borderWidth: 4,
+      borderColor: 'orange',
+      borderRadius: 20,
       flex: 10,
+    },
+    inputTitle: {
+      fontSize: width/16, 
+      color: 'white', 
+      fontStyle: 'italic',
+      alignItems: 'center'
     },
     buttonTextContainer: {
       flex: 1,
       alignItems: 'flex-start',
     },
     textContainer: {
-
       flexDirection: 'row',
+      justifyContent: 'space-around'
     },
     inputText: {
         // flex: 1,
         // flexDirection: 'row'
     },
     textSection: {
-      padding: 30,
+      // padding: 30,
+      paddingVertical: 20,
       rowGap: 20,
+      
     },
     setUp: {
     padding: 30,
@@ -316,21 +349,25 @@ interface TagDropdownProps {
         rowGap: 20,
         flexDirection: 'row',
         justifyContent: 'space-around',
-        alignItems: 'center',
         paddingTop: 10,
         paddingBottom: 30,
 
+    },
+    tagsContainer: {
+      
     },
     tagStyle: {
       borderColor: 'black', 
       borderWidth: 2,
       borderRadius: 20,
       // backgroundColor: 'black',
-      padding: 10,
+      padding: 15,
+      margin: 5
     },
     createContainer: {
  
       alignItems: 'center',
+
     },
     closeButton: {
       backgroundColor: 'blue', // Example background color
@@ -348,5 +385,32 @@ interface TagDropdownProps {
      height: 50,
     paddingLeft: 15,
     paddingRight: 15,
+    },
+    startButtons: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      padding: 10,
+    },
+    resultContainer: {
+      flex: 1,
+      backgroundColor: '#fff',
+      borderRadius: 10,
+      padding: 15,
+      marginTop: 10,
+      shadowColor: '#000',
+      shadowOpacity: 0.1,
+      shadowRadius: 10,
+      shadowOffset: { width: 0, height: 4 },
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    endButtons: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      padding: 20,
+      paddingBottom: 50,
+    },
+    flatList: {
+      // flex: 1,
     },
   });

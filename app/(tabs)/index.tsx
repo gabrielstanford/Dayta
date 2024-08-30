@@ -161,10 +161,10 @@ const ActivityItem = ({ activity, onRemove, timeState, dateIncrement, updateActi
             )}
           </View>
         </TouchableOpacity>
-        <View style={styles.touchableActivity}>
+        <View style={Cat.length>0 ? [styles.touchableActivity, {maxWidth: 150}] : styles.touchableActivity}>
           <Text style={styles.activityName}>{activity.button.text}</Text>
           </View>
-          <View style={{}}>
+          <View style={styles.indexCategories}>
           {Cat.length>0 ? Cat.map((cat) => (
               <View key={cat}>
                 {iconMapping[cat] || <Feather name="help-circle" style={styles.category} />}
@@ -430,7 +430,12 @@ allTouchables: {
 },
 touchableActivity: {
   flexShrink: 1,
-  marginHorizontal: 10,
+  flexWrap: 'nowrap',
+  marginHorizontal: 2,
+
+},
+indexCategories: {
+  marginLeft: 'auto'
 },
 touchableDelete: {
   marginLeft: 'auto'

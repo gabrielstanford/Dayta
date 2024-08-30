@@ -3,7 +3,7 @@ import { ThemedText } from '@/components/ThemedText';
 import {useState, useEffect, useRef} from 'react'
 import FetchDayActivities from '@/Data/FetchDayActivities';
 import { useAuth } from '@/contexts/AuthContext';
-import { Activity } from '@/Types/ActivityTypes';
+import { Activity, Card } from '@/Types/ActivityTypes';
 import { useCustomSet } from '@/Data/CustomSet';
 import { useAppContext } from '@/contexts/AppContext';
 import RecDescribeModal from '@/components/RecDescribeModal';
@@ -50,15 +50,19 @@ export default function Recommendations() {
     return totalScore
   }
 
-  const [cards, setCards] = useState([
-    { windDown: "Night-Time Wind Down Routine", recCategory: 'Sleep Hygiene', impactScore: 9, recDetails: 'Based on your entries, we gather that your sleep habits could use some serious improvement. Sleep is one of the most important parts of our health and well-being, and improving your sleep is proven to have numerous incredible benefits. A few simple shifts in your routine will make all the difference. Click below to generate a detailed report on your current habits and an actionable plan to improve!' },
-    { windDown: 'Unwind', recCategory: 'Reading', impactScore: 7, recDetails: 'Read a calming book before bed.' },
-    { windDown: 'New', recCategory: 'Reading', impactScore: 7, recDetails: 'Read a calming book before bed.' },
+  const [cards, setCards] = useState<Card[]>([
+    { title: "Night-Time Wind Down Routine", recCategory: 'Sleep Hygiene', impactScore: 9, recDetails: 'Based on your entries, we gather that your sleep habits could use some serious improvement. Sleep is one of the most important parts of our health and well-being, and improving your sleep is proven to have numerous incredible benefits. A few simple shifts in your routine will make all the difference. Click below to generate a detailed report on your current habits and an actionable plan to improve!' },
+    { title: 'Streamline Morning Routine', recCategory: 'Reading', impactScore: 7, recDetails: 'A well setup morning routine gives your day structure and sets you up properly for the rest of the day. Lets get you setup with the perfect one, using science-based principles to build a routine that is both structured and allows for variety & spontaneity. ' },
+    { title: 'Improve Movement Habits', recCategory: 'Reading', impactScore: 7, recDetails: 'Read a calming book before bed.' },
     // { windDown: 'Calm', recCategory: 'Breathing', impactScore: 8, recDetails: 'Deep breathing exercises to calm the mind.' },
     // Add more cards as needed
   ]);
   const swiperRef = useRef<any>(null);
   const [cardIndex, setCardIndex] = useState(0);
+
+  const diveInPressed = () => {
+    setLogicModalVisible(true);
+  }
 
   useEffect(() => {
     if (swiperRef.current) {
@@ -104,9 +108,9 @@ export default function Recommendations() {
     animateArrow();
   }, [cardIndex]);
   const {user} = useAuth();
-  useEffect(() => {
-    FetchDayActivities(user, 0, justActivities, setTodayActivities, true)
-  }, [justActivities])
+  // useEffect(() => {
+  //   FetchDayActivities(user, 0, justActivities, setTodayActivities, true)
+  // }, [justActivities])
 
   console.log('sleep sum: ', sleepSum)
 
@@ -114,7 +118,8 @@ export default function Recommendations() {
     return (
       <View style={styles.recContainer}>
         <View style={styles.recTitle}>
-          <Text style={[styles.recText, { color: 'white' }]}>{card.windDown}</Text>
+        <Text style={styles.recText}>{cardIndex + 1}. </Text>
+          <Text style={[styles.recText, { color: 'white' }]}>{card.title}</Text>
         </View>
         <View style={styles.recCategory}>
           <Text style={styles.recText}>Category: </Text>
@@ -129,7 +134,7 @@ export default function Recommendations() {
           <Text style={[styles.recText, { color: 'white' }]}>{card.recDetails}</Text>
         </View>
         <View style={styles.diveInButtonContainer}>
-          <CustomButton title="Dive In" onPress={() => setLogicModalVisible(true)} />
+          <CustomButton title="Dive In" onPress={diveInPressed} />
         </View>
       </View>
     );
@@ -138,7 +143,7 @@ export default function Recommendations() {
   return (
     <View style={styles.layoutContainer}>
       <RecDescribeModal visible={modalVisible} onClose={() => setModalVisible(false)} speel={entertainmentSpeel} />
-      <LogicModal visible={logicModalVisible} onClose={() => setLogicModalVisible(false)} speel={"Filler Text"}/>
+      <LogicModal visible={logicModalVisible} card={cards[cardIndex]} onClose={() => setLogicModalVisible(false)}/>
       <View style={styles.titleContainer}>
         <ThemedText type="titleText" style={{fontSize: width/12}}>Recommendations</ThemedText>
       </View>

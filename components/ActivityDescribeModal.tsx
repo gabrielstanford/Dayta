@@ -1,4 +1,4 @@
-import {ModalProps, Modal, View, StyleSheet, Dimensions, Text, TouchableWithoutFeedback, FlatList, TouchableOpacity} from 'react-native'
+import {ModalProps, Modal, View, StyleSheet, Dimensions, Text, TouchableWithoutFeedback, TextInput, FlatList, TouchableOpacity} from 'react-native'
 import {ThemedText} from './ThemedText'
 import React, {useState, useEffect} from 'react'
 import {Button} from '@rneui/themed'
@@ -25,11 +25,12 @@ const buttonWidth = width/6.25
     updatedTags: string[];
     setUpdatedTags: React.Dispatch<React.SetStateAction<string[]>>
     updatedCat: string[];
-    movementIntensity: number;
+    movementIntensity: string;
+    setMovementIntensity: React.Dispatch<React.SetStateAction<string>>
     onTap: () => void
   }
 
-  const ActivityItem = ({ activity, updatedCat, updatedTags, setUpdatedTags, movementIntensity, updateActivity, onTap }: ActivityItemProps) => {
+  const ActivityItem = ({ activity, updatedCat, updatedTags, setUpdatedTags, movementIntensity, setMovementIntensity, updateActivity, onTap }: ActivityItemProps) => {
     const iconMapping: { [key: string]: JSX.Element } = {
       "sunlight": <Feather name="sun" style={styles.category} />,
       "coffee": <Feather name="coffee" style={styles.category} />,
@@ -61,44 +62,45 @@ const buttonWidth = width/6.25
         setUpdatedTags(newTags);
       }
     };
-  
-    // if(changeTags == true) {   
-      
-    // const tags = activity.button.tags
+    const [error, setError] = useState<string | null>(null);
 
-    // const newTag = "Entertainment"
-    // const finalTags = [newTag]
-    
-    // const updates: Partial<Activity> = {
-    //   //first turn input value into unix. Create function for this. 
-    //   button: {
-    //     text: activity.button.text,
-    //     keywords: activity.button.keywords,
-    //     iconLibrary: activity.button.iconLibrary,
-    //     icon: activity.button.icon,
-    //     pressed: false,
-    //     tags: finalTags
-    //   },
-    // };
-    // updateActivity(activity, updates)
-    // setChangeTags(false)
-    // }
-    console.log(updatedCat)
+  const handleChangeText = (text: string) => {
+    // Remove non-numeric characters
+    const numericValue = text.replace(/\D/g, '');
+
+    // Convert to number
+    const number = parseInt(numericValue, 10);
+
+    // Check if the number is within the range 0-10
+    if (!isNaN(number) && number >= 0 && number <= 10) {
+      setMovementIntensity(numericValue);
+      setError(null);
+    } else if (numericValue === '') {
+      // Allow empty input
+      setMovementIntensity('')
+      setError(null);
+    } else {
+      setError('Value must be between 0 and 10');
+    }
+  };
+  console.log('intensity: ', movementIntensity)
+
     return (
-    <>
       <View style={styles.activityContainer}>
+        <View style={styles.rowContainer}>
         <View style={styles.detailsContainer}>
-          <TouchableOpacity onPress={onTap} style={styles.touchableContent}>
+          <View style={styles.name}>
             <Text style={styles.activityName}>{activity.button.text} </Text>
-          </TouchableOpacity>
-          <View style={styles.categoryContainer}>
-          {updatedCat.length>0 ? updatedCat.map((cat) => (
+            <View style={styles.categoryContainer}>
+            {updatedCat.length>0 ? updatedCat.map((cat) => (
               <View key={cat}>
                 {iconMapping[cat.toLowerCase()] || <Feather name="help-circle" style={styles.category} />}
                 
               </View>
             )) : <></>}          
           </View>
+          </View>
+
           <View style={styles.tagContainer}>
           {updatedTags.map((tag, index) => (
         <View key={index} style={styles.tagItem}>
@@ -111,10 +113,8 @@ const buttonWidth = width/6.25
               <FontAwesome name="minus-circle" size={16} color="red" style={styles.minusIcon} />
             </TouchableOpacity>
           )}
-          <View>
-            <Text>Movement Intensity: {movementIntensity}</Text>
-          </View>
         </View>
+        
       ))}
 
       {updatedTags.length < 4 && (
@@ -124,9 +124,24 @@ const buttonWidth = width/6.25
         )}
           </View>
         </View>
+          </View>
+          {updatedTags.includes("Physical") && 
+            <View style={styles.exerciseSection}>
+            <Text style={{fontSize: 18, color: 'darkcyan'}}>Customize Exercise</Text>
+            <View style={{flexDirection: 'row'}}>
+              <Text>Movement Intensity:</Text>
+              <TextInput         
+              value={movementIntensity.toString()}
+              onChangeText={handleChangeText}
+              maxLength={2} // This mask allows single digit input
+              keyboardType="numeric"
+              style={{ borderWidth: 1, borderColor: 'gray', padding: 10 }}
+               />
+               {error && <Text >{error}</Text>}
+            </View>
+          </View>}
       </View>
 
-          </>
   );}
 const ActivityDescribeModal: React.FC<MultitaskModalProps> = ({ ActivityDescribeVisible, Info, onClose, onTapOut, ...modalProps }) => {
 
@@ -135,9 +150,10 @@ const ActivityDescribeModal: React.FC<MultitaskModalProps> = ({ ActivityDescribe
     const [updatedTags, setUpdatedTags] = useState(startingTags);
     const startingCat: string[] = Info.button.category ? Info.button.category : []
     const [updatedCat, setUpdatedCat] = useState<string[]>(startingCat as string[]);
-    const startingMovementIntensity: number = Info.button.movementIntensity ? Info.button.movementIntensity : 0
-    const [movementIntensity, setMovementIntensity] = useState<number>(startingMovementIntensity)
-
+    const startingMovementIntensity: number = (Info.button.movementIntensity && Info.button.movementIntensity>=0 && Info.button.movementIntensity<=10) ? Info.button.movementIntensity : 0
+    const [movementIntensity, setMovementIntensity] = useState<string>(startingMovementIntensity.toString())
+    console.log('intensity passed in: ', movementIntensity)
+    console.log('')
     // Submit the tags to the database
     const handleSubmitTags = () => {
       let cat: string[] = []
@@ -153,7 +169,8 @@ const ActivityDescribeModal: React.FC<MultitaskModalProps> = ({ ActivityDescribe
           icon: Info.button.icon,
           pressed: false,
           tags: updatedTags,
-          category: cat
+          category: cat,
+          movementIntensity: parseInt(movementIntensity)
         },
       };
       console.log('updates: ', updates)
@@ -175,6 +192,7 @@ const ActivityDescribeModal: React.FC<MultitaskModalProps> = ({ ActivityDescribe
         setUpdatedTags([]);
       }
     }, [Info])
+
     const addCategory = (text: string) => {
       console.log('adding category')
       if(Info && text) {
@@ -195,7 +213,8 @@ const ActivityDescribeModal: React.FC<MultitaskModalProps> = ({ ActivityDescribe
           icon: Info.button.icon,
           pressed: false,
           tags: Info.button.tags,
-          category: newCat
+          category: newCat,
+          movementIntensity: Info.button.movementIntensity
         },
       };
       updateActivity(Info, updates)
@@ -249,7 +268,7 @@ const ActivityDescribeModal: React.FC<MultitaskModalProps> = ({ ActivityDescribe
                     <ThemedText type="title">Activity Info</ThemedText>
                   </View>
                 {Info ? 
-                <ActivityItem activity={Info} updatedTags={updatedTags} movementIntensity={movementIntensity} updatedCat={updatedCat} setUpdatedTags={setUpdatedTags} updateActivity={updateActivity} onTap={() => alert("Not Pressable")}/> : 
+                <ActivityItem activity={Info} updatedTags={updatedTags} movementIntensity={movementIntensity} setMovementIntensity={setMovementIntensity} updatedCat={updatedCat} setUpdatedTags={setUpdatedTags} updateActivity={updateActivity} onTap={() => alert("Not Pressable")}/> : 
                 <Text>Invalid Activity</Text>}
                 <CategoryBar current={updatedCat} onPress={addCategory} deleteCat={onDelete}/>
                 <View style={styles.nextContainer}>
@@ -320,13 +339,17 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: 'darkcyan'
       },
-
+      exerciseSection: {
+        marginTop: 'auto'
+      },
       categoryContainer: {
-
+        flexDirection: 'row',
+        
       },
       category: { 
         fontSize: 15,
         color: 'red',
+        marginHorizontal: 5
 
       },
       tagContainer: {
@@ -350,8 +373,10 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 10,
         shadowOffset: { width: 0, height: 4 },
-        flexDirection: 'row',
         // alignItems: 'center',
+      },
+      rowContainer: {
+        flexDirection: 'row',
       },
       tagItem: {
         flexDirection: 'row',
@@ -368,9 +393,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flex: 1, // Allows this section to take up the remaining space
       },
-      touchableContent: {
+      name: {
         // flexDirection: 'row',
         // marginRight: 30,
+          flexShrink: 1,
       },
       nextContainer: {
         left: ((width/1.1) / 2) - (buttonWidth / 2), // Center horizontally more precisely

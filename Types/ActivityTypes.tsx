@@ -1,14 +1,21 @@
-export type ButtonState = {
-  text: string;
-  iconLibrary: string;
-  icon: string;
-  keywords: string[];
-  tags: string[];
-  movementIntensity?: number;
-  category?: string[]
-  pressed: boolean;
-  id?: string;
-};
+    export interface ButtonState {
+      text: string;
+      iconLibrary: string;
+      icon: string;
+      keywords: string[];
+      tags: string[];
+      movementIntensity?: number;
+      category?: string[]
+      pressed: boolean;
+      id?: string;
+    };
+
+    export interface Card {
+      title: string,
+      recCategory: string,
+      impactScore: number,
+      recDetails: string
+    }
 
   export interface TimeBlock {
     startTime: number,   // Unix timestamp for the start time (or the date of the activity)
