@@ -176,12 +176,12 @@ function BlockedTime() {
 
     const { user } = useAuth();
     const [dbActivities, setDbActivities] = useState<any>(null);
-    const [activityInfo, setActivityInfo] = useState<Activity[]>([])
+    const [activityInfo, setActivityInfo] = useState<Activity>()
     const { justActivities, dateIncrement } = useAppContext();
     const [activityDescribeVisible, setActivityDescribeVisible] = useState<boolean>(false);
 
   useEffect(() => {
-    FetchDayActivities(user, dateIncrement, justActivities, setDbActivities)
+    FetchDayActivities(user, dateIncrement, justActivities, setDbActivities, false)
 
   }, [user, justActivities, dateIncrement]);
 const getActivityTimeDiffPairs = (range: TimeRange) => {
@@ -230,16 +230,10 @@ const dayStartHour = setMinutesToZero(dbActivities[0].timeBlock.startTime)
 
     const activityTapped = (activity: Activity) => {
       if(activity.button.text=="Multi-Activity") {
-        if(activity.Multi) {
-        let multiActivities: Activity[] = []
-        for(let i=0; i<activity.Multi.length; i++) {
-          multiActivities[i]=activity.Multi[i];
-        }
-        setActivityInfo(multiActivities)
-      }
+        alert("Multi activity")
       }
       else {
-        setActivityInfo([activity])
+        setActivityInfo(activity)
       }
       setActivityDescribeVisible(true);
     }
@@ -248,7 +242,7 @@ const dayStartHour = setMinutesToZero(dbActivities[0].timeBlock.startTime)
     
       <View style={styles.layoutContainer}>
         <MyModal visible={modalVisible} onClose={toggleModal} />
-        <ActivityDescribeModal style={styles.durationModal} ActivityDescribeVisible={activityDescribeVisible} Info={activityInfo} onClose={() => setActivityDescribeVisible(false)} onTapOut={() => setActivityDescribeVisible(false)}/>
+        {activityInfo && <ActivityDescribeModal style={styles.durationModal} ActivityDescribeVisible={activityDescribeVisible} Info={activityInfo} onClose={() => setActivityDescribeVisible(false)} onTapOut={() => setActivityDescribeVisible(false)}/>}
         <View style={styles.contentContainer}>
           <View style={styles.headerContainer}>
               <View style={styles.titleContainer}>

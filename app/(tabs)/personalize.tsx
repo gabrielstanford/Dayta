@@ -1,14 +1,16 @@
 import {useAppContext, AppProvider} from '@/contexts/AppContext'
 import {ButtonState} from '@/Types/ActivityTypes'
 import {useAuth} from '@/contexts/AuthContext'
-import {Dispatch, SetStateAction, useState, useRef} from 'react'
-import {View, Text, TouchableOpacity, StyleSheet, Dimensions, TextInput, TouchableWithoutFeedback, Keyboard, FlatList} from 'react-native'
+import {Dispatch, SetStateAction, useState, useRef, useEffect} from 'react'
+import {View, Text, TouchableOpacity, StyleSheet, Dimensions, TextInput, TouchableWithoutFeedback, Keyboard, FlatList, Button} from 'react-native'
 import { ThemedText } from '@/components/ThemedText'
 import RNPickerSelect from 'react-native-picker-select'
 import { Routine, Activity } from '@/Types/ActivityTypes'
 import CreateRoutineModal from '@/components/CreateRoutineModal'
 import uuid from 'react-native-uuid'
 import CustomButton from '@/components/CustomButton'
+import { MaterialIcons, AntDesign } from '@expo/vector-icons'
+import CustomActivityEdit from '@/components/CustomActivityEdit'
 
 const {width, height} = Dimensions.get("window");
 const buttonWidth = width/5;
@@ -16,7 +18,7 @@ const buttonHeight = height/19;
 const titleWidth = width/1.5;
 
 function Personalize() {
-    const {addCustomActivity, addCustomRoutine, customActivities} = useAppContext();
+    const {addCustomActivity, addCustomRoutine, customActivities, removeCustomAct} = useAppContext();
     const {user} = useAuth();
     const [createRoutineModalVisible, setCreateRoutineModalVisible] = useState<boolean>(false);
     const [inputText, setInputText] = useState<string>("")
@@ -28,6 +30,19 @@ function Personalize() {
     const [value, setValue] = useState<string>("Activity");
     const [pageType, setPageType] = useState<string>("Create")
     const flatListRef = useRef<FlatList>(null);
+    const [customActInfo, setCustomActInfo] = useState<ButtonState>()
+    const [customActEditVisible, setCustomActEditVisible] = useState<boolean>(false);
+
+    useEffect(() => {
+      if(customActInfo) {
+        setCustomActEditVisible(true);
+      }
+      }, [customActInfo])
+    const deleteCustomActivity = (customAct: ButtonState) => {
+      console.log('deleting')
+      removeCustomAct(customAct);
+    }
+
     const handleInputChange = (text: string) => {
         setInputText(text); 
        };
@@ -70,6 +85,10 @@ function Personalize() {
   
     const handleSubmit = () => {
         if(inputText.length>2 && (tag1Value!=="null" || tag2Value!=="null")) {
+          if(inputText.includes("/") || inputText.includes(",")) {
+            alert("No commas or slashes in activity titles");
+            return;
+          }
           if(tag1Value==tag2Value) {
             alert("Make sure the tags are not the same")
             return;
@@ -124,7 +143,18 @@ function Personalize() {
         }
 
     }
+    const customActTapped = (customAct: ButtonState) => {
 
+
+        if(customActInfo==customAct) {
+          setCustomActEditVisible(true);
+        }
+        else {
+          setCustomActInfo(customAct)
+
+        }
+      
+    }
     const renderContent = () => {
       if (pageType === "Create" && value === 'Activity') {
         return (
@@ -151,10 +181,10 @@ function Personalize() {
           <ThemedText type="subtitle">Add Tags: </ThemedText>
             <View style={styles.tagsContainer}>
               <View style={styles.tagStyle}>
-              <TagDropdown setTagValue={setTag1Value}/>
+              <TagDropdown tagValue={tag1Value} setTagValue={setTag1Value}/>
               </View>
               <View style={styles.tagStyle}>
-              <TagDropdown setTagValue={setTag2Value}/>
+              <TagDropdown tagValue={tag2Value} setTagValue={setTag2Value}/>
               </View>
             </View>
          </View>
@@ -188,9 +218,8 @@ function Personalize() {
           </View>
           <View style={styles.setUp}>
             <ThemedText type="subtitle">Set Up Routine: </ThemedText>
-            <TouchableOpacity style={styles.addRoutineButton} onPress={() => setCreateRoutineModalVisible(true)}>
-              <Text>Add Activities</Text>
-            </TouchableOpacity>
+            {/* <TouchableOpacity style={styles.addRoutineButton} onPress={() => setCreateRoutineModalVisible(true)}> */}
+              <CustomButton title="Add Activities" color="#ADD8E6" width={width*0.5} onPress={() => setCreateRoutineModalVisible(true)}/>
           </View>
           <View style={styles.createContainer}>
               <TouchableOpacity onPress={() => handleRoutineSubmit()} style={styles.closeButton}>
@@ -200,21 +229,31 @@ function Personalize() {
           </View>
         );
       } else if (pageType === "Edit" && value === 'Activity') {
+        const alphabeticalActs = customActivities.sort((a, b) => a.text.localeCompare(b.text));
         return (
           <View style={styles.container}>
               <FlatList
                 ref={flatListRef}
-                data={customActivities}
+                data={alphabeticalActs}
                 keyExtractor={(item) => item.text}
                 style={styles.flatList}
                 renderItem={({ item}) => ( 
+                  <TouchableOpacity onPress={() => customActTapped(item)}>
                   <View style={styles.resultContainer}>
-                      <Text >{item.text}</Text>  
+
+                      
+                        <Text >{item.text}</Text>  
+
+                        <AntDesign name="edit" size={width / 15} color="orange" />
+
+                        <TouchableOpacity onPress={() => deleteCustomActivity(item)} style={styles.touchableDelete}>
+                        <MaterialIcons name="delete" size={width / 15} color="black" />
+                      </TouchableOpacity>
+                    
                   </View>
+                  </TouchableOpacity>
                 )}
               />
-
-            {/* Add your content here */}
           </View>
         );
       } else if (pageType === "Edit" && value === 'Routine') {
@@ -230,30 +269,39 @@ function Personalize() {
     };
     
     return (
-      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <>
+      {/* <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}> */}
         <View style={styles.modalOverlay}>
+        {customActInfo && (<CustomActivityEdit style={styles.editModal} ActivityDescribeVisible={customActEditVisible} Info={customActInfo as ButtonState} onClose={() => setCustomActEditVisible(false)} onTapOut={() => setCustomActEditVisible(false)}/>)}
           <CreateRoutineModal style={{}} MultitaskModalVisible={createRoutineModalVisible} onNext={handleMultitaskNext} onTapOut={() => setCreateRoutineModalVisible(false)}/>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.titleContainer}>
               <ThemedText type="titleText" style={{fontSize: width/12}}>Personalization</ThemedText>
           </View>
+          </TouchableWithoutFeedback>
           <View style={styles.startButtons}>
             <CustomButton title="Activity" width={width*0.4} onPress={() => setValue('Activity')} />
             <CustomButton title="Routine" width={width*0.4} onPress={() => setValue('Routine')}/>
           </View>
+          
+          <View style={styles.renderButtons}>
             {renderContent()}
+          </View>
           <View style={styles.endButtons}>
             <CustomButton title="Create" width={width*0.4} onPress={() => {setPageType("Create")}} />
             <CustomButton title="Edit" width={width*0.4} onPress={() => {setPageType("Edit")}} />
           </View>
-        </View>
-        </TouchableWithoutFeedback>
+        </View> 
+        {/* </TouchableWithoutFeedback> */}
+        </>
     )
 }
 
 interface TagDropdownProps {
     setTagValue: Dispatch<SetStateAction<string>>;
+    tagValue: string;
   }
-  const TagDropdown: React.FC<TagDropdownProps> = ({ setTagValue }) => {
+  const TagDropdown: React.FC<TagDropdownProps> = ({ tagValue, setTagValue }) => {
     const tags = [
       { label: 'Food/Drink', value: 'Food/Drink'},
       { label: 'Physical', value: 'Physical' },
@@ -271,12 +319,55 @@ interface TagDropdownProps {
       {label: 'Intaking Knowledge', value: 'Intaking Knowledge'},
       { label: 'Other', value: 'Other' },
     ]
+    
     return (
+      <View style={{padding: 5}}>
       <RNPickerSelect
         onValueChange={(value) => setTagValue(value)}
         items={tags}
+        style={{
+          ...pickerSelectStyles,
+          placeholder: {
+            color: 'black',  // Set the color of the placeholder text
+          },
+        }}
+        value={tagValue}
+        useNativeAndroidPickerStyle={false} // Important for custom styles on Android
+        placeholder={{
+          label: 'Select a tag',
+          value: null,
+          color: 'black',
+        }}
       />
+    </View>
     );
+  };
+
+  const pickerSelectStyles = {
+    inputIOS: {
+      // Customize the selected text color for iOS
+      color: 'green', // Change this to your desired color
+      // You can add more styling here if needed
+      fontSize: 17,
+      paddingVertical: 3,
+      paddingHorizontal: 10,
+      // borderWidth: 1,
+      // borderColor: 'gray',
+      // borderRadius: 4,
+      // backgroundColor: 'white',
+    },
+    inputAndroid: {
+      // Customize the selected text color for Android
+      color: 'blue', // Change this to your desired color
+      // Additional styling options
+      fontSize: 16,
+      paddingHorizontal: 10,
+      paddingVertical: 2,
+      borderWidth: 0.5,
+      borderColor: 'purple',
+      borderRadius: 8,
+      backgroundColor: 'white',
+    },
   };
 
 // const Personalize: React.FC = () => {
@@ -305,17 +396,23 @@ interface TagDropdownProps {
       padding: 10,
       backgroundColor: 'yellow'
     },
+    editModal: {
+      flex: 1
+    },
     valueButtonContainer: {
       flexDirection: 'row',
       marginVertical: 8,
       borderColor: 'orange',
       borderWidth: 2,
     },
+    renderButtons: {
+      flex: 10,
+    },
     container: {
       borderWidth: 4,
       borderColor: 'orange',
       borderRadius: 20,
-      flex: 10,
+      flex: 1,
     },
     inputTitle: {
       fontSize: width/16, 
@@ -343,7 +440,8 @@ interface TagDropdownProps {
     },
     setUp: {
     padding: 30,
-    flexDirection: 'row'
+    flexDirection: 'row',
+    alignItems: 'center'
     },
     tagSection: {
         rowGap: 20,
@@ -357,7 +455,8 @@ interface TagDropdownProps {
       
     },
     tagStyle: {
-      borderColor: 'black', 
+      borderColor: 'lightblue', 
+      backgroundColor: 'lightblue',
       borderWidth: 2,
       borderRadius: 20,
       // backgroundColor: 'black',
@@ -404,6 +503,12 @@ interface TagDropdownProps {
       flexDirection: 'row',
       alignItems: 'center',
     },
+    touchableDelete: {
+      marginLeft: 'auto'
+    },
+    editIcon: {
+      paddingHorizontal: 20
+    },
     endButtons: {
       flexDirection: 'row',
       justifyContent: 'space-between',
@@ -411,6 +516,6 @@ interface TagDropdownProps {
       paddingBottom: 50,
     },
     flatList: {
-      // flex: 1,
+      flex: 1,
     },
   });

@@ -16,7 +16,9 @@ interface AppContextProps {
   dateIncrement: number;
   setDateIncrement: React.Dispatch<React.SetStateAction<number>>;
   updateActivity: (activity: Activity, updates: Partial<Activity>) => void;
+  updateCustomActivities: (customAct: ButtonState, updates: Partial<ButtonState>) => void;
   customActivities: ButtonState[];
+  removeCustomAct: (customAct: ButtonState) => void;
   setUpdateLocalStorage: React.Dispatch<React.SetStateAction<boolean>>;
   moveActivity: (activity: Activity, updates: Partial<Activity>) => void;
   addActivity: (activity: Activity) => void;
@@ -120,6 +122,40 @@ const updateActivity = async (activity: Activity, updates: Partial<Activity>) =>
   }
 };
 
+const updateCustomActivities = async (customAct: ButtonState, updates: Partial<ButtonState>) => {
+  try {
+    if(user) {
+    // Update the timeBlock of the relevant activity
+      const updatedActs = customActivities.map((act) => {
+
+        if (act === customAct) {
+          return {
+            ...act,
+            ...updates, // Spread the input properties to update the matching activity
+          };
+        }
+        return act;
+      });
+      // Set the updated array
+      setCustomActivities(updatedActs);
+      storage.set('CustomActivities', JSON.stringify(updatedActs))
+
+    const activityRef = doc(firestore, 'users', user.uid, 'customActivities', customAct.text);
+    
+    // Add a timestamp to the updates
+    const updatedFields = {
+      ...updates,
+      updatedAt: serverTimestamp(), // Optional: add an update timestamp
+    };
+
+    // Update the activity document
+    await updateDoc(activityRef, updatedFields);
+  }
+  } catch (error) {
+    console.error('Error updating activity: ', error);
+  }
+}
+
 const moveActivity = async (
   activity: Activity,
   updates: Partial<Activity>
@@ -195,24 +231,6 @@ const moveActivity = async (
     console.error('Error moving activity: ', error);
   }
 };
-
-// useEffect(() => {
-//   console.log('customActivities in AppProvider: ', customActivities);
-// }, [customActivities]);
-  const addActivityToDate = (date: string, activity: Activity) => {
-    // setAllActivities(prevDates => {
-    //   const existingDate = prevDates.find(d => d.date === date);
-    //   if (existingDate) {
-    //     return prevDates.map(d => 
-    //       d.date === date
-    //         ? { ...d, activities: [...d.activities, activity] }
-    //         : d
-    //     );
-    //   } else {
-    //     return [...prevDates, { date, activities: [activity] }];
-    //   }
-    // });
-  };
 
 useEffect(() => {
 
@@ -381,7 +399,17 @@ useEffect(() => {
 
   const addCustomActivity = async (button: ButtonState) => {
     try {
-      setCustomActivities(prevButtons => [...prevButtons, button] // Add new activity
+      setCustomActivities((prevButtons: ButtonState[]) => {
+        const prev = prevButtons.some(oldButton => oldButton.text === button.text)
+        if(prev) {
+          alert("duplicate!")
+        }
+        if(!prev) {
+          storage.set('CustomRoutines', JSON.stringify([...customRoutines, button]))
+        }
+        return (!prev ?
+          [...prevButtons, button] : [...prevButtons])});
+        setCustomActivities(prevButtons => [...prevButtons, button] // Add new activity
       );
       storage.set('CustomActivities', JSON.stringify([...customActivities, button]))
       console.log('completed setting custom activities')
@@ -412,9 +440,11 @@ useEffect(() => {
         if(prev) {
           alert("duplicate!")
         }
+        if(!prev) {
+          storage.set('CustomRoutines', JSON.stringify([...customRoutines, routine]))
+        }
         return (!prev ?
           [...prevRouts, routine] : [...prevRouts])});
-        storage.set('CustomRoutines', JSON.stringify([...customRoutines, routine]))
         if (user) {
         //first add to context, in background add to local storage/database
         const routineRef = doc(firestore, 'users', user.uid, 'customRoutines', routine.name); // Using routine name as ID
@@ -433,6 +463,20 @@ useEffect(() => {
       }
   };
 
+  const removeCustomAct = async (customAct: ButtonState) => {
+    try {
+      setCustomActivities(prevCustomActs => prevCustomActs.filter(button => button.text !== customAct.text));
+      storage.set('CustomActivities', JSON.stringify(customActivities.filter(button => button.text !== customAct.text)))
+      if(user) {
+
+        await deleteDoc(doc(firestore, 'users', user.uid, 'customActivities', customAct.text));
+
+    }
+    } catch (error) {
+    console.error('Error adding activity to Firestore:', error);
+    }
+  };
+
   const removeActivity = async (activ: Activity) => {
     try {
       setJustActivities(prevActivities => prevActivities.filter(act => act.id !== activ.id));
@@ -447,7 +491,7 @@ useEffect(() => {
     }
   };
   return (
-    <AppContext.Provider value={{ justActivities, allActivities, dateIncrement, customActivities, setDateIncrement, setUpdateLocalStorage, addActivity, addCustomActivity, addCustomRoutine, customRoutines, addRoutineActivities, updateActivity, moveActivity, removeActivity, state, updateState, finalArray, setFinalArray }}>
+    <AppContext.Provider value={{ justActivities, allActivities, dateIncrement, customActivities, setDateIncrement, setUpdateLocalStorage, addActivity, addCustomActivity, removeCustomAct, addCustomRoutine, customRoutines, addRoutineActivities, updateActivity, moveActivity, removeActivity, updateCustomActivities, state, updateState, finalArray, setFinalArray }}>
       {children}
     </AppContext.Provider>
   );

@@ -1,13 +1,14 @@
 import {ModalProps, Modal, View, StyleSheet, Dimensions, Text, TouchableWithoutFeedback, TextInput, FlatList, TouchableOpacity} from 'react-native'
 import {ThemedText} from './ThemedText'
 import React, {useState, useEffect} from 'react'
-import {Button} from '@rneui/themed'
-import {Activity} from '@/Types/ActivityTypes'
+import { Button } from '@rneui/themed'
+import {ButtonState, Activity} from '@/Types/ActivityTypes'
 import { useAppContext } from '@/contexts/AppContext';
 import RNPickerSelect from 'react-native-picker-select'
 import { AntDesign } from '@expo/vector-icons';
 import CategoryBar from './CategoryBar'
 import {Feather, MaterialCommunityIcons, FontAwesome, FontAwesome5, MaterialIcons} from '@expo/vector-icons'
+import { parse } from '@babel/core'
 
 const {width, height} = Dimensions.get("window");
 const buttonWidth = width/6.25
@@ -15,22 +16,20 @@ const buttonWidth = width/6.25
   
   interface MultitaskModalProps extends ModalProps {
     ActivityDescribeVisible: boolean;
-    Info: Activity
+    Info: ButtonState
     onClose: () => void;
     onTapOut: () => void;
   }
-  interface ActivityItemProps {
-    activity: Activity;
-    updateActivity: (activity: Activity, updates: Partial<Activity>) => void;
+  interface CustomActItemProps {
+    customAct: ButtonState;
     updatedTags: string[];
     setUpdatedTags: React.Dispatch<React.SetStateAction<string[]>>
     updatedCat: string[];
     movementIntensity: string;
     setMovementIntensity: React.Dispatch<React.SetStateAction<string>>
-    onTap: () => void
   }
 
-  const ActivityItem = ({ activity, updatedCat, updatedTags, setUpdatedTags, movementIntensity, setMovementIntensity, updateActivity, onTap }: ActivityItemProps) => {
+  const ActivityItem = ({ customAct, updatedCat, updatedTags, setUpdatedTags, movementIntensity, setMovementIntensity }: CustomActItemProps) => {
     const iconMapping: { [key: string]: JSX.Element } = {
       "sunlight": <Feather name="sun" style={styles.category} />,
       "coffee": <Feather name="coffee" style={styles.category} />,
@@ -90,7 +89,7 @@ const buttonWidth = width/6.25
         <View style={styles.rowContainer}>
         <View style={styles.detailsContainer}>
           <View style={styles.name}>
-            <Text style={styles.activityName}>{activity.button.text} </Text>
+            <Text style={styles.activityName}>{customAct.text} </Text>
             <View style={styles.categoryContainer}>
             {updatedCat.length>0 ? updatedCat.map((cat) => (
               <View key={cat}>
@@ -143,32 +142,32 @@ const buttonWidth = width/6.25
       </View>
 
   );}
-const ActivityDescribeModal: React.FC<MultitaskModalProps> = ({ ActivityDescribeVisible, Info, onClose, onTapOut, ...modalProps }) => {
+const CustomActivityEdit: React.FC<MultitaskModalProps> = ({ ActivityDescribeVisible, Info, onClose, onTapOut, ...modalProps }) => {
 
-    const {updateActivity} = useAppContext();
-    const startingTags: string[] = Info.button.tags
+    const {updateCustomActivities} = useAppContext();
+    const startingTags: string[] = Info.tags
     const [updatedTags, setUpdatedTags] = useState(startingTags);
-    const startingCat: string[] = Info.button.category ? Info.button.category : []
+    const startingCat: string[] = Info.category ? Info.category : []
     const [updatedCat, setUpdatedCat] = useState<string[]>(startingCat as string[]);
-    const startingMovementIntensity: number = (Info.button.movementIntensity && Info.button.movementIntensity>=0 && Info.button.movementIntensity<=10) ? Info.button.movementIntensity : 0
+    const startingMovementIntensity: number = (Info.movementIntensity && Info.movementIntensity>=0 && Info.movementIntensity<=10) ? Info.movementIntensity : 0
     const [movementIntensity, setMovementIntensity] = useState<string>(startingMovementIntensity.toString())
     console.log('intensity passed in: ', movementIntensity)
     console.log('')
     // Submit the tags to the database
     const handleSubmitTags = () => {
       let cat: string[] = []
-      if(Info.button.category) {
-        cat = Info.button.category
+      if(Info.category) {
+        cat = Info.category
       }
       const parsedMovement = parseInt(movementIntensity)!==undefined ? parseInt(movementIntensity) : 0
-      
+
       const updates: Partial<Activity> = {
         //first turn input value into unix. Create function for this. 
         button: {
-          text: Info.button.text,
-          keywords: Info.button.keywords,
-          iconLibrary: Info.button.iconLibrary,
-          icon: Info.button.icon,
+          text: Info.text,
+          keywords: Info.keywords,
+          iconLibrary: Info.iconLibrary,
+          icon: Info.icon,
           pressed: false,
           tags: updatedTags,
           category: cat,
@@ -176,19 +175,19 @@ const ActivityDescribeModal: React.FC<MultitaskModalProps> = ({ ActivityDescribe
         },
       };
       console.log('updates: ', updates)
-      updateActivity(Info, updates);
+         updateCustomActivities(Info, updates);
       // Add your database logic here
     };
 
     useEffect(() => {
-      if(Info.button.category) {
-        setUpdatedCat(Info.button.category)
+      if(Info.category) {
+        setUpdatedCat(Info.category)
       }
       else {
         setUpdatedCat([])
       }
-      if(Info.button.tags) {
-        setUpdatedTags(Info.button.tags)
+      if(Info.tags) {
+        setUpdatedTags(Info.tags)
       }
       else {
         setUpdatedTags([]);
@@ -207,20 +206,19 @@ const ActivityDescribeModal: React.FC<MultitaskModalProps> = ({ ActivityDescribe
         }
         const parsedMovement = parseInt(movementIntensity)!==undefined ? parseInt(movementIntensity) : 0
 
-      const updates: Partial<Activity> = {
+      const updates: Partial<ButtonState> = {
         //first turn input value into unix. Create function for this. 
-        button: {
-          text: Info.button.text,
-          keywords: Info.button.keywords,
-          iconLibrary: Info.button.iconLibrary,
-          icon: Info.button.icon,
+          text: Info.text,
+          keywords: Info.keywords,
+          iconLibrary: Info.iconLibrary,
+          icon: Info.icon,
           pressed: false,
-          tags: Info.button.tags,
+          tags: Info.tags,
           category: newCat,
           movementIntensity: parsedMovement
-        },
+
       };
-      updateActivity(Info, updates)
+      updateCustomActivities(Info, updates)
       setUpdatedCat(prevCat => {
         
         const prev = prevCat.some(cat => cat === text)
@@ -232,30 +230,27 @@ const ActivityDescribeModal: React.FC<MultitaskModalProps> = ({ ActivityDescribe
        }
     }
 
-    const onDeleteCat = (text: string) => {
-      console.log("To delete: ", text, "Current cat: ", Info.button.category)
+    const onDelete = (text: string) => {
+      console.log("To delete: ", text, "Current cat: ", Info.category)
       let newCat=[""]
       if(updatedCat.length>0) {
         newCat = updatedCat.filter(cat => cat!==text)
 
       }
-      console.log(newCat)
       const parsedMovement = parseInt(movementIntensity)!==undefined ? parseInt(movementIntensity) : 0
 
-      const updates: Partial<Activity> = {
-        //first turn input value into unix. Create function for this. 
-        button: {
-          text: Info.button.text,
-          keywords: Info.button.keywords,
-          iconLibrary: Info.button.iconLibrary,
-          icon: Info.button.icon,
+      const updates: Partial<ButtonState> = {
+          text: Info.text,
+          keywords: Info.keywords,
+          iconLibrary: Info.iconLibrary,
+          icon: Info.icon,
           pressed: false,
-          tags: Info.button.tags,
+          tags: Info.tags,
           category: newCat,
           movementIntensity: parsedMovement
-        },
+
       };
-      updateActivity(Info, updates)
+     updateCustomActivities(Info, updates)
       setUpdatedCat(newCat)
       
     }
@@ -274,9 +269,9 @@ const ActivityDescribeModal: React.FC<MultitaskModalProps> = ({ ActivityDescribe
                     <ThemedText type="title">Activity Info</ThemedText>
                   </View>
                 {Info ? 
-                <ActivityItem activity={Info} updatedTags={updatedTags} movementIntensity={movementIntensity} setMovementIntensity={setMovementIntensity} updatedCat={updatedCat} setUpdatedTags={setUpdatedTags} updateActivity={updateActivity} onTap={() => alert("Not Pressable")}/> : 
+                <ActivityItem customAct={Info} updatedTags={updatedTags} movementIntensity={movementIntensity} setMovementIntensity={setMovementIntensity} updatedCat={updatedCat} setUpdatedTags={setUpdatedTags}/> : 
                 <Text>Invalid Activity</Text>}
-                <CategoryBar current={updatedCat} onPress={addCategory} deleteCat={onDeleteCat}/>
+                <CategoryBar current={updatedCat} onPress={addCategory} deleteCat={onDelete}/>
                 <View style={styles.nextContainer}>
                   <Button title="Next" style={styles.nextButton} onPress={() => {handleSubmitTags(); onClose()}} />
                 </View>
@@ -428,4 +423,4 @@ const androidCustom = StyleSheet.create({
     padding: 10, // Optional padding
   },
 })
-export default ActivityDescribeModal;
+export default CustomActivityEdit;
