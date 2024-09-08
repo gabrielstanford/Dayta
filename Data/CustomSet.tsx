@@ -76,7 +76,7 @@ function useCustomSet() {
   }
   const createDurationSummary = () => {   
 
-      const relevantActivities = justActivities.filter(act =>  act!==null && act.timeBlock.startTime>1722988800 && act.timeBlock.duration!==undefined)
+      const relevantActivities = justActivities.filter(act =>  act!==null && act.timeBlock.startTime>1722988800 && act.timeBlock.duration!==undefined && act.button.text!=="Sleeping")
       //maybe tinker with what the cutoff is; perhaps it should be lunch
       
       const activityText = relevantActivities.map((activity) => activity.button.text);
@@ -109,7 +109,7 @@ function useCustomSet() {
   };
 
   const createTagDurationSum = () => {
-      const relevantActs = justActivities.filter((activity) => activity!==null && activity.timeBlock.duration!==undefined);
+      const relevantActs = justActivities.filter((activity) => activity!==null && activity.timeBlock.duration!==undefined && activity.button.text!=="Sleeping");
         // Step 1: Group activities by name and sum durations
 
           const totalDurationPerTag = relevantActs.reduce<Record<string, number>>((acc, activity) => {
@@ -192,7 +192,7 @@ function useCustomSet() {
       const oneWeekInSeconds = 7 * 24 * 60 * 60; // One week in seconds
       return currentTimestamp - oneWeekInSeconds;
     };
-    const relevantActivities = justActivities.filter(act => act!==null && act.timeBlock.startTime>getUnixTimestampMinusOneWeek() && act.timeBlock.duration!==undefined)
+    const relevantActivities = justActivities.filter(act => act!==null && act.timeBlock.startTime>getUnixTimestampMinusOneWeek() && act.timeBlock.duration!==undefined && act.button.text!=="Sleeping")
     const activityText = relevantActivities.map((activity) => activity.button.text);
 
     // Step 1: Group activities by name and sum durations
@@ -214,7 +214,7 @@ function useCustomSet() {
   }
 
   const createDailyAverageStats = () => {
-    const relevantActivities = justActivities.filter(act => act!==null && act.timeBlock.duration!==undefined)
+    const relevantActivities = justActivities.filter(act => act!==null && act.timeBlock.duration!==undefined && act.button.text!=="Sleeping")
     const startTimes = relevantActivities.map(act => act.timeBlock.startTime)
     const minStart = Math.min(...startTimes)
     let maxStart = Math.max(...startTimes)
@@ -242,7 +242,7 @@ function useCustomSet() {
 
   const analyzeTodayStats = () => {
   
-    const relevantActs = todayActs.filter(act => act!==null && act.timeBlock.duration!==undefined)
+    const relevantActs = todayActs.filter(act => act!==null && act.timeBlock.duration!==undefined && act.button.text!=="Sleeping")
     const totalDurationPerTag = relevantActs.reduce<Record<string, number>>((acc, activity) => {
       // Iterate over each tag in the current activity
       
@@ -292,6 +292,7 @@ function useCustomSet() {
 
     const sleepHours = sleepInfo.map(slot => (new Date(slot * 1000)).getHours())
     const wakeHours = wakeInfo.map(slot => (new Date(slot * 1000)).getHours())
+
     // const allSlots = justActivities.filter(act => act.button.text=="Went To Bed" || act.button.text=="Woke Up")
     // allSlots.sort((a, b) => b.timeBlock.startTime-a.timeBlock.startTime)
 // Function to calculate the average of numbers
@@ -319,7 +320,7 @@ function useCustomSet() {
     let elements: any[] = [];
     let sumElements: any[]=[]
     let summaryStats: any[] = [];
-    let summaryDurs: any[] = [];
+    let summaryDurs: [string, number][] = [];
     for (let startDate = -12 ; startDate <= 0; startDate++) {
 
       let element = getFiltered(startDate);
@@ -336,13 +337,16 @@ function useCustomSet() {
       summaryDurs = [...summaryDurs, [summedElement[0], summedElement[4]]]
 
     }
-    
-    return {summaryStats, summaryDurs}
+    return {summaryStats, summaryDurs, }
     }
     const {summaryStats, summaryDurs} = generateDateArray();
+    const totalLoggedTimeTwoWeeks = summaryDurs.reduce((accumulator, currentValue) => accumulator + currentValue[1], 0);
+    const avgLoggedTimeDaily = totalLoggedTimeTwoWeeks/12
+    // const loggedTimesMapped = summaryDurs.map((loc) => loc[1])
+    // const avgLoggedTimeTwoWeeks = avg(loggedTimesMapped)
     const averageSleepTime = avg(sleepHours)
     const averageWakeTime = avg(wakeHours)
-    updateState({sleepSum: summaryStats, summaryDurs: summaryDurs, avgSleepTime: averageSleepTime, avgWakeTime: averageWakeTime})
+    updateState({sleepSum: summaryStats, summaryDurs: summaryDurs, avgSleepTime: averageSleepTime, avgWakeTime: averageWakeTime, avgLoggedTimeDaily: avgLoggedTimeDaily})
   }
   useEffect(() => {
     if(justActivities.length>0) {

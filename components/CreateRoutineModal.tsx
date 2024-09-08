@@ -24,6 +24,7 @@ const buttonWidth = width*0.6
     onNext: (text: [string, number, number][]) => void;
     onTapOut: () => void;
     customRoutine?: Routine;
+    submit?: boolean
   }
 
   function timeStringToSeconds(time: string): number {
@@ -33,7 +34,7 @@ const buttonWidth = width*0.6
     return totalSeconds;
   }
 
-const CreateRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible, onNext, onTapOut, customRoutine, ...modalProps }) => {
+const CreateRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible, submit, onNext, onTapOut, customRoutine, ...modalProps }) => {
 
   const [multiSearchVisible, setMultiSearchVisible] = useState(false);
   const [activityNum, setActivityNum] = useState<number>(1)
@@ -43,7 +44,6 @@ const CreateRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisib
   const [routineActivities, setRoutineActivities] = useState<RoutineActivity[]>(filler)
   useEffect(() => {
     if(customRoutine) {
-      console.log(customRoutine)
       let tempRout: RoutineActivity[] = []
       for(let i=0; i<customRoutine.activities.length; i++) {
         let act = customRoutine.activities[i];
@@ -58,7 +58,6 @@ const CreateRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisib
         }
         tempRout[i] = {name: act.button.text, duration: formatSecondsToHHMM(act.timeBlock.duration), tag: tag, gapBetween: between}
       }
-      console.log('temprout: ', tempRout)
       setRoutineActivities(tempRout)
     }
     else {
@@ -84,7 +83,6 @@ const CreateRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisib
   };
 // Update a specific activity by index
     const updateActivity = (index: number, updatedFields: Partial<RoutineActivity>) => {
-      console.log(index, updatedFields)
       setRoutineActivities(prevActivities => 
         prevActivities.map((activity, i) => 
           i === index ? { ...activity, ...updatedFields } : activity
@@ -136,11 +134,20 @@ const CreateRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisib
             activityDetails.push([activity.name || `Activity ${index + 1}`, duration, gapBetween]);
           }
         });
-        console.log(activityDetails)
         return activityDetails;
     };
 
-  
+    const renderEndButton = () => {
+      if(submit) {
+        return <CustomButton title="Submit To Journal" onPress={() => onNext(createFull())} />
+      }
+      else if(customRoutine) {
+        return <CustomButton title="Submit Changes" onPress={() => onNext(createFull())} />
+      }
+      else {
+        return <CustomButton title="Next" onPress={() => onNext(createFull())} />
+      }
+    }
     return(
         <Modal 
         transparent={true}
@@ -162,8 +169,11 @@ const CreateRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisib
             // contentContainerStyle={styles.contContStyle}
             >
             {/* <View style={styles.MultitaskModalContent}> */}
-                  <View style={styles.titleContainer}>
-                    <ThemedText type="title"> Select Activities </ThemedText>
+            <View style={submit ? styles.headerSection : {}}>
+                {submit && <CustomButton title="Back" width={width*0.2} fontSize={11} style={{}} onPress={onTapOut} />}
+                  <View style={submit ? styles.title2Container : styles.titleContainer}>
+                    {customRoutine ?  <ThemedText type="title"> {customRoutine.name} </ThemedText> : <ThemedText type="title"> Select Activities </ThemedText>}
+                  </View>
                   </View>
               {/* Dynamically render each activity input group */}
             {routineActivities.map((activity, index) => (
@@ -220,7 +230,7 @@ const CreateRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisib
             </KeyboardAvoidingView>
             </TouchableWithoutFeedback>
             <View style={styles.nextContainer}>
-                  <CustomButton title="Next" onPress={() => onNext(createFull())} />
+                {renderEndButton()}                  
               </View>
             </View>
           
@@ -272,6 +282,7 @@ const styles = StyleSheet.create({
         marginBottom: 5,
         alignItems: 'center'
       },
+
       stepContainer: {
         // flex: .7,
         flexDirection: 'row',
@@ -281,6 +292,19 @@ const styles = StyleSheet.create({
         
         flexDirection: 'row',
         alignItems: 'flex-start',
+      },
+      headerSection: {
+        flexDirection: 'row',
+        position: 'relative',
+        marginRight: 20,
+        paddingLeft: 5,
+      },
+      title2Container: {
+        width: width*0.7,
+        position: 'absolute',
+        alignItems: 'center',
+        left: ((width/1.1) / 2) - (width*0.7 / 2), // Center horizontally more precisely
+        margin: 15,
       },
       actSearchButton: {
         backgroundColor: '#DDDDDD',

@@ -42,7 +42,6 @@ function Personalize() {
 
       useEffect(() => {
         if(tappedRout) {
-          console.log('modal about to launch')
         setCreateRoutineModalVisible(true)
         }
       }, [tappedRout])
@@ -68,6 +67,7 @@ function Personalize() {
     
     const handleSubmitRoutineModal = (texts: [string, number, number][]) => {
       // Close the modal
+      
       setCreateRoutineModalVisible(false);
   
       // Create a new array to hold the activities
@@ -79,6 +79,7 @@ function Personalize() {
           const button = customActivities.find(act => act.text === name);
   
           if (button) {
+
               const newActivity: Activity = {
                   id: uuid.v4() as string,
                   button: button,
@@ -97,38 +98,14 @@ function Personalize() {
       // Set duration between activities
       setDurationBetween(texts.map(text => text[2]));
       if(tappedRout) {
-        const areAllObjectsEqualWithoutId = (arr: Array<{ [key: string]: any }>): boolean => {
-          if (arr.length === 0) return true; // Empty array is considered equal
-        
-          // Destructure the first object to use as a reference
-          const { id: id1, ...referenceObj } = arr[0];
-        
-          // Compare each subsequent object to the reference object (excluding 'id')
-          for (let i = 1; i < arr.length; i++) {
-            const { id, ...currentObj } = arr[i];
-        
-            // Check if the current object (without id) matches the reference object
-            if (JSON.stringify(referenceObj) !== JSON.stringify(currentObj)) {
-              return false;
-            }
-          }
-        
-          return true;
-        };
-      
-        if(areAllObjectsEqualWithoutId([newActivities, tappedRout.activities])) {
-          console.log('new: making...')
+
         const updates: Partial<Routine> = {
           //first turn input value into unix. Create function for this. 
           activities: newActivities,
           durationBetween: texts.map(text => text[2])
-        };
     
       }
-      else {
-        console.log('nothing changed')
-      }
-        // updateRoutine(tappedRout, updates)
+        updateRoutine(tappedRout, updates)
       }
   };
   
@@ -296,7 +273,7 @@ function Personalize() {
                   <View style={styles.resultContainer}>
 
                       
-                        <Text >{item.text}</Text>  
+                        <Text style={{fontWeight: 'bold'}}>{item.text}</Text>  
 
                         <AntDesign name="edit" size={width / 15} color="orange" />
 
@@ -323,7 +300,7 @@ function Personalize() {
                   <View style={styles.resultContainer}>
 
                       
-                        <Text >{item.name}</Text>  
+                        <Text style={{fontWeight: 'bold'}}>{item.name}</Text>  
 
                         <AntDesign name="edit" size={width / 15} color="orange" />
 

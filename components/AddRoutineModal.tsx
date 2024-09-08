@@ -7,6 +7,8 @@ import RNPickerSelect from 'react-native-picker-select'
 import TimeDropdown from './TimeDropdown'
 import { convertTimeToUnix, adjustDateByDays, decimalToDurationTime } from '@/utils/DateTimeUtils';
 import { Routine,  Activity } from '@/Types/ActivityTypes';
+import CreateRoutineModal from './CreateRoutineModal';
+import uuid from 'react-native-uuid'
 
 const {width, height} = Dimensions.get("window");
 const buttonWidth = width*0.6
@@ -33,7 +35,7 @@ const AddRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible,
   const {dateIncrement, customRoutines} = useAppContext();
   const [part2Visible, setPart2Visible] = useState<boolean>(false);
   const [relevantRoutine, setRelevantRoutine] = useState<Routine>()
-
+const {customActivities} = useAppContext();
   const [editDurations, setEditDurations] = useState<string[]>([]);
   useEffect(() => {
     if(relevantRoutine) {
@@ -101,26 +103,37 @@ const AddRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible,
       } 
       else {alert("Please set the routine")}
     }
-    const handleSubmit = () => {
+
+    const handleSubmit = (texts: [string, number, number][]) => {
+      const newActivities: Activity[] = [];
+  
+      // Iterate over the texts array to build the activities
+      texts.forEach((text, index) => {
+          const [name, duration, gapBetween] = text;
+          const button = customActivities.find(act => act.text === name);
+  
+          if (button) {
+
+              const newActivity: Activity = {
+                  id: uuid.v4() as string,
+                  button: button,
+                  timeBlock: {
+                      startTime: 0,
+                      duration: duration,
+                      endTime: 0
+                  }
+              };
+              newActivities.push(newActivity);
+          }
+      });
       if (relevantRoutine) {
         // Create a new array of updated activities
-        const updatedActivities = relevantRoutine.activities.map((activity, index) => {
-          // Ensure that editDurations is properly indexed
-          const editedDuration = editDurations[index] || '00:00';
-          return {
-            ...activity,
-            timeBlock: {
-              ...activity.timeBlock,
-              duration: timeStringToSeconds(editedDuration),
-            },
-          };
-        });
-    
-        // Create a new routine with the updated activities
         const newRoutine: Routine = {
-          ...relevantRoutine,
-          activities: updatedActivities,
-        };
+          name: relevantRoutine.name,
+          activities: newActivities,
+          durationBetween: texts.map(text => text[2])
+    
+        }
     
         // Pass the updated routine and calculated start time to the onNext function
         setPart2Visible(false);
@@ -167,33 +180,37 @@ const AddRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible,
                   <CustomButton title="Next" width={width*0.6} onPress={() => handleNext(createStartTime(convertTimeToUnix(generateTimeString())))} />
                 </View>
             </View>
-            : <View style={styles.MultitaskModalContent}>
-                  <View style={styles.headerSection}>
-                    <CustomButton title="Back" width={width*0.2} fontSize={11} onPress={() => setPart2Visible(false)} />
-                    <View style={styles.title2Container}>
-                      <Text style={styles.title}>Preview</Text>
-                    </View>
-                  </View>
-                    {relevantRoutine && (
-                    <View style={{ flex: 6 }}>
-                      {relevantRoutine.activities.map((activity: Activity, index: number) => (
-                        <View key={activity.id} style={styles.actInfo}>
-                          <Text style={styles.actName}>
-                            {activity.button.text}:
-                          </Text>
-                          <TimeInput
-                            custom={"Type2"}
-                            time={editDurations[index] || '00:00'}
-                            onTimeChange={time => handleTimeChange(index, time as string)}
-                          />
-                        </View>
-                      ))}
-                    </View>
-                    )}
-                  <View style={styles.nextContainer}>
-                    <CustomButton title="Submit Routine" width={buttonWidth} style={styles.nextContainer} onPress={() => handleSubmit()} />
-                  </View>
-              </View>}
+            
+            :  <CreateRoutineModal submit={true} style={{}} MultitaskModalVisible={part2Visible} onNext={handleSubmit} customRoutine={relevantRoutine} onTapOut={() => setPart2Visible(false)}/>
+
+            // <View style={styles.MultitaskModalContent}>
+            //       <View style={styles.headerSection}>
+            //         <CustomButton title="Back" width={width*0.2} fontSize={11} onPress={() => setPart2Visible(false)} />
+            //         <View style={styles.title2Container}>
+            //           <Text style={styles.title}>Preview</Text>
+            //         </View>
+            //       </View>
+            //         {relevantRoutine && (
+            //         <View style={{ flex: 6 }}>
+            //           {relevantRoutine.activities.map((activity: Activity, index: number) => (
+            //             <View key={activity.id} style={styles.actInfo}>
+            //               <Text style={styles.actName}>
+            //                 {activity.button.text}:
+            //               </Text>
+            //               <TimeInput
+            //                 custom={"Type2"}
+            //                 time={editDurations[index] || '00:00'}
+            //                 onTimeChange={time => handleTimeChange(index, time as string)}
+            //               />
+            //             </View>
+            //           ))}
+            //         </View>
+            //         )}
+            //       <View style={styles.nextContainer}>
+            //         <CustomButton title="Submit Routine" width={buttonWidth} style={styles.nextContainer} onPress={() => handleSubmit()} />
+            //       </View>
+            //   </View>
+              }
             </TouchableWithoutFeedback>
           </View>
         </TouchableWithoutFeedback>

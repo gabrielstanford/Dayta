@@ -83,7 +83,6 @@ const buttonWidth = width/6.25
       setError('Value must be between 0 and 10');
     }
   };
-  console.log('intensity: ', movementIntensity)
 
     return (
       <View style={styles.activityContainer}>
@@ -152,8 +151,6 @@ const ActivityDescribeModal: React.FC<MultitaskModalProps> = ({ ActivityDescribe
     const [updatedCat, setUpdatedCat] = useState<string[]>(startingCat as string[]);
     const startingMovementIntensity: number = (Info.button.movementIntensity && Info.button.movementIntensity>=0 && Info.button.movementIntensity<=10) ? Info.button.movementIntensity : 0
     const [movementIntensity, setMovementIntensity] = useState<string>(startingMovementIntensity.toString())
-    console.log('intensity passed in: ', movementIntensity)
-    console.log('')
     // Submit the tags to the database
     const handleSubmitTags = () => {
       let cat: string[] = []
@@ -175,7 +172,6 @@ const ActivityDescribeModal: React.FC<MultitaskModalProps> = ({ ActivityDescribe
           movementIntensity: parsedMovement
         },
       };
-      console.log('updates: ', updates)
       updateActivity(Info, updates);
       // Add your database logic here
     };
@@ -196,7 +192,6 @@ const ActivityDescribeModal: React.FC<MultitaskModalProps> = ({ ActivityDescribe
     }, [Info])
 
     const addCategory = (text: string) => {
-      console.log('adding category')
       if(Info && text) {
         let newCat: string[] = [""]
         if(updatedCat.length>0) {
@@ -233,13 +228,12 @@ const ActivityDescribeModal: React.FC<MultitaskModalProps> = ({ ActivityDescribe
     }
 
     const onDeleteCat = (text: string) => {
-      console.log("To delete: ", text, "Current cat: ", Info.button.category)
       let newCat=[""]
       if(updatedCat.length>0) {
         newCat = updatedCat.filter(cat => cat!==text)
 
       }
-      console.log(newCat)
+      
       const parsedMovement = parseInt(movementIntensity)!==undefined ? parseInt(movementIntensity) : 0
 
       const updates: Partial<Activity> = {

@@ -118,7 +118,6 @@ function Stats() {
     const filtered = mapped.filter(dur => dur!=="0:00")
     return filtered
   }
-
   const [sleepLabels, setSleepLabels] = useState<string[]>([]);
   const [sleepValues, setSleepValues] = useState<[number, number][]>([]);
   const [sleepLens, setSleepLens] = useState<[string, number][]>([])

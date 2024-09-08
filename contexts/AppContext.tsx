@@ -35,15 +35,6 @@ interface AppContextProps {
   setFinalArray: React.Dispatch<React.SetStateAction<ButtonState[]>>;
   state: StatisticsState;
   updateState: UpdateState;
-
-  // weekDurationSummary: ActivitySummary[];
-  // avgSleepTime: number;
-  // setAvgSleepTime: React.Dispatch<React.SetStateAction<number>>;
-  // avgWakeTime: number;
-  // setAvgWakeTime: React.Dispatch<React.SetStateAction<number>>
-  // setWeekDurationSummary: React.Dispatch<React.SetStateAction<ActivitySummary[]>>;
-  // sleepSum: any[];
-  // setSleepSum:  React.Dispatch<React.SetStateAction<any[]>>
 }
 
 interface AppProviderProps {
@@ -52,7 +43,7 @@ interface AppProviderProps {
 
 
 const AppContext = createContext<AppContextProps | undefined>(undefined);
-console.log('running context')
+
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [justActivities, setJustActivities] = useState<Activity[]>([]);
   const [dayActivities, setDayActivities] = useState<Activity[]>([]);
@@ -63,7 +54,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [updateLocalStorage, setUpdateLocalStorage] = useState(false);
   const [finalArray, setFinalArray] = useState<ButtonState[]>([])
 
-  const initialState = {
+  const initialState: StatisticsState = {
     durationSummary: [] as ActivitySummary[],
     avgSleepTime: 0.111,
     avgWakeTime: 0.111,
@@ -72,7 +63,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     tagDurationSum: [] as ActivitySummary[],
     avgTimeByTag: [] as ActivitySummary[],
     todayTagDurationSum: [] as ActivitySummary[],
-    summaryDurs: [] as [string, number][]
+    summaryDurs: [] as [string, number][],
+    avgLoggedTimeDaily: 0.111
   };
 
   const [state, setState] = useState(initialState);
@@ -129,6 +121,7 @@ const updateRoutine = async (routine: Routine, updates: Partial<Routine>) => {
   try {
     
     // Update the timeBlock of the relevant activity
+    
       const updatedRoutines = customRoutines.map((rout) => {
         if (rout.name === routine.name) {
           return {
@@ -136,7 +129,7 @@ const updateRoutine = async (routine: Routine, updates: Partial<Routine>) => {
             ...updates, // Spread the input properties to update the matching activity
           };
         }
-        return routine;
+        return rout;
       });
       // Set the updated array
       setCustomRoutines(updatedRoutines);
@@ -250,15 +243,12 @@ const moveActivity = async (
 
       // Copy the activity data to the new location
       await setDoc(newActivityRef, updatedActivityData);
-      console.log('Activity moved successfully!');
 
       // Delete the original activity document
       await deleteDoc(currentActivityRef);
-      console.log('Original activity document deleted successfully!');
 
       // Update or create the new date document with a timestamp
       await setDoc(newDateRef, { createdAt: serverTimestamp() }, { merge: true });
-      console.log('New date document updated successfully!');
       if(updateLocalStorage) {
         setUpdateLocalStorage(false)}
     } else {
@@ -274,19 +264,13 @@ useEffect(() => {
   const initializeActivityData = async () => {
     
     if(user) {
-        console.log('Initializing Activities')
         if(storage.getString('JustActivities') && !updateLocalStorage) {
-          console.log('Found storage immediately')
           if(justActivities.length==0) {
-            console.log('justActivities length=0')
           const justActivitiesTemp = JSON.parse(storage.getString('JustActivities') as string)
-          console.log('setting activities')
           setJustActivities(justActivitiesTemp as Activity[])
           }
-          console.log('justActivities length>0')
         }
         else {
-          console.log('Didnt find local storage')
         // Step 1: Get all dates
         const datesRef = collection(firestore, 'users', user.uid, 'dates');
         const datesSnapshot = await getDocs(datesRef);
@@ -327,7 +311,6 @@ useEffect(() => {
         }
       }
       else {
-        console.log('Local Storage Not Found')
         const activitiesRef = collection(firestore, `users/${user.uid}/customActivities`);
         const snapshot = await getDocs(activitiesRef);
   
@@ -394,7 +377,6 @@ useEffect(() => {
     }
   };  
   const addRoutineActivities = async (activities: Activity[]) => {
-    console.log('Activities being sent in: ', activities)
     try {
       for(let i=0; i< activities.length; i++) {
       const tempAct = activities[i]
@@ -484,7 +466,6 @@ useEffect(() => {
         const newRoutine = {
           ...routine,
         };
-        console.log('ROUTINE ATTEMPTING BEING ADDED: ', newRoutine)
         await setDoc(routineRef, newRoutine);
         
         // await fetchActivities();

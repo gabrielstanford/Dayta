@@ -38,7 +38,6 @@ export default function HandleSubmitEditing(inputValue: string, input2Value: str
                       },
                     };
                     const dayDiff = calculateDayDifference(startUnixTimestamp, activity.timeBlock.startTime)
-                    console.log('day diff: calcs: ', 'startUnixTimeStamp: ', startUnixTimestamp, 'activity start: ', activity.timeBlock.startTime)
                     if(dayDiff==0) {
                       console.log("updating activity")
                     updateActivity(activity, updates)

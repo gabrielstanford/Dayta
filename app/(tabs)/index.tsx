@@ -104,6 +104,7 @@ const ActivityItem = ({ activity, onRemove, timeState, dateIncrement, updateActi
     "sunlight": <Feather name="sun" style={styles.category} />,
     "coffee": <Feather name="coffee" style={styles.category} />,
     "intense activity": <MaterialCommunityIcons name="dumbbell" style={styles.category} />,
+    "workout": <MaterialCommunityIcons name="dumbbell" style={styles.category} />,
     "exercise": <MaterialCommunityIcons name="dumbbell" style={styles.category} />,
     "light activity": <FontAwesome5 name="heartbeat" style={styles.category} />,
     "mental stimulation": <FontAwesome5 name="brain" style={styles.category} />,
@@ -232,7 +233,6 @@ function Journal() {
   withSunriseSunset.sort((a, b) => a.timeBlock.endTime - b.timeBlock.endTime);
 
   const noEnd: Activity[] = dbActivities.filter((act) => act.timeBlock.endTime == null || !(act.timeBlock.endTime>0))
-  console.log('No end: ', noEnd)
   const generateSunriseSunset = () => {
       const timeZone = 'America/Los_Angeles'; // Replace with the user's time zone
       const today = generateISODate(dateIncrement, timeZone);

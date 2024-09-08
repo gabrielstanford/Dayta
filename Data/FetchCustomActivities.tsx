@@ -16,7 +16,10 @@ export const ActivityButtons: ButtonState[] = [
   { text: 'Preparing Breakfast', iconLibrary: "materialCommunityIcons", icon: "egg-fried", keywords: ['Cooking', 'Breakfast'], pressed: false, tags: ['Food/Drink'] },
   { text: 'Eating Out', iconLibrary: "fontAwesome5", icon: "utensils", keywords: ['Restaurant', 'Cafe'], pressed: false, tags: ['Food/Drink'] },
   { text: 'Other Food/Drink', iconLibrary: "materialIcons", icon: "more-horiz", keywords: ['Miscellaneous'], pressed: false, tags: ['Food/Drink'] },
-
+  //OP
+  { text: 'Went To Bed', iconLibrary: "materialCommunityIcons", icon: "sleep", keywords: ['Sleep', 'Fell Asleep', 'Fall Asleep', 'Asleep', 'Good Night', 'Night', 'Konked Out'], pressed: false, tags: ['Relax'] },
+  { text: 'Woke Up', iconLibrary: "ionicons", icon: "alarm", keywords: ['Awoke', 'Good Morning', 'Woken Up', 'Wake Up', 'Alarm Rang', 'Started Day'], pressed: false, tags: ['Relax'] },
+  { text: 'Sleeping', iconLibrary: "materialCommunityIcons", icon: "sleep", keywords: ['Sleep'], pressed: false, tags: ['Relax'] },
   // Physical
   { text: 'Walking', iconLibrary: "fontAwesome5", icon: "walking", keywords: ['Stroll'], pressed: false, tags: ['Physical'], category: ["Sunlight", "Light Activity"], movementIntensity: 5 },
   { text: 'Running', iconLibrary: "materialCommunityIcons", icon: "run-fast", keywords: ['Jogging'], pressed: false, tags: ['Physical'], category: ["Intense Activity", "Sunlight"], movementIntensity: 10 },
@@ -44,8 +47,6 @@ export const ActivityButtons: ButtonState[] = [
   { text: 'Wound Care', iconLibrary: "ionicons", icon: "bandage", keywords: ['Bandage', 'Injury'], pressed: false, tags: ['Relax'] },
   { text: 'Hygiene/Skin Care', iconLibrary: "fontAwesome5", icon: "smile-beam", keywords: ['Brushing Teeth', 'Tooth Brush', 'Brush', 'Washing Face', 'Face Mask'], pressed: false, tags: ['Relax'] },
   { text: 'Briefly Woke Up', iconLibrary: "ionicons", icon: "moon", keywords: ['Awoke', 'Woke Up', 'Fell Back Asleep'], pressed: false, tags: ['Relax'] },
-  { text: 'Went To Bed', iconLibrary: "materialCommunityIcons", icon: "sleep", keywords: ['Sleep', 'Fell Asleep', 'Fall Asleep', 'Asleep', 'Good Night', 'Night', 'Konked Out'], pressed: false, tags: ['Relax'] },
-  { text: 'Woke Up', iconLibrary: "ionicons", icon: "alarm", keywords: ['Awoke', 'Good Morning', 'Woken Up', 'Wake Up', 'Alarm Rang', 'Started Day'], pressed: false, tags: ['Relax'] },
   { text: 'Meditating', iconLibrary: "materialCommunityIcons", icon: "meditation", keywords: ['Relaxing', 'Mindfulness', 'Yoga Nidra', 'NSDR'], pressed: false, tags: ['Relax'], category: ["Meditation"] },
   { text: 'Taking a Nap', iconLibrary: "materialIcons", icon: "bed", keywords: ['Rest', 'Sleep'], pressed: false, tags: ['Relax'] },
   {text: 'Laying In Bed', iconLibrary: "materialIcons", icon: "bed", keywords: ['Lying In Bed', 'Laying Down', 'Relaxing'], pressed: false, tags: ['Relax']},

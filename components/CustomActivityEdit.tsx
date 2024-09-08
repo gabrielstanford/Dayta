@@ -34,6 +34,7 @@ const buttonWidth = width/6.25
       "sunlight": <Feather name="sun" style={styles.category} />,
       "coffee": <Feather name="coffee" style={styles.category} />,
       "intense activity": <MaterialCommunityIcons name="dumbbell" style={styles.category} />,
+      "workout": <MaterialCommunityIcons name="dumbbell" style={styles.category} />,
       "exercise": <MaterialCommunityIcons name="dumbbell" style={styles.category} />,
       "light activity": <FontAwesome5 name="heartbeat" style={styles.category} />,
       "mental stimulation": <FontAwesome5 name="brain" style={styles.category} />,
@@ -82,7 +83,6 @@ const buttonWidth = width/6.25
       setError('Value must be between 0 and 10');
     }
   };
-  console.log('intensity: ', movementIntensity)
 
     return (
       <View style={styles.activityContainer}>
@@ -91,10 +91,9 @@ const buttonWidth = width/6.25
           <View style={styles.name}>
             <Text style={styles.activityName}>{customAct.text} </Text>
             <View style={styles.categoryContainer}>
-            {updatedCat.length>0 ? updatedCat.map((cat) => (
+          {updatedCat.length>0 ? updatedCat.map((cat) => (
               <View key={cat}>
                 {iconMapping[cat.toLowerCase()] || <Feather name="help-circle" style={styles.category} />}
-                
               </View>
             )) : <></>}          
           </View>
@@ -151,8 +150,6 @@ const CustomActivityEdit: React.FC<MultitaskModalProps> = ({ ActivityDescribeVis
     const [updatedCat, setUpdatedCat] = useState<string[]>(startingCat as string[]);
     const startingMovementIntensity: number = (Info.movementIntensity && Info.movementIntensity>=0 && Info.movementIntensity<=10) ? Info.movementIntensity : 0
     const [movementIntensity, setMovementIntensity] = useState<string>(startingMovementIntensity.toString())
-    console.log('intensity passed in: ', movementIntensity)
-    console.log('')
     // Submit the tags to the database
     const handleSubmitTags = () => {
       let cat: string[] = []
@@ -174,7 +171,6 @@ const CustomActivityEdit: React.FC<MultitaskModalProps> = ({ ActivityDescribeVis
           movementIntensity: parsedMovement
         },
       };
-      console.log('updates: ', updates)
          updateCustomActivities(Info, updates);
       // Add your database logic here
     };
@@ -195,7 +191,6 @@ const CustomActivityEdit: React.FC<MultitaskModalProps> = ({ ActivityDescribeVis
     }, [Info])
 
     const addCategory = (text: string) => {
-      console.log('adding category')
       if(Info && text) {
         let newCat: string[] = [""]
         if(updatedCat.length>0) {
@@ -231,7 +226,6 @@ const CustomActivityEdit: React.FC<MultitaskModalProps> = ({ ActivityDescribeVis
     }
 
     const onDelete = (text: string) => {
-      console.log("To delete: ", text, "Current cat: ", Info.category)
       let newCat=[""]
       if(updatedCat.length>0) {
         newCat = updatedCat.filter(cat => cat!==text)

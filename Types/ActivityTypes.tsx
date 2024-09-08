@@ -75,4 +75,5 @@
     avgTimeByTag: ActivitySummary[];
     todayTagDurationSum: ActivitySummary[];
     summaryDurs: [string, number][];
+    avgLoggedTimeDaily: number;
   }

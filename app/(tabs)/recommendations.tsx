@@ -6,7 +6,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Activity, Card } from '@/Types/ActivityTypes';
 import { useCustomSet } from '@/Data/CustomSet';
 import { useAppContext } from '@/contexts/AppContext';
-import RecDescribeModal from '@/components/RecDescribeModal';
 import Swiper from 'react-native-deck-swiper';
 import LogicModal from '@/components/LogicModal'
 import CustomButton from '@/components/CustomButton'
@@ -32,13 +31,8 @@ const decimalToTime = (decimal: number): string => {
 };
 
 export default function Recommendations() {
-  const [rec1, setRec1] = useState<string>("")
   const {state} = useCustomSet();
-  const entertainmentSpeel = `We know that entertaining activities can feel good in the moment, and a bit of it is fine, but in excessive amounts these will have detrimental effects on the health of your dopamine system. In other words, in the long term you will be more sad and stressed if you continue like this. But don't worry, we're here to help!`
-  const {justActivities} = useAppContext();
-  const {tagDurationSum, avgTimeByTag, sleepSum} = state
-  const [todayActivities, setTodayActivities] = useState<Activity[]>([]);
-  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const {sleepSum, avgLoggedTimeDaily} = state
   const [logicModalVisible, setLogicModalVisible] = useState<boolean>(false);
 
   const calculateExerciseScore = (light: number, mod: number, vig: number) => {
@@ -51,12 +45,61 @@ export default function Recommendations() {
   }
 
   const [cards, setCards] = useState<Card[]>([
+    { title: 'Improve Logging Habits', recCategory: 'Tracking', impactScore: 10, recDetails: `In order to generate meaningful recommendations, we need enough information. This is gathered completely through the journal. Over the last two weeks, you have logged an average of ${Math.round(avgLoggedTimeDaily/3600)} hours of your day. The benchmark to aim for is 8 hours a day. We believe this is realistic and will give us enough to generate real stats and recommendations. The more the merrier though! For detailed suggestions on improving your logging habits, click below!` },
     { title: "Night-Time Wind Down Routine", recCategory: 'Sleep Hygiene', impactScore: 9, recDetails: 'Based on your entries, we gather that your sleep habits could use some serious improvement. Sleep is one of the most important parts of our health and well-being, and improving your sleep is proven to have numerous incredible benefits. A few simple shifts in your routine will make all the difference. Click below to generate a detailed report on your current habits and an actionable plan to improve!' },
     { title: 'Streamline Morning Routine', recCategory: 'Reading', impactScore: 7, recDetails: 'A well setup morning routine gives your day structure and sets you up properly for the rest of the day. Lets get you setup with the perfect one, using science-based principles to build a routine that is both structured and allows for variety & spontaneity. ' },
     { title: 'Improve Movement Habits', recCategory: 'Reading', impactScore: 7, recDetails: 'Read a calming book before bed.' },
     // { windDown: 'Calm', recCategory: 'Breathing', impactScore: 8, recDetails: 'Deep breathing exercises to calm the mind.' },
     // Add more cards as needed
   ]);
+
+  const generateCards = () => {
+    const premadeCards = [
+      { title: 'Improve Logging Habits', recCategory: 'Tracking', impactScore: 4, recDetails: `In order to generate meaningful recommendations, we need enough information. This is gathered completely through the journal. Over the last two weeks, you have logged an average of ${Math.round(avgLoggedTimeDaily/3600)} hours of your day. The benchmark to aim for is 8 hours a day. We believe this is realistic and will give us enough to generate real stats and recommendations. The more the merrier though! For detailed suggestions on improving your logging habits, click below!` },
+      { title: "Night-Time Wind Down Routine", recCategory: 'Sleep Hygiene', impactScore: 2, recDetails: 'Based on your entries, we gather that your sleep habits could use some serious improvement. Sleep is one of the most important parts of our health and well-being, and improving your sleep is proven to have numerous incredible benefits. A few simple shifts in your routine will make all the difference. Click below to generate a detailed report on your current habits and an actionable plan to improve!' },
+      { title: 'Streamline Morning Routine', recCategory: 'Reading', impactScore: 7, recDetails: 'A well setup morning routine gives your day structure and sets you up properly for the rest of the day. Lets get you setup with the perfect one, using science-based principles to build a routine that is both structured and allows for variety & spontaneity. ' },
+      { title: 'Improve Movement Habits', recCategory: 'Reading', impactScore: 7, recDetails: 'Read a calming book before bed.' }]
+    let customizedCards: Card[] = []
+    const wasEnteredSleepDay = (val: any[]) => {
+      if(val[1][0]>0) {
+        if(val[2][0]>0) {
+          return 1
+        }
+        else {
+          return 0
+        }
+      }
+      else {
+        return 0
+      }
+
+    }
+    const numEnteredSleepDays = sleepSum.reduce((accumulator, currentValue) => accumulator + (wasEnteredSleepDay(currentValue)), 0)
+    
+    if(avgLoggedTimeDaily<8) {
+      if (numEnteredSleepDays<=4) {
+      const impact = 10
+      customizedCards = [{...premadeCards[0], impactScore: impact, recDetails: `In order to generate meaningful recommendations, we need enough information. This is gathered completely through the journal. Over the last two weeks, you have only logged an average of ${Math.round(avgLoggedTimeDaily/3600)} hours each day. The benchmark to aim for is 8 hours a day. We believe this is realistic and will give us enough to generate real stats and recommendations. The more the merrier though! We additionally see that you have only entered both sleep and wake times for ${numEnteredSleepDays} of the past 12 days. It's very easy and quick to enter this so get in the habit of doing it! For now, recommendations will be general and untailored. Feel free to scroll nonetheless to learn about the most important principles! For detailed suggestions on improving your logging habits, click below!`}, ...premadeCards]
+    }
+      else {
+      const impact = 8
+      customizedCards = [{...premadeCards[0], impactScore: impact, recDetails: `In order to generate meaningful recommendations, we need enough information. This is gathered completely through the journal. Over the last two weeks, you have only logged an average of ${Math.round(avgLoggedTimeDaily/3600)} hours each day. The benchmark to aim for is 8 hours a day. We believe this is realistic and will give us enough to generate real stats and recommendations. The more the merrier though! Since you have entered adequate data about sleep (great job!), we are able to offer some sleep-related recommendations. Feel free to scroll nonetheless for these, as well as general ones to learn! For detailed suggestions on improving your logging habits, click below!`}, ...premadeCards]
+
+      }
+    }
+  
+    else {
+      //here's where we can get down to the nitty gritty, generating statistics from the day/sleep info and then offering related recs.
+      customizedCards = premadeCards
+      customizedCards.sort((a, b) => b.impactScore-a.impactScore)
+    }
+    
+    setCards(customizedCards)
+  }
+
+  useEffect(() => {
+    generateCards()
+  }, [avgLoggedTimeDaily])
   const swiperRef = useRef<any>(null);
   const [cardIndex, setCardIndex] = useState(0);
 
@@ -112,7 +155,6 @@ export default function Recommendations() {
   //   FetchDayActivities(user, 0, justActivities, setTodayActivities, true)
   // }, [justActivities])
 
-  console.log('sleep sum: ', sleepSum)
 
   const renderCard = (card: any) => {
     return (
@@ -142,7 +184,6 @@ export default function Recommendations() {
 
   return (
     <View style={styles.layoutContainer}>
-      <RecDescribeModal visible={modalVisible} onClose={() => setModalVisible(false)} speel={entertainmentSpeel} />
       <LogicModal visible={logicModalVisible} card={cards[cardIndex]} onClose={() => setLogicModalVisible(false)}/>
       <View style={styles.titleContainer}>
         <ThemedText type="titleText" style={{fontSize: width/12}}>Recommendations</ThemedText>
