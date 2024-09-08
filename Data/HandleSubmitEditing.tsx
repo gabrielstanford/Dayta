@@ -23,6 +23,7 @@ export default function HandleSubmitEditing(inputValue: string, input2Value: str
                   const nowInUserTimezone = DateTime.now().setZone(userTimeZone).plus({days: dateIncrement})
                   const startUnixTimestamp = convertLocalDateTimeToUnix(nowInUserTimezone, inputValue);
                   const endUnixTimestamp = convertLocalDateTimeToUnix(nowInUserTimezone, input2Value);
+                  // console.log("start: ", startUnixTimestamp, "end: ", endUnixTimestamp)
                   if(endUnixTimestamp-startUnixTimestamp<0) {
                     alert('Make sure your end time is after your start time')
                   }
@@ -37,12 +38,15 @@ export default function HandleSubmitEditing(inputValue: string, input2Value: str
                       },
                     };
                     const dayDiff = calculateDayDifference(startUnixTimestamp, activity.timeBlock.startTime)
+                    console.log('day diff: calcs: ', 'startUnixTimeStamp: ', startUnixTimestamp, 'activity start: ', activity.timeBlock.startTime)
                     if(dayDiff==0) {
+                      console.log("updating activity")
                     updateActivity(activity, updates)
                     console.log('updates: ', updates)
                     alert('Activity Updated');
                     }
                     else {
+                      console.log("moving activity")
                     moveActivity(activity, updates)
                     console.log('updates: ', updates)
                     alert('Activity Moved')
@@ -89,9 +93,12 @@ const convertLocalDateTimeToUnix = (date: DateTime, time: string): number => {
       } else if (period === 'AM' && hours === 12) {
         adjustedHours = 0;
       }
-  
+      let technicalDate: DateTime = date
+      if(adjustedHours<4) {
+        technicalDate = date.plus({days: 1})
+      }
       // Combine date and time into a DateTime object
-      const localDateTime = date.set({
+      const localDateTime = technicalDate.set({
         hour: adjustedHours,
         minute: minutes,
         second: 0,

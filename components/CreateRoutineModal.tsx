@@ -10,10 +10,11 @@ import FetchDayActivities from '@/Data/FetchDayActivities'
 import ActivitySearchModal from './ActivitySearchModal'
 import { SearchBar } from '@rneui/themed'
 import TimeInput from './TimeInput'
-import { RoutineActivity } from '@/Types/ActivityTypes'
+import { RoutineActivity, Routine } from '@/Types/ActivityTypes'
 import { create } from 'react-test-renderer'
 import RNPickerSelect from 'react-native-picker-select'
 import { Ionicons } from '@expo/vector-icons'
+import { formatSecondsToHHMM } from '@/utils/DateTimeUtils'
 
 const {width, height} = Dimensions.get("window");
 const buttonWidth = width*0.6
@@ -22,6 +23,7 @@ const buttonWidth = width*0.6
     MultitaskModalVisible: boolean;
     onNext: (text: [string, number, number][]) => void;
     onTapOut: () => void;
+    customRoutine?: Routine;
   }
 
   function timeStringToSeconds(time: string): number {
@@ -31,30 +33,39 @@ const buttonWidth = width*0.6
     return totalSeconds;
   }
 
-const CreateRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible, onNext, onTapOut, ...modalProps }) => {
+const CreateRoutineModal: React.FC<MultitaskModalProps> = ({ MultitaskModalVisible, onNext, onTapOut, customRoutine, ...modalProps }) => {
 
   const [multiSearchVisible, setMultiSearchVisible] = useState(false);
   const [activityNum, setActivityNum] = useState<number>(1)
-  const [activityOne, setActivityOne] = useState<string>("Activity One")
-  const [durationOne, setDurationOne] = useState<string>("00:10");
-  const [tagValue, setTagValue] = useState<string>("Consecutive")
-  const [gapBetween1, setGapBetween1] = useState<string>("00:01");
-  const [activityTwo, setActivityTwo] = useState<string>("Activity Two")
-  const [durationTwo, setDurationTwo] = useState<string>("00:10");
-  const [tag2Value, setTag2Value] = useState<string>("Consecutive")
-  const [gapBetween2, setGapBetween2] = useState<string>("00:01");
-  const [activityThree, setActivityThree] = useState<string>("Activity Three")
-  const [durationThree, setDurationThree] = useState<string>("00:10");
-  const [gapBetween3, setGapBetween3] = useState<string>("00:01");
-  const [tag3Value, setTag3Value] = useState<string>("Consecutive")
-  const [activityFour, setActivityFour] = useState<string>("Activity Four")
-  const [durationFour, setDurationFour] = useState<string>("00:10");
+  const filler = [
+    { name: "", duration: "00:10", tag: "Consecutive", gapBetween: "00:01" },
+    { name: "", duration: "00:10", tag: "Consecutive", gapBetween: "00:01" }]
+  const [routineActivities, setRoutineActivities] = useState<RoutineActivity[]>(filler)
+  useEffect(() => {
+    if(customRoutine) {
+      console.log(customRoutine)
+      let tempRout: RoutineActivity[] = []
+      for(let i=0; i<customRoutine.activities.length; i++) {
+        let act = customRoutine.activities[i];
+        let between = formatSecondsToHHMM(customRoutine.durationBetween[i])
+        let tag = "Consecutive"
+        if(customRoutine.durationBetween[i]>60) {
+          tag="Gap Between"
+        }
+        else if(customRoutine.durationBetween[i]<60) {
+          tag="Overlapping"
+          between="00:01"
+        }
+        tempRout[i] = {name: act.button.text, duration: formatSecondsToHHMM(act.timeBlock.duration), tag: tag, gapBetween: between}
+      }
+      console.log('temprout: ', tempRout)
+      setRoutineActivities(tempRout)
+    }
+    else {
+      setRoutineActivities(filler)
+    }
+  }, [customRoutine])
 
-  const [routineActivities, setRoutineActivities] = useState<RoutineActivity[]>([
-    { name: "", duration: "00:10", tag: "Consecutive", gapBetween: "00:01" },
-    { name: "", duration: "00:10", tag: "Consecutive", gapBetween: "00:01" },
-    // You can initialize more empty activities here or add them dynamically.
-  ]);
   const addActivity = () => {
     if (routineActivities.length < 10) {
       setRoutineActivities((prev) => [

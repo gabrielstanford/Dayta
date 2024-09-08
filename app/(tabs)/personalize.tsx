@@ -18,7 +18,7 @@ const buttonHeight = height/19;
 const titleWidth = width/1.5;
 
 function Personalize() {
-    const {addCustomActivity, addCustomRoutine, customActivities, removeCustomAct} = useAppContext();
+    const {addCustomActivity, addCustomRoutine, customActivities, customRoutines, removeCustomAct, removeRoutine, updateRoutine} = useAppContext();
     const {user} = useAuth();
     const [createRoutineModalVisible, setCreateRoutineModalVisible] = useState<boolean>(false);
     const [inputText, setInputText] = useState<string>("")
@@ -32,15 +32,30 @@ function Personalize() {
     const flatListRef = useRef<FlatList>(null);
     const [customActInfo, setCustomActInfo] = useState<ButtonState>()
     const [customActEditVisible, setCustomActEditVisible] = useState<boolean>(false);
+    const [tappedRout, setTappedRout] = useState<Routine>()
 
     useEffect(() => {
       if(customActInfo) {
         setCustomActEditVisible(true);
       }
       }, [customActInfo])
+
+      useEffect(() => {
+        if(tappedRout) {
+          console.log('modal about to launch')
+        setCreateRoutineModalVisible(true)
+        }
+      }, [tappedRout])
+
     const deleteCustomActivity = (customAct: ButtonState) => {
       console.log('deleting')
       removeCustomAct(customAct);
+    }
+
+    const deleteCustomRoutine = (customRout: Routine) => {
+      alert(`Trying to delete ${customRout.name}`)
+      removeRoutine(customRout);
+      // removeCustomRout(customRout)
     }
 
     const handleInputChange = (text: string) => {
@@ -50,8 +65,8 @@ function Personalize() {
     const handleRoutineInputChange = (name: string) => {
       setRoutineName(name);
     }
-
-    const handleMultitaskNext = (texts: [string, number, number][]) => {
+    
+    const handleSubmitRoutineModal = (texts: [string, number, number][]) => {
       // Close the modal
       setCreateRoutineModalVisible(false);
   
@@ -81,12 +96,47 @@ function Personalize() {
       setRoutineActivities(newActivities);
       // Set duration between activities
       setDurationBetween(texts.map(text => text[2]));
+      if(tappedRout) {
+        const areAllObjectsEqualWithoutId = (arr: Array<{ [key: string]: any }>): boolean => {
+          if (arr.length === 0) return true; // Empty array is considered equal
+        
+          // Destructure the first object to use as a reference
+          const { id: id1, ...referenceObj } = arr[0];
+        
+          // Compare each subsequent object to the reference object (excluding 'id')
+          for (let i = 1; i < arr.length; i++) {
+            const { id, ...currentObj } = arr[i];
+        
+            // Check if the current object (without id) matches the reference object
+            if (JSON.stringify(referenceObj) !== JSON.stringify(currentObj)) {
+              return false;
+            }
+          }
+        
+          return true;
+        };
+      
+        if(areAllObjectsEqualWithoutId([newActivities, tappedRout.activities])) {
+          console.log('new: making...')
+        const updates: Partial<Routine> = {
+          //first turn input value into unix. Create function for this. 
+          activities: newActivities,
+          durationBetween: texts.map(text => text[2])
+        };
+    
+      }
+      else {
+        console.log('nothing changed')
+      }
+        // updateRoutine(tappedRout, updates)
+      }
   };
   
     const handleSubmit = () => {
+      console.log('running sumbit')
         if(inputText.length>2 && (tag1Value!=="null" || tag2Value!=="null")) {
-          if(inputText.includes("/") || inputText.includes(",")) {
-            alert("No commas or slashes in activity titles");
+          if(inputText.includes("/")) {
+            alert("No slashes in activity titles");
             return;
           }
           if(tag1Value==tag2Value) {
@@ -143,6 +193,10 @@ function Personalize() {
         }
 
     }
+    const customRoutTapped = (customRout: Routine) => {
+      setTappedRout(customRout)
+      }
+
     const customActTapped = (customAct: ButtonState) => {
 
 
@@ -189,7 +243,7 @@ function Personalize() {
             </View>
          </View>
         <View style={styles.createContainer}>
-            <TouchableOpacity onPress={() => handleSubmit()} style={styles.closeButton}>
+            <TouchableOpacity onPress={handleSubmit} style={styles.closeButton}>
               <Text style={styles.buttonText}>Create Activity</Text>
             </TouchableOpacity>
           </View>
@@ -259,8 +313,28 @@ function Personalize() {
       } else if (pageType === "Edit" && value === 'Routine') {
         return (
           <View style={styles.container}>
-            <Text>Edit Routine Page</Text>
-            {/* Add your content here */}
+              <FlatList
+                ref={flatListRef}
+                data={customRoutines}
+                keyExtractor={(item) => item.name}
+                style={styles.flatList}
+                renderItem={({ item}) => ( 
+                  <TouchableOpacity onPress={() => customRoutTapped(item)}>
+                  <View style={styles.resultContainer}>
+
+                      
+                        <Text >{item.name}</Text>  
+
+                        <AntDesign name="edit" size={width / 15} color="orange" />
+
+                        <TouchableOpacity onPress={() => deleteCustomRoutine(item)} style={styles.touchableDelete}>
+                        <MaterialIcons name="delete" size={width / 15} color="black" />
+                      </TouchableOpacity>
+                    
+                  </View>
+                  </TouchableOpacity>
+                )}
+              />
           </View>
         );
       } else {
@@ -273,7 +347,7 @@ function Personalize() {
       {/* <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}> */}
         <View style={styles.modalOverlay}>
         {customActInfo && (<CustomActivityEdit style={styles.editModal} ActivityDescribeVisible={customActEditVisible} Info={customActInfo as ButtonState} onClose={() => setCustomActEditVisible(false)} onTapOut={() => setCustomActEditVisible(false)}/>)}
-          <CreateRoutineModal style={{}} MultitaskModalVisible={createRoutineModalVisible} onNext={handleMultitaskNext} onTapOut={() => setCreateRoutineModalVisible(false)}/>
+          <CreateRoutineModal style={{}} MultitaskModalVisible={createRoutineModalVisible} onNext={handleSubmitRoutineModal} customRoutine={tappedRout} onTapOut={() => setCreateRoutineModalVisible(false)}/>
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.titleContainer}>
               <ThemedText type="titleText" style={{fontSize: width/12}}>Personalization</ThemedText>
@@ -288,7 +362,7 @@ function Personalize() {
             {renderContent()}
           </View>
           <View style={styles.endButtons}>
-            <CustomButton title="Create" width={width*0.4} onPress={() => {setPageType("Create")}} />
+            <CustomButton title="Create" width={width*0.4} onPress={() => {setTappedRout(undefined); setPageType("Create")}} />
             <CustomButton title="Edit" width={width*0.4} onPress={() => {setPageType("Edit")}} />
           </View>
         </View> 

@@ -102,6 +102,18 @@ export const convertTimeToUnix = (timeString: string, date: Date = new Date()): 
     // Return time in 'HH:MM' format
     return `${formattedHours}:${formattedMinutes}`;
   };
+export const formatSecondsToHHMM = (seconds: number): string => {
+    // Calculate hours and minutes from the total seconds
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+  
+    // Format hours and minutes to always be two digits
+    const formattedHours = hours.toString().padStart(2, '0');
+    const formattedMinutes = minutes.toString().padStart(2, '0');
+  
+    // Return time in 'HH:MM' format
+    return `${formattedHours}:${formattedMinutes}`;
+  };
   
 export function getSunriseSunset(date: Date, timeZone: string): { sunrise: string; sunset: string } {
   // Create a DateTime object in the given time zone

@@ -17,6 +17,7 @@ interface AppContextProps {
   setDateIncrement: React.Dispatch<React.SetStateAction<number>>;
   updateActivity: (activity: Activity, updates: Partial<Activity>) => void;
   updateCustomActivities: (customAct: ButtonState, updates: Partial<ButtonState>) => void;
+  updateRoutine: (routine: Routine, updates: Partial<Routine>) => void;
   customActivities: ButtonState[];
   removeCustomAct: (customAct: ButtonState) => void;
   setUpdateLocalStorage: React.Dispatch<React.SetStateAction<boolean>>;
@@ -27,6 +28,7 @@ interface AppContextProps {
   addRoutineActivities: (activities: Activity[]) => void;
   customRoutines: Routine[];
   removeActivity: (activ: Activity) => void;
+  removeRoutine: (rout: Routine) => void;
   // durationSummary: ActivitySummary[];
   // setDurationSummary: React.Dispatch<React.SetStateAction<ActivitySummary[]>>;
   finalArray: ButtonState[];
@@ -116,6 +118,41 @@ const updateActivity = async (activity: Activity, updates: Partial<Activity>) =>
 
     // Update the activity document
     await updateDoc(activityRef, updatedFields);
+  }
+  } catch (error) {
+    console.error('Error updating activity: ', error);
+  }
+};
+
+const updateRoutine = async (routine: Routine, updates: Partial<Routine>) => {
+  //if start time's date is different, then after updating the times, call a diff function, moveactivity and pass in the updated one to change date ref.
+  try {
+    
+    // Update the timeBlock of the relevant activity
+      const updatedRoutines = customRoutines.map((rout) => {
+        if (rout.name === routine.name) {
+          return {
+            ...routine,
+            ...updates, // Spread the input properties to update the matching activity
+          };
+        }
+        return routine;
+      });
+      // Set the updated array
+      setCustomRoutines(updatedRoutines);
+      storage.set('CustomRoutines', JSON.stringify(updatedRoutines))
+    // Convert the start time to the date format used in Firestore
+    
+    if(user) {
+      const routineRef = doc(firestore, 'users', user.uid, 'customRoutines', routine.name)
+
+    const updatedFields = {
+      ...updates,
+      updatedAt: serverTimestamp(), // Optional: add an update timestamp
+    };
+
+    // Update the activity document
+    await updateDoc(routineRef, updatedFields);
   }
   } catch (error) {
     console.error('Error updating activity: ', error);
@@ -405,14 +442,10 @@ useEffect(() => {
           alert("duplicate!")
         }
         if(!prev) {
-          storage.set('CustomRoutines', JSON.stringify([...customRoutines, button]))
+          storage.set('CustomActivities', JSON.stringify([...customActivities, button]))
         }
         return (!prev ?
           [...prevButtons, button] : [...prevButtons])});
-        setCustomActivities(prevButtons => [...prevButtons, button] // Add new activity
-      );
-      storage.set('CustomActivities', JSON.stringify([...customActivities, button]))
-      console.log('completed setting custom activities')
         if (user) {
         // storage.set('ShuffledActivities', JSON.stringify(newActivities))
         // storage.set('CustomActivities', JSON.stringify([...customActivities, button]))
@@ -477,6 +510,20 @@ useEffect(() => {
     }
   };
 
+  const removeRoutine = async (rout: Routine) => {
+    try {
+      setCustomRoutines(prevRouts => prevRouts.filter(prevRoutine => prevRoutine.name !== rout.name));
+      storage.set('CustomRoutines', JSON.stringify(customRoutines.filter(routine => routine.name !== rout.name)))
+      if(user) {
+
+        await deleteDoc(doc(firestore, 'users', user.uid, 'customRoutines', rout.name));
+
+      }
+    } catch (error) {
+    console.error('Error removing routine:', error);
+    }
+  };
+
   const removeActivity = async (activ: Activity) => {
     try {
       setJustActivities(prevActivities => prevActivities.filter(act => act.id !== activ.id));
@@ -491,7 +538,7 @@ useEffect(() => {
     }
   };
   return (
-    <AppContext.Provider value={{ justActivities, allActivities, dateIncrement, customActivities, setDateIncrement, setUpdateLocalStorage, addActivity, addCustomActivity, removeCustomAct, addCustomRoutine, customRoutines, addRoutineActivities, updateActivity, moveActivity, removeActivity, updateCustomActivities, state, updateState, finalArray, setFinalArray }}>
+    <AppContext.Provider value={{ justActivities, allActivities, dateIncrement, customActivities, setDateIncrement, setUpdateLocalStorage, addActivity, addCustomActivity, removeCustomAct, addCustomRoutine, customRoutines, addRoutineActivities, updateActivity, updateRoutine, moveActivity, removeActivity, removeRoutine, updateCustomActivities, state, updateState, finalArray, setFinalArray }}>
       {children}
     </AppContext.Provider>
   );

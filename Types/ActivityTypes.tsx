@@ -61,7 +61,7 @@
 }
   export interface Routine {
     name: string;
-    durationBetween?: number[]
+    durationBetween: number[]
     activities: Activity[];
   }
 
