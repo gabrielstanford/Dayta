@@ -84,6 +84,8 @@ const ActivityItem = ({ activity, onRemove, timeState, dateIncrement, updateActi
   else if(activity.button.text=='Sunrise' || activity.button.text=="Sunset") {
     sunrise = true;
   }
+  // const morningCutoff = justActivities.filter()
+  // if(activity.timeBlock.startTime>=)
 
   const [inputValue, setInputValue] = useState<string>(convertUnixToTimeString(activity.timeBlock.startTime, activity.timeBlock.endTime, true));
   const [input2Value, setInput2Value] = useState<string>(convertUnixToTimeString(activity.timeBlock.endTime, 0, true));
