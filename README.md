@@ -1,5 +1,3 @@
-# Welcome to the open source Dayta Project!
-
 ## About
 
 Dayta performs three key functions: 
