@@ -12,6 +12,8 @@ import {Activity, ActivityWithEnd} from '@/Types/ActivityTypes';
 import HandleSubmitEditing from '@/Data/HandleSubmitEditing';
 import uuid from 'react-native-uuid'
 import NoStartTimeModal from '@/components/NoStartTimeModal';
+import CalendarConnect from '@/components/calendarConfig';
+import CalendarInformation from '@/components/CalendarInformation'
 
 import { getSunriseSunset, generateISODate } from '@/utils/DateTimeUtils';
 
@@ -338,6 +340,8 @@ function Journal() {
               </View>
         </TouchableOpacity>
         </View>
+        <CalendarConnect />
+        <CalendarInformation />
         {withSunriseSunset.length>0 ? 
         <KeyboardAvoidingView 
         behavior= {'padding'}
