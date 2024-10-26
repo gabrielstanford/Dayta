@@ -17,8 +17,12 @@ const DISCOVERY = {
   revocationEndpoint: 'https://oauth2.googleapis.com/revoke',
 };
 
-export default function CalendarConnect() {
-  const [authToken, setAuthToken] = useState<string | null>(null);
+interface CalendarConnectProps {
+  authToken: string | null; 
+  setAuthToken: React.Dispatch<React.SetStateAction<string | null>>;
+}
+
+const CalendarConnect: React.FC<CalendarConnectProps> = ({ authToken, setAuthToken }) => {
   const [calendarData, setCalendarData] = useState<any>(null);
 
   // State for PKCE challenge and verifier
@@ -108,7 +112,9 @@ export default function CalendarConnect() {
         disabled={!request}
         onPress={() => promptAsync()}
       />
-      {calendarData && <Text>{JSON.stringify(calendarData, null, 2)}</Text>}
+      {/* {calendarData && <Text>{JSON.stringify(calendarData, null, 2)}</Text>} */}
     </View>
   );
 }
+
+export default CalendarConnect

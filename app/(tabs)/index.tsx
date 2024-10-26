@@ -12,8 +12,9 @@ import {Activity, ActivityWithEnd} from '@/Types/ActivityTypes';
 import HandleSubmitEditing from '@/Data/HandleSubmitEditing';
 import uuid from 'react-native-uuid'
 import NoStartTimeModal from '@/components/NoStartTimeModal';
-import CalendarConnect from '@/components/calendarConfig';
+import CalendarConnect from '@/components/CalendarConnect';
 import CalendarInformation from '@/components/CalendarInformation'
+import {storage} from '@/utils/mmkvStorage';
 
 import { getSunriseSunset, generateISODate } from '@/utils/DateTimeUtils';
 
@@ -193,6 +194,19 @@ function Journal() {
   const [activityInfo, setActivityInfo] = useState<Activity>()
   const [sunriseTime, setSunriseTime] = useState<number>(0);
   const [sunsetTime, setSunsetTime] = useState<number>(0);
+  const [authToken, setAuthToken] = useState<string | null>(null)
+  const [showAuth, setShowAuth] = useState<boolean>(false);
+  const storedToken = storage.getString('AuthToken')
+
+  if(!storedToken) {
+    setShowAuth(true)
+  }
+  useEffect(() => {
+    if(authToken) {
+    storage.set('AuthToken', authToken)  
+    setShowAuth(false);
+    }
+  }, [authToken])
   const sunriseActivity: ActivityWithEnd = {
     id: uuid.v4() as string,
     parentRoutName: 'sun',  // Optional field to identify special types
@@ -340,8 +354,8 @@ function Journal() {
               </View>
         </TouchableOpacity>
         </View>
-        <CalendarConnect />
-        <CalendarInformation />
+        {showAuth ? <CalendarConnect authToken={authToken} setAuthToken={setAuthToken} /> : <></>}
+        <CalendarInformation authToken={authToken}/>
         {withSunriseSunset.length>0 ? 
         <KeyboardAvoidingView 
         behavior= {'padding'}

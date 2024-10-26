@@ -1,16 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import { FlatList, View, Text, StyleSheet } from 'react-native';
 import axios from 'axios';
+import {storage} from '@/utils/mmkvStorage';
 
-export default function CalendarInformation() {
-  const [authToken, setAuthToken] = useState<string | null>(null);
+interface CalendarInformationProps {
+  authToken: string | null;
+}
+const CalendarInformation: React.FC<CalendarInformationProps> = ({authToken}) => {
+
   const [calendarData, setCalendarData] = useState<any[]>([]); // Change to array for FlatList
+  const storedToken = storage.getString('AuthToken')
 
   useEffect(() => {
-    if (authToken) {
+    let token = ""
+    if(storedToken) {
+      token = storedToken
+      console.log(token)
+    }
+    else if(authToken) {
+      token=authToken
+    }
+
+    if (token!=="") {
+      
       axios
         .get('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
-          headers: { Authorization: `Bearer ${authToken}` },
+          headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => {
           setCalendarData(res.data.items); // Set the events data for FlatList
@@ -19,7 +34,10 @@ export default function CalendarInformation() {
           console.error('Error fetching calendar data:', error);
         });
     }
-  }, [authToken]);
+    else {
+      console.log('no auth token')
+    }
+  }, [authToken, storedToken]);
 
   // Render function for each calendar event item
   const renderItem = ({ item }: { item: any }) => {
@@ -73,3 +91,5 @@ const styles = StyleSheet.create({
     color: '#555',
   },
 });
+
+export default CalendarInformation
