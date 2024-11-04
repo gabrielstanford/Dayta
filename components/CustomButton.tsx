@@ -23,7 +23,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   height = 48, // Default height
   paddingVertical = 12, // Default padding vertical
   paddingHorizontal = 20, // Default padding horizontal
-  color = 'orange', // Default button color
+  color = '#F5F5F5', // Default button color
   fontSize = 16, // Default font size
   disabled = false,
   style,
@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
     elevation: 2, // Adds shadow for Android
   } as ViewStyle,
   buttonText: {
-    color: '#fff',
+    color: '#1B1B1B',
     fontWeight: '600',
     textAlign: 'center',
     textTransform: 'uppercase',

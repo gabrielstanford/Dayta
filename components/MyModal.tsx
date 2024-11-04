@@ -239,7 +239,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
                   <IconComponent
                     name={button.icon}
                     size={width / 6.25}
-                    color="white"
+                    color="#F5F5F5"
                   />
                 </TouchableOpacity>
                 <View style={styles.buttonTextContainer}>
@@ -306,7 +306,7 @@ const MyModal: React.FC<MyModalProps> = ({ visible, onClose, ...modalProps }) =>
   const styles = StyleSheet.create({
     modalOverlay: {
       flex: 1,
-      backgroundColor: 'darkcyan',
+      backgroundColor: '#1B1B1B',
       paddingTop: height/18,
       position: 'relative'
     },

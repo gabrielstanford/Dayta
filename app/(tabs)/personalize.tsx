@@ -409,7 +409,7 @@ interface TagDropdownProps {
     },
     inputAndroid: {
       // Customize the selected text color for Android
-      color: 'blue', // Change this to your desired color
+      color: '#F5F5F5', // Change this to your desired color
       // Additional styling options
       fontSize: 16,
       paddingHorizontal: 10,
@@ -434,7 +434,7 @@ interface TagDropdownProps {
   const styles = StyleSheet.create({
     modalOverlay: {
       flex: 1,
-      backgroundColor: 'darkcyan',
+      backgroundColor: '#1B1B1B',
       paddingTop: height/18,
       position: 'relative'
     },
@@ -520,14 +520,14 @@ interface TagDropdownProps {
 
     },
     closeButton: {
-      backgroundColor: 'blue', // Example background color
+      backgroundColor: '#F5F5F5', // Example background color
       paddingVertical: 10,
       paddingHorizontal: 20,
       borderRadius: 5,
     },
     buttonText: {
       fontSize: 21,
-      color: 'white',
+      color: '#1B1B1B',
     },
     textInputContainer: {
      backgroundColor: 'white',

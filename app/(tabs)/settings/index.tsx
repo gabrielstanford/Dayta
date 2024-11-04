@@ -34,13 +34,13 @@ const Settings = () => {
       <View style={styles.titleContainer}>
         <ThemedText type="titleText" style={{fontSize: width/12}}>Settings</ThemedText>
       </View>
-      <View style={styles.settingItem}>
+      {/* <View style={styles.settingItem}>
         <ThemedText type="journalText" style={styles.settingLabel}>Dark Mode</ThemedText>
         <Switch
           value={isDarkMode}
           onValueChange={handleDarkModeToggle}
         />
-      </View>
+      </View> */}
       <View style={styles.settingItem}>
         <ThemedText type="journalText" style={styles.settingLabel}>Notifications</ThemedText>
         <Switch
@@ -49,14 +49,18 @@ const Settings = () => {
         />
       </View>
       <View style={styles.settingItem}>
-        <Button color="secondary" title="User Info" onPress={() => router.push("/info")} />
+        <Button color="#F5F5F5" title="User Info" titleStyle={{ color: '#1B1B1B' }} onPress={() => router.push("/info")} />
       </View>
       <View style={styles.settingItem}>
-        <Button color="secondary" title="Log Out" onPress={logout} />
+        <Button color="#F5F5F5" title="Log Out" titleStyle={{ color: '#1B1B1B' }} onPress={logout} />
       </View>
-      <Button color="success" title="Save" onPress={handleSave} />
+      <View style={styles.settingItem}>
+      <Button color="#F5F5F5" title="Save" titleStyle={{ color: '#1B1B1B' }} onPress={handleSave} />
       </View>
-      <Button color="warning" title="Update" onPress={() => setUpdateLocalStorage(true)} />
+      <View style={styles.settingItem}>
+      <Button color="#F5F5F5" title="Update" titleStyle={{ color: '#1B1B1B' }} onPress={() => setUpdateLocalStorage(true)} />
+      </View>
+      </View>
     </View>
   );
 };
@@ -65,7 +69,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: height/18,
-    backgroundColor: 'darkcyan',
+    backgroundColor: '#1B1B1B',
     position: 'relative', // Container must be relative for absolute positioning of child
   },
   titleContainer: {
@@ -79,7 +83,7 @@ const styles = StyleSheet.create({
   settingItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 5,
   },
   settingLabel: {
     flex: 1,

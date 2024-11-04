@@ -178,7 +178,7 @@ const ActivityItem = ({ activity, onRemove, timeState, dateIncrement, updateActi
             )) : <></>}  
             </View>
       <TouchableOpacity onPress={() => onRemove(activity)} style={styles.touchableDelete}>
-        <MaterialIcons name="delete" size={width / 15} color="black" />
+        <MaterialIcons name="delete" size={width / 15} color="grey" />
       </TouchableOpacity>
       </TouchableOpacity>
     </View>
@@ -194,19 +194,19 @@ function Journal() {
   const [activityInfo, setActivityInfo] = useState<Activity>()
   const [sunriseTime, setSunriseTime] = useState<number>(0);
   const [sunsetTime, setSunsetTime] = useState<number>(0);
-  const [authToken, setAuthToken] = useState<string | null>(null)
-  const [showAuth, setShowAuth] = useState<boolean>(false);
+  // const [authToken, setAuthToken] = useState<string | null>(null)
+  // const [showAuth, setShowAuth] = useState<boolean>(false);
   const storedToken = storage.getString('AuthToken')
 
-  if(!storedToken) {
-    setShowAuth(true)
-  }
-  useEffect(() => {
-    if(authToken) {
-    storage.set('AuthToken', authToken)  
-    setShowAuth(false);
-    }
-  }, [authToken])
+  // if(!storedToken) {
+  //   setShowAuth(true)
+  // }
+  // useEffect(() => {
+  //   if(authToken) {
+  //   storage.set('AuthToken', authToken)  
+  //   setShowAuth(false);
+  //   }
+  // }, [authToken])
   const sunriseActivity: ActivityWithEnd = {
     id: uuid.v4() as string,
     parentRoutName: 'sun',  // Optional field to identify special types
@@ -339,23 +339,23 @@ function Journal() {
         <NoStartTimeModal visible={noStartModalVisible} onClose={() => setNoStartModalVisible(false)} remove={remove} otherArray={noEnd}/>
         <View style={styles.contentContainer} >
               <View style={{alignItems: 'center'}}>
-                <ThemedText type="titleText" style={{fontSize: width/12}}>My Journal</ThemedText>
+                <ThemedText type="titleText" style={{fontSize: width/12}}>Journal</ThemedText>
               </View>
         <View style={styles.headerContainer}>
         <TouchableOpacity onPress={() => setDateIncrement(dateIncrement-1)}>
                 <View style={styles.incrementButtonContainer}>
-                  <Ionicons name="return-up-back" size={height/27} color="black"/>
+                  <Ionicons name="return-up-back" size={height/27} color="#F5F5F5"/>
                 </View>
         </TouchableOpacity>   
         <ThemedText type="subtitle" style={styles.titleContainer}>{localTime.toFormat('cccc')}</ThemedText>
         <TouchableOpacity onPress={() => setDateIncrement(dateIncrement+1)}>
               <View style={styles.incrementButtonContainer}>
-                <Ionicons name="return-up-forward" size={height/27} color="black"/>
+                <Ionicons name="return-up-forward" size={height/27} color="#F5F5F5"/>
               </View>
         </TouchableOpacity>
         </View>
-        {showAuth ? <CalendarConnect authToken={authToken} setAuthToken={setAuthToken} /> : <></>}
-        <CalendarInformation authToken={authToken}/>
+        {/* {showAuth ? <CalendarConnect authToken={authToken} setAuthToken={setAuthToken} /> : <></>} */}
+        {/* <CalendarInformation authToken={authToken}/> */}
         {withSunriseSunset.length>0 ? 
         <KeyboardAvoidingView 
         behavior= {'padding'}
@@ -375,14 +375,19 @@ function Journal() {
             </ThemedText> */}
           </>}
         </View>
+        <View style={styles.calendarButtonContainer}>
+          <TouchableOpacity onPress={toggleNoStartModal}>
+            <AntDesign name="calendar" size={width/8} color="grey" />
+          </TouchableOpacity>
+        </View>
         <View style={styles.plusButtonContainer}>
           <TouchableOpacity onPress={toggleModal}>
-            <AntDesign name="pluscircle" size={width/6.25} color="black" />
+            <AntDesign name="pluscircle" size={width/6.25} color="#F5F5F5" />
           </TouchableOpacity>
         </View>
         <View style={styles.otherButtonContainer}>
           <TouchableOpacity onPress={toggleNoStartModal}>
-            <MaterialIcons name="other-houses" size={width/8} color="black" />
+            <MaterialIcons name="other-houses" size={width/8} color="grey" />
           </TouchableOpacity>
         </View>
       </View>
@@ -394,7 +399,7 @@ const styles = StyleSheet.create({
  layoutContainer: {
   flex: 1,
   paddingTop: height/18,
-  backgroundColor: 'darkcyan',
+  backgroundColor: '#1B1B1B',
   position: 'relative', // Container must be relative for absolute positioning of child
 },
 contentContainer: {
@@ -414,7 +419,7 @@ dateContainer: {
   alignItems: 'center'
 },
 incrementButtonContainer: {
-  backgroundColor: 'white'
+  backgroundColor: '#1B1B1B'
 },
 container: {
   flex: 1,
@@ -427,9 +432,11 @@ listContent: {
 activityContainer: {
   flex: 1,
   backgroundColor: '#fff',
-  borderRadius: 10,
+  borderRadius: 2,
   padding: 15,
-  marginTop: 10,
+  // marginTop: 10,
+  borderColor: 'lightgrey',
+  borderWidth: 0.1,
   shadowColor: '#000',
   shadowOpacity: 0.1,
   shadowRadius: 10,
@@ -472,12 +479,14 @@ timeContainer: {
 timeText: {
   fontSize: 13,
   flexWrap: 'nowrap',
-  color: '#333',
+  color: 'grey',
 },
 activityName: {
+  paddingLeft: 15,
   flex: 3,
   fontSize: 16,
   fontWeight: 'bold',
+  color: '#F5F5F5'
 },
 durationModal: {
   flex: 1
@@ -487,6 +496,12 @@ plusButtonContainer: {
     bottom: height/40.6, // Space from the bottom of the container
     left: (width / 2) - (buttonWidth / 2), // Center horizontally more precisely
     width: buttonWidth
+},
+calendarButtonContainer: {
+  position: 'absolute', // Absolute positioning to overlay everything
+  bottom: height/40.6, // Space from the bottom of the container
+  right: width-buttonWidth-20, // Center horizontally more precisely
+  width: buttonWidth
 },
 otherButtonContainer: {
   position: 'absolute', // Absolute positioning to overlay everything
@@ -499,10 +514,12 @@ otherButtonContainer: {
 const styles2 = StyleSheet.create({
   activityContainer: {
     flex: 1,
-    backgroundColor: 'darkturquoise',
-    borderRadius: 10,
+    backgroundColor: '#222222',
+    borderRadius: 2,
     padding: 15,
-    marginTop: 10,
+    // marginTop: 10,
+    borderColor: 'lightgrey',
+    borderWidth: 0.1,
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 10,
@@ -520,10 +537,12 @@ const styles2 = StyleSheet.create({
 const styles3 = StyleSheet.create({
   activityContainer: {
     flex: 1,
-    backgroundColor: 'orange',
-    borderRadius: 10,
+    backgroundColor: '#222222',
+    borderRadius: 2,
     padding: 15,
-    marginTop: 10,
+    // marginTop: 10,
+    borderColor: 'lightgrey',
+    borderWidth: 0.1,
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 10,
@@ -536,10 +555,12 @@ const styles3 = StyleSheet.create({
 const styles4 = StyleSheet.create({
   activityContainer: {
     flex: 1,
-    backgroundColor: 'lightgreen',
-    borderRadius: 10,
+    backgroundColor: '#222222',
+    borderRadius: 2,
     padding: 15,
-    marginTop: 10,
+    // marginTop: 10,
+    borderColor: 'lightgrey',
+    borderWidth: 0.1,
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 10,

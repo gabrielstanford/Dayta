@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
   layoutContainer: {
     flex: 1,
     paddingTop: height/18,
-    backgroundColor: 'darkcyan',
+    backgroundColor: '#1B1B1B',
     position: 'relative', // Container must be relative for absolute positioning of child
   },
   contentContainer: {

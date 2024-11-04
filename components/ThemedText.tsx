@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 15,
     fontWeight: 'bold',
-    color: 'bisque'
+    color: '#F5F5F5'
   },
   link: {
     lineHeight: 30,
@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
   titleText: {
       
       fontWeight: 'bold',
-      color: 'mintcream'
+      color: '#F5F5F5'
     
   },
 });

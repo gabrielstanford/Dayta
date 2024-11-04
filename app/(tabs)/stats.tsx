@@ -146,7 +146,7 @@ function Stats() {
   }
   }, [sleepSum])
   return (
-    <ScrollView style={{backgroundColor: 'darkcyan'}}>
+    <ScrollView style={{backgroundColor: '#1B1B1B'}}>
     <View style={styles.layoutContainer}>
       <View style={styles.titleContainer}>
         <ThemedText type="titleText" style={{fontSize: width/12}}>Statistics</ThemedText>
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
   layoutContainer: {
     flex: 1,
     paddingTop: height/18,
-    backgroundColor: 'darkcyan',
+    backgroundColor: '#1B1B1B',
   },
   contentContainer: {
     flex: 1,
